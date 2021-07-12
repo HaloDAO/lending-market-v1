@@ -21,7 +21,7 @@ contract Treasury {
         rnbw = _rnbw;
     }
 
-    function buybackRnbw(address[] calldata _underlyings) public returns (uint256){
+    function buybackRnbw(address[] calldata _underlyings) public returns (uint256) {
 
         uint256 totalRnbwBoughtBack = 0;
         uint256 rnbwBought;
@@ -43,6 +43,7 @@ contract Treasury {
 
             totalRnbwBoughtBack = totalRnbwBoughtBack.add(rnbwBought);
         }
+        return totalRnbwBoughtBack;
     }
 
 
