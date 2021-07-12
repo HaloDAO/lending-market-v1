@@ -5,9 +5,8 @@ pragma experimental ABIEncoderV2;
 import { ILendingPool } from '../../interfaces/ILendingPool.sol';
 import { IUniswapV2Router02 } from './interfaces/IUniswapV2Router02.sol';
 import { SafeMath } from '@openzeppelin/contracts/math/SafeMath.sol';
-import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
-contract Treasury is Ownable {
+contract Treasury {
 
     event RnbwBought(uint256 amount, address caller);
     event RnbwSentToVesting(uint256 amount);
@@ -53,7 +52,7 @@ contract Treasury is Ownable {
         return totalRnbwBoughtBack;
     }
 
-    function sendToVestingRewards() onlyOwner public {
+    function sendToVestingRewards() public {
         uint256 rnbwAmount = IERC20(rnbw).balanceOf(address(this));
         IERC20(rnbw).transfer(vestingContract, rnbwAmount);
         emit RnbwSentToVesting(rnbwAmount);
