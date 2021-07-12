@@ -5,20 +5,26 @@ pragma experimental ABIEncoderV2;
 import { ILendingPool } from '../../interfaces/ILendingPool.sol';
 import { IUniswapV2Router02 } from './interfaces/IUniswapV2Router02.sol';
 import { SafeMath } from '@openzeppelin/contracts/math/SafeMath.sol';
+import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
-contract Treasury {
+contract Treasury is Ownable {
+
+    event RnbwBought(uint256 amount, address caller);
+    event RnbwSentToVesting(uint256 amount);
 
     using SafeMath for uint256;
 
     address public lendingPool;
     address public router;
     address public rnbw;
+    address public vestingContract;
     address public WETH9 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    constructor(address _lendingPool, address _router, address _rnbw) {
+    constructor(address _lendingPool, address _router, address _rnbw, address _vestingContract) {
         lendingPool = _lendingPool;
         router = _router;
         rnbw = _rnbw;
+        vestingContract = _vestingContract;
     }
 
     function buybackRnbw(address[] calldata _underlyings) public returns (uint256) {
@@ -43,8 +49,13 @@ contract Treasury {
 
             totalRnbwBoughtBack = totalRnbwBoughtBack.add(rnbwBought);
         }
+        emit RnbwBought(totalRnbwBoughtBack, msg.sender);
         return totalRnbwBoughtBack;
     }
 
-
+    function sendToVestingRewards() onlyOwner public {
+        uint256 rnbwAmount = IERC20(rnbw).balanceOf(address(this));
+        IERC20(rnbw).transfer(vestingContract, rnbwAmount);
+        emit RnbwSentToVesting(rnbwAmount);
+    }
 }
