@@ -25,11 +25,11 @@ contract RnbwIncentivesController is
   using SafeMath for uint256;
   uint256 public constant REVISION = 1;
 
-  IStakedAave public immutable PSM;
+  //IStakedAave public immutable PSM;
 
   IERC20 public immutable REWARD_TOKEN;
   address public immutable REWARDS_VAULT;
-  uint256 public immutable EXTRA_PSM_REWARD;
+  //uint256 public immutable EXTRA_PSM_REWARD;
 
   mapping(address => uint256) internal _usersUnclaimedRewards;
 
@@ -39,15 +39,15 @@ contract RnbwIncentivesController is
   constructor(
     IERC20 rewardToken,
     address rewardsVault,
-    IStakedAave psm,
-    uint256 extraPsmReward,
+    //IStakedAave psm,
+    //uint256 extraPsmReward,
     address emissionManager,
     uint128 distributionDuration
   ) public RnbwDistributionManager(emissionManager, distributionDuration) {
     REWARD_TOKEN = rewardToken;
     REWARDS_VAULT = rewardsVault;
-    PSM = psm;
-    EXTRA_PSM_REWARD = extraPsmReward;
+    //PSM = psm;
+    //EXTRA_PSM_REWARD = extraPsmReward;
   }
 
   /**
@@ -140,13 +140,16 @@ contract RnbwIncentivesController is
     uint256 amountToClaim = amount > unclaimedRewards ? unclaimedRewards : amount;
     _usersUnclaimedRewards[user] = unclaimedRewards - amountToClaim; // Safe due to the previous line
 
-    if (stake) {
+    /* if (stake) {
       amountToClaim = amountToClaim.add(amountToClaim.mul(EXTRA_PSM_REWARD).div(100));
       REWARD_TOKEN.transferFrom(REWARDS_VAULT, address(this), amountToClaim);
       PSM.stake(to, amountToClaim);
     } else {
       REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
-    }
+    } */
+
+    REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
+
     emit RewardsClaimed(msg.sender, to, amountToClaim);
 
     return amountToClaim;

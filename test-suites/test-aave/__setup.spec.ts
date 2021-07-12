@@ -93,7 +93,7 @@ const deployAllMockTokens = async (deployer: Signer) => {
   return tokens;
 };
 
-const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
+const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVault: Signer) => {
   console.time('setup');
   const aaveAdmin = await deployer.getAddress();
 
@@ -250,6 +250,29 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   } = config;
   const treasuryAddress = await getTreasuryAddress(config);
 
+  // await initReservesByHelper(
+  //   reservesParams,
+  //   allReservesAddresses,
+  //   ATokenNamePrefix,
+  //   StableDebtTokenNamePrefix,
+  //   VariableDebtTokenNamePrefix,
+  //   SymbolPrefix,
+  //   admin,
+  //   treasuryAddress,
+  //   ZERO_ADDRESS,
+  //   false
+  // );
+
+  const RewardToken = await ethers.getContractFactory('MockERC20')
+  const rewardTokenContract = await RewardToken.deploy('Rainbow', 'RNBW')
+  await rewardTokenContract.deployed()
+
+
+  const RnbwIncentivesController = await ethers.getContractFactory('RnbwIncentivesController')
+  const rnbwIncentivesController = await RnbwIncentivesController.deploy(rewardTokenContract.address, rewardsVault,
+                                    )
+  await rewardTokenContract.deployed()
+
   await initReservesByHelper(
     reservesParams,
     allReservesAddresses,
@@ -293,14 +316,14 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
 before(async () => {
   await rawBRE.run('set-DRE');
-  const [deployer, secondaryWallet] = await getEthersSigners();
+  const [deployer, secondaryWallet, rewardsVault, ...restWallets] = await getEthersSigners();
   const FORK = process.env.FORK;
 
   if (FORK) {
     await rawBRE.run('aave:mainnet');
   } else {
     console.log('-> Deploying test environment...');
-    await buildTestEnv(deployer, secondaryWallet);
+    await buildTestEnv(deployer, secondaryWallet, rewardsVault);
   }
 
   await initializeMakeSuite();
