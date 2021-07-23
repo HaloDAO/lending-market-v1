@@ -31,7 +31,7 @@ contract Treasury {
     vestingContract = _vestingContract;
   }
 
-  function buybackRnbw(address[] calldata _underlyings) public returns (uint256) {
+  function buybackRnbw(address[] calldata _underlyings) public onlyEOA returns (uint256) {
     uint256 totalRnbwBoughtBack = 0;
     uint256 rnbwBought;
 
@@ -62,9 +62,14 @@ contract Treasury {
     return totalRnbwBoughtBack;
   }
 
-  function sendToVestingContract() public {
+  function sendToVestingContract() public onlyEOA {
     uint256 rnbwAmount = IERC20(rnbw).balanceOf(address(this));
     IERC20(rnbw).transfer(vestingContract, rnbwAmount);
     emit RnbwSentToVesting(rnbwAmount, msg.sender);
+  }
+
+  modifier onlyEOA() {
+    require(msg.sender == tx.origin, 'Only EOA allowed');
+    _;
   }
 }
