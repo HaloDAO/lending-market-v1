@@ -242,12 +242,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
 
   const config = loadPoolConfig(ConfigNames.Aave);
 
-  const {
-    ATokenNamePrefix,
-    StableDebtTokenNamePrefix,
-    VariableDebtTokenNamePrefix,
-    SymbolPrefix,
-  } = config;
+  const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
+    config;
   const treasuryAddress = await getTreasuryAddress(config);
 
   // await initReservesByHelper(
@@ -263,15 +259,15 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   //   false
   // );
 
-  const RewardToken = await ethers.getContractFactory('MockERC20')
-  const rewardTokenContract = await RewardToken.deploy('Rainbow', 'RNBW')
-  await rewardTokenContract.deployed()
-
-
-  const RnbwIncentivesController = await ethers.getContractFactory('RnbwIncentivesController')
-  const rnbwIncentivesController = await RnbwIncentivesController.deploy(rewardTokenContract.address, rewardsVault,
-                                    )
-  await rewardTokenContract.deployed()
+  // const RewardToken = await ethers.getContractFactory('MockERC20')
+  // const rewardTokenContract = await RewardToken.deploy('Rainbow', 'RNBW')
+  // await rewardTokenContract.deployed()
+  //
+  //
+  // const RnbwIncentivesController = await ethers.getContractFactory('RnbwIncentivesController')
+  // const rnbwIncentivesController = await RnbwIncentivesController.deploy(rewardTokenContract.address, rewardsVault,
+  //                                   )
+  // await rewardTokenContract.deployed()
 
   await initReservesByHelper(
     reservesParams,
