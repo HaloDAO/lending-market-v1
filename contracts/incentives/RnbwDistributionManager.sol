@@ -6,6 +6,8 @@ import {SafeMath} from './lib/SafeMath.sol';
 import {DistributionTypes} from './lib/DistributionTypes.sol';
 import {IRnbwDistributionManager} from './interfaces/IRnbwDistributionManager.sol';
 
+//import "hardhat/console.sol";
+
 /**
  * @title AaveDistributionManager
  * @notice Accounting contract to manage multiple staking distributions
@@ -87,7 +89,12 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
 
     uint256 newIndex =
       _getAssetIndex(oldIndex, assetConfig.emissionPerSecond, lastUpdateTimestamp, totalStaked);
-
+    /* console.log("----------------------");
+    console.log(block.timestamp);
+    console.log(lastUpdateTimestamp);
+    console.log("oldIndex: ", oldIndex);
+    console.log("newIndex: ", newIndex);
+    console.log("----------------------"); */
     if (newIndex != oldIndex) {
       assetConfig.index = newIndex;
       emit AssetIndexUpdated(underlyingAsset, newIndex);
@@ -117,7 +124,7 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
     uint256 accruedRewards = 0;
 
     uint256 newIndex = _updateAssetStateInternal(asset, assetData, totalStaked);
-
+    //console.log("newIndex", newIndex);
     if (userIndex != newIndex) {
       if (stakedByUser != 0) {
         accruedRewards = _getRewards(stakedByUser, newIndex, userIndex);
@@ -178,7 +185,7 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
           assetConfig.lastUpdateTimestamp,
           stakes[i].totalStaked
         );
-
+      //console.log("Asset index: ", assetIndex);
       accruedRewards = accruedRewards.add(
         _getRewards(stakes[i].stakedByUser, assetIndex, assetConfig.users[user])
       );
@@ -227,6 +234,8 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
     uint256 currentTimestamp =
       block.timestamp > DISTRIBUTION_END ? DISTRIBUTION_END : block.timestamp;
     uint256 timeDelta = currentTimestamp.sub(lastUpdateTimestamp);
+    //console.log("timeDelta: ", timeDelta);
+    //console.log("emissionPerSecond: ", emissionPerSecond);
     return
       emissionPerSecond.mul(timeDelta).mul(10**uint256(PRECISION)).div(totalBalance).add(
         currentIndex

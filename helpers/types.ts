@@ -87,6 +87,14 @@ export enum eContractid {
   UniswapLiquiditySwapAdapter = 'UniswapLiquiditySwapAdapter',
   UniswapRepayAdapter = 'UniswapRepayAdapter',
   FlashLiquidationAdapter = 'FlashLiquidationAdapter',
+  Treasury = 'Treasury',
+  MockRnbw = 'MockRnbw',
+  RnbwIncentivesController = 'RnbwIncentivesController',
+  VestingContractMock = 'VestingContractMock',
+  MockEmissionManager = 'MockEmissionManager',
+  CurveMock = 'CurveMock',
+  UniswapMock = 'UniswapMock',
+  CurveFactoryMock = 'CurveFactoryMock',
 }
 
 /*
@@ -201,6 +209,8 @@ export interface iAssetCommon<T> {
 export interface iAssetBase<T> {
   WETH: T;
   DAI: T;
+  XSGD: T;
+  THKD: T;
   TUSD: T;
   USDC: T;
   USDT: T;
@@ -250,6 +260,8 @@ export type iAavePoolAssets<T> = Pick<
   | 'DAI'
   | 'TUSD'
   | 'USDC'
+  | 'XSGD'
+  | 'THKD'
   | 'USDT'
   | 'SUSD'
   | 'AAVE'
@@ -352,6 +364,14 @@ export enum TokenContractId {
   WMATIC = 'WMATIC',
   STAKE = 'STAKE',
   xSUSHI = 'xSUSHI',
+}
+
+export enum TokenContractIdHalo {
+  DAI = 'DAI',
+  WETH = 'WETH',
+  USDC = 'USDC',
+  XSGD = 'XSGD',
+  THKD = 'THKD',
 }
 
 export interface IReserveParams extends IReserveBorrowParams, IReserveCollateralParams {

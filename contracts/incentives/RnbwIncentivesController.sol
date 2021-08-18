@@ -28,7 +28,7 @@ contract RnbwIncentivesController is
   //IStakedAave public immutable PSM;
 
   IERC20 public immutable REWARD_TOKEN;
-  address public immutable REWARDS_VAULT;
+  //address public immutable REWARDS_VAULT;
   //uint256 public immutable EXTRA_PSM_REWARD;
 
   mapping(address => uint256) internal _usersUnclaimedRewards;
@@ -38,14 +38,14 @@ contract RnbwIncentivesController is
 
   constructor(
     IERC20 rewardToken,
-    address rewardsVault,
+    //address rewardsVault,
     //IStakedAave psm,
     //uint256 extraPsmReward,
     address emissionManager,
     uint128 distributionDuration
   ) public RnbwDistributionManager(emissionManager, distributionDuration) {
     REWARD_TOKEN = rewardToken;
-    REWARDS_VAULT = rewardsVault;
+    //REWARDS_VAULT = rewardsVault;
     //PSM = psm;
     //EXTRA_PSM_REWARD = extraPsmReward;
   }
@@ -70,6 +70,11 @@ contract RnbwIncentivesController is
     uint256 totalSupply
   ) external override {
     uint256 accruedRewards = _updateUserAssetInternal(user, msg.sender, userBalance, totalSupply);
+    /* console.log("user: ",  user);
+    console.log("msg.sender: ", msg.sender);
+    console.log("userBalance: ", userBalance);
+    console.log("totalSupply: ", totalSupply);
+    console.log("accruedRewards: ", accruedRewards); */
     if (accruedRewards != 0) {
       _usersUnclaimedRewards[user] = _usersUnclaimedRewards[user].add(accruedRewards);
       emit RewardsAccrued(user, accruedRewards);
@@ -148,7 +153,8 @@ contract RnbwIncentivesController is
       REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
     } */
 
-    REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
+    //REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
+    REWARD_TOKEN.transfer(to, amountToClaim);
 
     emit RewardsClaimed(msg.sender, to, amountToClaim);
 

@@ -5,18 +5,19 @@ pragma experimental ABIEncoderV2;
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {IRnbwDistributionManager} from '../interfaces/IRnbwDistributionManager.sol';
 import {DistributionTypes} from '../lib/DistributionTypes.sol';
+import 'hardhat/console.sol';
 
 contract MockEmissionManager is Ownable {
-  address incentivesController;
+  address public incentivesController;
 
-  constructor(address _incentivesController) public {
-    incentivesController = _incentivesController;
-  }
-
-  function setEmissionRate(DistributionTypes.AssetConfigInput[] calldata assetsConfigInput)
-    public
+  function configure(DistributionTypes.AssetConfigInput[] calldata assetsConfigInput)
+    external
     onlyOwner
   {
     IRnbwDistributionManager(incentivesController).configureAssets(assetsConfigInput);
+  }
+
+  function setIncentivesController(address _incentivesController) external onlyOwner {
+    incentivesController = _incentivesController;
   }
 }

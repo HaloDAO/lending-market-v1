@@ -71,3 +71,11 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   xSUSHI: oneEther.multipliedBy('0.00913428586').toFixed(),
   USD: '5848466240000000',
 };
+
+export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
+  DAI: oneEther.multipliedBy('0.00031912').toFixed(),
+  USDC: oneEther.multipliedBy('0.00031912').toFixed(),
+  WETH: oneEther.toFixed(),
+  XSGD: oneEther.multipliedBy('0.00023421').toFixed(),
+  THKD: oneEther.multipliedBy('0.00014912').toFixed(),
+};

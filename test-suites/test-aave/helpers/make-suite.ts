@@ -110,6 +110,7 @@ export async function initializeMakeSuite() {
     });
   }
   testEnv.deployer = deployer;
+  testEnv.secondaryWallet = restSigners[0];
   testEnv.pool = await getLendingPool();
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
@@ -130,29 +131,48 @@ export async function initializeMakeSuite() {
   const allTokens = await testEnv.helpersContract.getAllATokens();
   const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
 
+  const aXsgdAddress = allTokens.find((aToken) => aToken.symbol === 'aXSGD')?.tokenAddress;
+  const aThkdAddress = allTokens.find((aToken) => aToken.symbol === 'aTHKD')?.tokenAddress;
+
   const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
 
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 
   const daiAddress = reservesTokens.find((token) => token.symbol === 'DAI')?.tokenAddress;
   const usdcAddress = reservesTokens.find((token) => token.symbol === 'USDC')?.tokenAddress;
-  const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
+
+  const xsgdAddress = reservesTokens.find((token) => token.symbol === 'XSGD')?.tokenAddress;
+
+  const thkdAddress = reservesTokens.find((token) => token.symbol === 'THKD')?.tokenAddress;
+
+  //const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
   if (!aDaiAddress || !aWEthAddress) {
     process.exit(1);
   }
-  if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
+  // if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
+  //   process.exit(1);
+  // }
+
+  if (!daiAddress || !usdcAddress || !wethAddress) {
     process.exit(1);
   }
 
   testEnv.aDai = await getAToken(aDaiAddress);
   testEnv.aWETH = await getAToken(aWEthAddress);
 
+  testEnv.aXSGD = await getAToken(aXsgdAddress);
+  testEnv.aTHKD = await getAToken(aThkdAddress);
+
   testEnv.dai = await getMintableERC20(daiAddress);
   testEnv.usdc = await getMintableERC20(usdcAddress);
-  testEnv.aave = await getMintableERC20(aaveAddress);
+  //testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
+
+  testEnv.xsgd = await getMintableERC20(xsgdAddress);
+  testEnv.thkd = await getWETHMocked(thkdAddress);
+
   testEnv.wethGateway = await getWETHGateway();
 
   testEnv.uniswapLiquiditySwapAdapter = await getUniswapLiquiditySwapAdapter();

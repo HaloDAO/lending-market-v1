@@ -11,6 +11,7 @@ import {
   PoolConfiguration,
   eEthereumNetwork,
 } from './types';
+import BigNumber from 'bignumber.js';
 import { MintableERC20 } from '../types/MintableERC20';
 import { MockContract } from 'ethereum-waffle';
 import { getReservesConfigByPool } from './configuration';
@@ -49,6 +50,14 @@ import {
   WETH9MockedFactory,
   WETHGatewayFactory,
   FlashLiquidationAdapterFactory,
+  RnbwMockFactory,
+  UniswapMockFactory,
+  CurveMockFactory,
+  CurveFactoryMockFactory,
+  TreasuryFactory,
+  VestingContractMockFactory,
+  RnbwIncentivesControllerFactory,
+  MockEmissionManagerFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -634,6 +643,82 @@ export const deployFlashLiquidationAdapter = async (
   withSaveAndVerify(
     await new FlashLiquidationAdapterFactory(await getFirstSigner()).deploy(...args),
     eContractid.FlashLiquidationAdapter,
+    args,
+    verify
+  );
+
+export const deployRnbwMock = async (args: [string, string], verify?: boolean) =>
+  withSaveAndVerify(
+    await new RnbwMockFactory(await getFirstSigner()).deploy(...args),
+    eContractid.MockRnbw,
+    args,
+    verify
+  );
+
+export const deployUniswapMock = async (args: [tEthereumAddress], verify?: boolean) =>
+  withSaveAndVerify(
+    await new UniswapMockFactory(await getFirstSigner()).deploy(...args),
+    eContractid.UniswapMock,
+    args,
+    verify
+  );
+
+export const deployTreasury = async (
+  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress],
+  verify?: boolean
+) =>
+  withSaveAndVerify(
+    await new TreasuryFactory(await getFirstSigner()).deploy(...args),
+    eContractid.Treasury,
+    args,
+    verify
+  );
+
+export const deployVestingContractMock = async (args: [tEthereumAddress], verify?: boolean) =>
+  withSaveAndVerify(
+    await new VestingContractMockFactory(await getFirstSigner()).deploy(...args),
+    eContractid.VestingContractMock,
+    args,
+    verify
+  );
+
+export const deployMockEmissionManager = async (args: [], verify?: boolean) =>
+  withSaveAndVerify(
+    await new MockEmissionManagerFactory(await getFirstSigner()).deploy(),
+    eContractid.MockEmissionManager,
+    args,
+    verify
+  );
+
+export const deployRnbwIncentivesContoller = async (
+  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress],
+  verify?: boolean
+) =>
+  withSaveAndVerify(
+    await new RnbwIncentivesControllerFactory(await getFirstSigner()).deploy(...args),
+    eContractid.RnbwIncentivesController,
+    args,
+    verify
+  );
+
+export const deployCurveMock = async (
+  args: [tEthereumAddress, tEthereumAddress, BigNumber],
+  verify?: boolean
+) =>
+  withSaveAndVerify(
+    await new CurveMockFactory(await getFirstSigner()).deploy(...args),
+    eContractid.CurveMock,
+    args,
+    verify
+  );
+
+export const deployCurveFactoryMock = async (
+  args: [tEthereumAddress, tEthereumAddress[], tEthereumAddress[]],
+  verify?: boolean
+) =>
+  withSaveAndVerify(
+    await new CurveFactoryMockFactory(await getFirstSigner()).deploy(...args),
+    eContractid.CurveFactoryMock,
     args,
     verify
   );

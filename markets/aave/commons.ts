@@ -5,6 +5,7 @@ import {
   RAY,
   ZERO_ADDRESS,
   MOCK_CHAINLINK_AGGREGATORS_PRICES,
+  MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
 } from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
 
@@ -35,6 +36,9 @@ export const CommonsConfig: ICommonConfiguration = {
   Mocks: {
     AllAssetsInitialPrices: {
       ...MOCK_CHAINLINK_AGGREGATORS_PRICES,
+    },
+    AllAssetsInitialPricesHalo: {
+      ...MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
@@ -98,6 +102,23 @@ export const CommonsConfig: ICommonConfiguration = {
     },
     BUSD: {
       borrowRate: oneRay.multipliedBy(0.05).toFixed(),
+    },
+  },
+  LendingRateOracleRatesCommonHalo: {
+    WETH: {
+      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    },
+    DAI: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
+    },
+    USDC: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
+    },
+    XSGD: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
+    },
+    THKD: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
   },
   // ----------------

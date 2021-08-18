@@ -7,7 +7,7 @@ import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 contract UniswapMock is IUniswapV2RouterMock {
   using SafeMath for uint256;
 
-  address rnbwToken;
+  address public rnbwToken;
 
   constructor(address _rnbwToken) public {
     rnbwToken = _rnbwToken;
