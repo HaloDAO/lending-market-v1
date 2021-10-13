@@ -2,7 +2,7 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-interface IRnbwIncentivesController {
+interface IRNBWIncentivesController {
   function handleAction(
     address asset,
     uint256 userBalance,

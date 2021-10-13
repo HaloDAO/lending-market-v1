@@ -7,29 +7,29 @@ import {SafeMath} from './lib/SafeMath.sol';
 
 import {IERC20} from './interfaces/IERC20.sol';
 import {IAToken} from './interfaces/IAToken.sol';
-import {IRnbwIncentivesController} from './interfaces/IRnbwIncentivesController.sol';
+import {IRNBWIncentivesController} from './interfaces/IRNBWIncentivesController.sol';
 import {IStakedAave} from './interfaces/IStakedAave.sol';
 import {VersionedInitializable} from './VersionedInitializable.sol';
-import {RnbwDistributionManager} from './RnbwDistributionManager.sol';
+import {RNBWDistributionManager} from './RNBWDistributionManager.sol';
 
 /**
  * @title AaveIncentivesController
  * @notice Distributor contract for rewards to the Aave protocol
  * @author Aave
  **/
-contract RnbwIncentivesController is
-  IRnbwIncentivesController,
+contract RNBWIncentivesController is
+  IRNBWIncentivesController,
   VersionedInitializable,
-  RnbwDistributionManager
+  RNBWDistributionManager
 {
   using SafeMath for uint256;
   uint256 public constant REVISION = 1;
 
-  //IStakedAave public immutable PSM;
+  IStakedAave public immutable PSM;
 
   IERC20 public immutable REWARD_TOKEN;
-  //address public immutable REWARDS_VAULT;
-  //uint256 public immutable EXTRA_PSM_REWARD;
+  address public immutable REWARDS_VAULT;
+  uint256 public immutable EXTRA_PSM_REWARD;
 
   mapping(address => uint256) internal _usersUnclaimedRewards;
 
@@ -38,25 +38,26 @@ contract RnbwIncentivesController is
 
   constructor(
     IERC20 rewardToken,
-    //address rewardsVault,
-    //IStakedAave psm,
-    //uint256 extraPsmReward,
+    address rewardsVault,
+    IStakedAave psm,
+    uint256 extraPsmReward,
     address emissionManager,
     uint128 distributionDuration
-  ) public RnbwDistributionManager(emissionManager, distributionDuration) {
+  ) public RNBWDistributionManager(emissionManager, distributionDuration) {
     REWARD_TOKEN = rewardToken;
-    //REWARDS_VAULT = rewardsVault;
-    //PSM = psm;
-    //EXTRA_PSM_REWARD = extraPsmReward;
+    REWARDS_VAULT = rewardsVault;
+    PSM = psm;
+    EXTRA_PSM_REWARD = extraPsmReward;
   }
 
   /**
-   * @dev Called by the proxy contract. Not used at the moment, but for the future
+   * @dev Called by the proxy contract. Not used at the moment, but for the future. Not integrated yet in HALO Lending market
    **/
-  /* function initialize() external initializer {
+
+  function initialize() external initializer {
     // to unlock possibility to stake on behalf of the user
     REWARD_TOKEN.approve(address(PSM), type(uint256).max);
-  } */
+  }
 
   /**
    * @dev Called by the corresponding asset on any update that affects the rewards distribution
@@ -94,8 +95,9 @@ contract RnbwIncentivesController is
   {
     uint256 unclaimedRewards = _usersUnclaimedRewards[user];
 
-    DistributionTypes.UserStakeInput[] memory userState =
-      new DistributionTypes.UserStakeInput[](assets.length);
+    DistributionTypes.UserStakeInput[] memory userState = new DistributionTypes.UserStakeInput[](
+      assets.length
+    );
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
       (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i])
@@ -124,8 +126,9 @@ contract RnbwIncentivesController is
     address user = msg.sender;
     uint256 unclaimedRewards = _usersUnclaimedRewards[user];
 
-    DistributionTypes.UserStakeInput[] memory userState =
-      new DistributionTypes.UserStakeInput[](assets.length);
+    DistributionTypes.UserStakeInput[] memory userState = new DistributionTypes.UserStakeInput[](
+      assets.length
+    );
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
       (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i])
@@ -145,16 +148,15 @@ contract RnbwIncentivesController is
     uint256 amountToClaim = amount > unclaimedRewards ? unclaimedRewards : amount;
     _usersUnclaimedRewards[user] = unclaimedRewards - amountToClaim; // Safe due to the previous line
 
-    /* if (stake) {
+    if (stake) {
       amountToClaim = amountToClaim.add(amountToClaim.mul(EXTRA_PSM_REWARD).div(100));
       REWARD_TOKEN.transferFrom(REWARDS_VAULT, address(this), amountToClaim);
       PSM.stake(to, amountToClaim);
     } else {
       REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
-    } */
+    }
 
-    //REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
-    REWARD_TOKEN.transfer(to, amountToClaim);
+    REWARD_TOKEN.transferFrom(REWARDS_VAULT, to, amountToClaim);
 
     emit RewardsClaimed(msg.sender, to, amountToClaim);
 

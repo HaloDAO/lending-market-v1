@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
-import {IRnbwDistributionManager} from '../interfaces/IRnbwDistributionManager.sol';
+import {IRNBWDistributionManager} from '../interfaces/IRNBWDistributionManager.sol';
 import {DistributionTypes} from '../lib/DistributionTypes.sol';
 import 'hardhat/console.sol';
 
@@ -14,7 +14,7 @@ contract MockEmissionManager is Ownable {
     external
     onlyOwner
   {
-    IRnbwDistributionManager(incentivesController).configureAssets(assetsConfigInput);
+    IRNBWDistributionManager(incentivesController).configureAssets(assetsConfigInput);
   }
 
   function setIncentivesController(address _incentivesController) external onlyOwner {

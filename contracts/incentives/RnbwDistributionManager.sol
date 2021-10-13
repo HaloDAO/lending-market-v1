@@ -4,16 +4,14 @@ pragma experimental ABIEncoderV2;
 
 import {SafeMath} from './lib/SafeMath.sol';
 import {DistributionTypes} from './lib/DistributionTypes.sol';
-import {IRnbwDistributionManager} from './interfaces/IRnbwDistributionManager.sol';
-
-//import "hardhat/console.sol";
+import {IRNBWDistributionManager} from './interfaces/IRNBWDistributionManager.sol';
 
 /**
  * @title AaveDistributionManager
  * @notice Accounting contract to manage multiple staking distributions
  * @author Aave
  **/
-contract RnbwDistributionManager is IRnbwDistributionManager {
+contract RNBWDistributionManager is IRNBWDistributionManager {
   using SafeMath for uint256;
 
   struct AssetData {
@@ -87,14 +85,13 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
       return oldIndex;
     }
 
-    uint256 newIndex =
-      _getAssetIndex(oldIndex, assetConfig.emissionPerSecond, lastUpdateTimestamp, totalStaked);
-    /* console.log("----------------------");
-    console.log(block.timestamp);
-    console.log(lastUpdateTimestamp);
-    console.log("oldIndex: ", oldIndex);
-    console.log("newIndex: ", newIndex);
-    console.log("----------------------"); */
+    uint256 newIndex = _getAssetIndex(
+      oldIndex,
+      assetConfig.emissionPerSecond,
+      lastUpdateTimestamp,
+      totalStaked
+    );
+
     if (newIndex != oldIndex) {
       assetConfig.index = newIndex;
       emit AssetIndexUpdated(underlyingAsset, newIndex);
@@ -124,7 +121,7 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
     uint256 accruedRewards = 0;
 
     uint256 newIndex = _updateAssetStateInternal(asset, assetData, totalStaked);
-    //console.log("newIndex", newIndex);
+
     if (userIndex != newIndex) {
       if (stakedByUser != 0) {
         accruedRewards = _getRewards(stakedByUser, newIndex, userIndex);
@@ -178,14 +175,13 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
 
     for (uint256 i = 0; i < stakes.length; i++) {
       AssetData storage assetConfig = assets[stakes[i].underlyingAsset];
-      uint256 assetIndex =
-        _getAssetIndex(
-          assetConfig.index,
-          assetConfig.emissionPerSecond,
-          assetConfig.lastUpdateTimestamp,
-          stakes[i].totalStaked
-        );
-      //console.log("Asset index: ", assetIndex);
+      uint256 assetIndex = _getAssetIndex(
+        assetConfig.index,
+        assetConfig.emissionPerSecond,
+        assetConfig.lastUpdateTimestamp,
+        stakes[i].totalStaked
+      );
+
       accruedRewards = accruedRewards.add(
         _getRewards(stakes[i].stakedByUser, assetIndex, assetConfig.users[user])
       );
@@ -231,11 +227,11 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
       return currentIndex;
     }
 
-    uint256 currentTimestamp =
-      block.timestamp > DISTRIBUTION_END ? DISTRIBUTION_END : block.timestamp;
+    uint256 currentTimestamp = block.timestamp > DISTRIBUTION_END
+      ? DISTRIBUTION_END
+      : block.timestamp;
     uint256 timeDelta = currentTimestamp.sub(lastUpdateTimestamp);
-    //console.log("timeDelta: ", timeDelta);
-    //console.log("emissionPerSecond: ", emissionPerSecond);
+
     return
       emissionPerSecond.mul(timeDelta).mul(10**uint256(PRECISION)).div(totalBalance).add(
         currentIndex
