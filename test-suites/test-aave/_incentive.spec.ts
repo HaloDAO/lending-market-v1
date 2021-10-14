@@ -14,25 +14,10 @@ import {
   getRnbwIncentivesController,
 } from '../../helpers/contracts-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { CommonsConfig } from '../../markets/aave/commons';
+
 const { parseEther } = ethers.utils;
 import { DRE, getDb, notFalsyOrZeroAddress, increaseTime } from '../../helpers/misc-utils';
-import {
-  tEthereumAddress,
-  eContractid,
-  tStringTokenSmallUnits,
-  eEthereumNetwork,
-  AavePools,
-  iParamsPerNetwork,
-  iParamsPerPool,
-  ePolygonNetwork,
-  eXDaiNetwork,
-  eNetwork,
-  iParamsPerNetworkAll,
-  iEthereumParamsPerNetwork,
-  iPolygonParamsPerNetwork,
-  iXDaiParamsPerNetwork,
-} from '../../helpers/types';
+
 makeSuite('Incentives Controller', (testEnv: TestEnv) => {
   const {
     INVALID_FROM_BALANCE_AFTER_TRANSFER,
@@ -99,30 +84,30 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
     //deposit weth
     console.log(dai.address);
 
-    await xsgd.connect(secondaryWallet).mint(parseEther('50000'));
-    await xsgd.connect(secondaryWallet).approve(pool.address, parseEther('50000'));
+    await xsgd.connect(secondaryWallet.signer).mint(parseEther('50000'));
+    await xsgd.connect(secondaryWallet.signer).approve(pool.address, parseEther('50000'));
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .deposit(xsgd.address, parseEther('20000'), secondaryWallet.address, 0);
-    await pool.connect(secondaryWallet).setUserUseReserveAsCollateral(xsgd.address, true);
+    await pool.connect(secondaryWallet.signer).setUserUseReserveAsCollateral(xsgd.address, true);
 
     increaseTime(600);
 
     //deposit 2
     await pool.deposit(dai.address, parseEther('2000'), deployer.address, 0);
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .deposit(xsgd.address, parseEther('20000'), secondaryWallet.address, 0);
 
     //borrow 2
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .borrow(dai.address, parseEther('1000'), 1, 0, secondaryWallet.address);
     increaseTime(600);
 
     //borrow 4
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .borrow(dai.address, parseEther('500'), 1, 0, secondaryWallet.address);
     increaseTime(600);
 

@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {IRNBWDistributionManager} from '../interfaces/IRNBWDistributionManager.sol';
 import {DistributionTypes} from '../lib/DistributionTypes.sol';
-import 'hardhat/console.sol';
 
 contract MockEmissionManager is Ownable {
   address public incentivesController;

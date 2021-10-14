@@ -51,6 +51,7 @@ export interface SignerWithAddress {
 }
 export interface TestEnv {
   deployer: SignerWithAddress;
+  secondaryWallet: SignerWithAddress;
   users: SignerWithAddress[];
   pool: LendingPool;
   configurator: LendingPoolConfigurator;
@@ -60,6 +61,8 @@ export interface TestEnv {
   aWETH: AToken;
   dai: MintableERC20;
   aDai: AToken;
+  xsgd: MintableERC20;
+  aXSGD: AToken;
   usdc: MintableERC20;
   aave: MintableERC20;
   addressesProvider: LendingPoolAddressesProvider;
@@ -77,6 +80,7 @@ const setBuidlerevmSnapshotId = (id: string) => {
 
 const testEnv: TestEnv = {
   deployer: {} as SignerWithAddress,
+  secondaryWallet: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
   pool: {} as LendingPool,
   configurator: {} as LendingPoolConfigurator,
@@ -110,7 +114,10 @@ export async function initializeMakeSuite() {
     });
   }
   testEnv.deployer = deployer;
-  testEnv.secondaryWallet = restSigners[0];
+  testEnv.secondaryWallet = {
+    address: await restSigners[0].getAddress(),
+    signer: restSigners[0],
+  };
   testEnv.pool = await getLendingPool();
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
@@ -163,15 +170,15 @@ export async function initializeMakeSuite() {
   testEnv.aWETH = await getAToken(aWEthAddress);
 
   testEnv.aXSGD = await getAToken(aXsgdAddress);
-  testEnv.aTHKD = await getAToken(aThkdAddress);
+  // testEnv.aTHKD = await getAToken(aThkdAddress);
 
   testEnv.dai = await getMintableERC20(daiAddress);
   testEnv.usdc = await getMintableERC20(usdcAddress);
   //testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
 
-  testEnv.xsgd = await getMintableERC20(xsgdAddress);
-  testEnv.thkd = await getWETHMocked(thkdAddress);
+  testEnv.xsgd = await getMintableERC20(xsgdAddress!);
+  //testEnv.thkd = await getWETHMocked(thkdAddress);
 
   testEnv.wethGateway = await getWETHGateway();
 

@@ -1,4 +1,4 @@
-import { Contract } from 'ethers';
+import { BigNumberish, Contract } from 'ethers';
 import { DRE } from './misc-utils';
 import {
   tEthereumAddress,
@@ -56,7 +56,7 @@ import {
   CurveFactoryMockFactory,
   TreasuryFactory,
   VestingContractMockFactory,
-  RnbwIncentivesControllerFactory,
+  RNBWIncentivesControllerFactory,
   MockEmissionManagerFactory,
 } from '../types';
 import {
@@ -647,6 +647,7 @@ export const deployFlashLiquidationAdapter = async (
     verify
   );
 
+// HALO Deployments
 export const deployRnbwMock = async (args: [string, string], verify?: boolean) =>
   withSaveAndVerify(
     await new RnbwMockFactory(await getFirstSigner()).deploy(...args),
@@ -664,7 +665,14 @@ export const deployUniswapMock = async (args: [tEthereumAddress], verify?: boole
   );
 
 export const deployTreasury = async (
-  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress],
+  args: [
+    tEthereumAddress,
+    tEthereumAddress,
+    tEthereumAddress,
+    tEthereumAddress,
+    tEthereumAddress,
+    tEthereumAddress
+  ],
   verify?: boolean
 ) =>
   withSaveAndVerify(
@@ -691,18 +699,18 @@ export const deployMockEmissionManager = async (args: [], verify?: boolean) =>
   );
 
 export const deployRnbwIncentivesContoller = async (
-  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress],
+  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, tEthereumAddress, string],
   verify?: boolean
 ) =>
   withSaveAndVerify(
-    await new RnbwIncentivesControllerFactory(await getFirstSigner()).deploy(...args),
+    await new RNBWIncentivesControllerFactory(await getFirstSigner()).deploy(...args),
     eContractid.RnbwIncentivesController,
     args,
     verify
   );
 
 export const deployCurveMock = async (
-  args: [tEthereumAddress, tEthereumAddress, BigNumber],
+  args: [tEthereumAddress, tEthereumAddress, string],
   verify?: boolean
 ) =>
   withSaveAndVerify(

@@ -37,9 +37,6 @@ export const CommonsConfig: ICommonConfiguration = {
     AllAssetsInitialPrices: {
       ...MOCK_CHAINLINK_AGGREGATORS_PRICES,
     },
-    AllAssetsInitialPricesHalo: {
-      ...MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
-    },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
   LendingRateOracleRatesCommon: {

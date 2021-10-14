@@ -69,23 +69,23 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
     await pool.setUserUseReserveAsCollateral(dai.address, true);
 
     //deposit xsgd
-    await xsgd.connect(secondaryWallet).mint(parseEther('50000'));
+    await xsgd.connect(secondaryWallet.signer).mint(parseEther('50000'));
 
-    await xsgd.connect(secondaryWallet).approve(pool.address, parseEther('50000'));
+    await xsgd.connect(secondaryWallet.signer).approve(pool.address, parseEther('50000'));
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .deposit(xsgd.address, parseEther('20000'), secondaryWallet.address, 0);
 
     increaseTime(600);
 
     //borrow 2
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .borrow(dai.address, parseEther('1000'), 2, 0, secondaryWallet.address);
     increaseTime(600);
 
     await pool
-      .connect(secondaryWallet)
+      .connect(secondaryWallet.signer)
       .borrow(dai.address, parseEther('1000'), 2, 0, secondaryWallet.address);
     increaseTime(600);
     //check balance
@@ -107,7 +107,7 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
       `Treasury Contract Rnbw balance initial: ${await rnbwContract.balanceOf(treasuryAddress)}`
     );
     console.log('Buy back rnbw ...');
-    await treasuryContract.buybackRnbw([dai.address]);
+    await treasuryContract.buybackRnbw([dai.address], 0); // minRNBW set to 0
 
     console.log(
       `Treasury Contract Rnbw balance final: ${await rnbwContract.balanceOf(treasuryAddress)}`

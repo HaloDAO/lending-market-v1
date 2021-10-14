@@ -89,7 +89,7 @@ export enum eContractid {
   FlashLiquidationAdapter = 'FlashLiquidationAdapter',
   Treasury = 'Treasury',
   MockRnbw = 'MockRnbw',
-  RnbwIncentivesController = 'RnbwIncentivesController',
+  RnbwIncentivesController = 'RNBWIncentivesController',
   VestingContractMock = 'VestingContractMock',
   MockEmissionManager = 'MockEmissionManager',
   CurveMock = 'CurveMock',

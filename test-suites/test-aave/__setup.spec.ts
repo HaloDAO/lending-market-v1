@@ -68,12 +68,12 @@ import { WETH9Mocked } from '../../types/WETH9Mocked';
 
 const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
-const ALL_ASSETS_INITIAL_PRICES_HALO = AaveConfig.Mocks.AllAssetsInitialPricesHalo;
+const ALL_ASSETS_INITIAL_PRICES_HALO = AaveConfig.Mocks.AllAssetsInitialPrices;
 const USD_ADDRESS = AaveConfig.ProtocolGlobalParams.UsdAddress;
 const MOCK_CHAINLINK_AGGREGATORS_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
-const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = AaveConfig.Mocks.AllAssetsInitialPricesHalo;
+const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = AaveConfig.Mocks.AllAssetsInitialPrices;
 const LENDING_RATE_ORACLE_RATES_COMMON = AaveConfig.LendingRateOracleRatesCommon;
-const LENDING_RATE_ORACLE_RATES_COMMON_HALO = AaveConfig.LendingRateOracleRatesCommonHalo;
+const LENDING_RATE_ORACLE_RATES_COMMON_HALO = AaveConfig.LendingRateOracleRatesCommon;
 
 const deployAllMockTokens = async (deployer: Signer) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
@@ -205,6 +205,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   //   },
   //   fallbackOracle
   // );
+  // TODO: CHeck
+  /*
   await setInitialAssetPricesInOracle(
     ALL_ASSETS_INITIAL_PRICES_HALO,
     {
@@ -216,6 +218,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
     },
     fallbackOracle
   );
+
+  */
   const mockAggregators = await deployAllMockAggregators(MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO);
   console.log('Mock aggs deployed');
   const allTokenAddresses = Object.entries(mockTokens).reduce(
@@ -242,12 +246,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   const allReservesAddresses = {
     ...tokensAddressesWithoutUsd,
   };
-  // await setInitialMarketRatesInRatesOracleByHelper(
-  //   LENDING_RATE_ORACLE_RATES_COMMON,
-  //   allReservesAddresses,
-  //   lendingRateOracle,
-  //   aaveAdmin
-  // );
+  await setInitialMarketRatesInRatesOracleByHelper(
+    LENDING_RATE_ORACLE_RATES_COMMON,
+    allReservesAddresses,
+    lendingRateOracle,
+    aaveAdmin
+  );
   await setInitialMarketRatesInRatesOracleByHelper(
     LENDING_RATE_ORACLE_RATES_COMMON_HALO,
     allReservesAddresses,
@@ -276,9 +280,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   //   false
   // );
   const distributionDuration = 1000000000000;
-  const rnbwToken = await deployRnbwMock(['Rainbow', 'RNBW']);
-  const uniswapMock = await deployUniswapMock([rnbwToken.address]);
-  const vestingContractMock = await deployVestingContractMock([rnbwToken.address]);
+  const xrnbwToken = await deployRnbwMock(['Rainbow', 'XRNBW']);
+  const uniswapMock = await deployUniswapMock([xrnbwToken.address]);
+  const vestingContractMock = await deployVestingContractMock([xrnbwToken.address]);
   const oneEther = new BigNumber(Math.pow(10, 18));
   const curveMockDai = await deployCurveMock([
     mockTokens.USDC.address,
@@ -293,16 +297,19 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   const treasury = await deployTreasury([
     lendingPoolAddress,
     uniswapMock.address,
-    rnbwToken.address,
+    xrnbwToken.address,
     vestingContractMock.address,
     curveFactoryMock.address,
     mockTokens.USDC.address,
   ]);
-  const mockEmissionManager = await deployMockEmissionManager();
+  const mockEmissionManager = await deployMockEmissionManager([]);
   const rnbwIncentivesController = await deployRnbwIncentivesContoller([
-    rnbwToken.address,
+    xrnbwToken.address,
+    xrnbwToken.address, // change to vault
+    xrnbwToken.address, // change to psm
+    '0',
     mockEmissionManager.address,
-    distributionDuration,
+    `${distributionDuration}`,
   ]);
   await mockEmissionManager.setIncentivesController(rnbwIncentivesController.address);
 
