@@ -4,7 +4,7 @@ pragma solidity 0.6.12;
 import {Context} from './Context.sol';
 import {IERC20} from '../interfaces/IERC20.sol';
 import {IERC20Detailed} from '../interfaces/IERC20Detailed.sol';
-import {SafeMath} from './SafeMath.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 
 /**
  * @title ERC20
