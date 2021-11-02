@@ -3,14 +3,13 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {DistributionTypes} from './lib/DistributionTypes.sol';
-import {SafeMath} from './lib/SafeMath.sol';
-
-import {IERC20} from './interfaces/IERC20.sol';
 import {IAToken} from './interfaces/IAToken.sol';
 import {IRnbwIncentivesController} from './interfaces/IRnbwIncentivesController.sol';
 import {IStakedAave} from './interfaces/IStakedAave.sol';
 import {VersionedInitializable} from './VersionedInitializable.sol';
 import {RnbwDistributionManager} from './RnbwDistributionManager.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /**
  * @title AaveIncentivesController
@@ -28,8 +27,6 @@ contract RnbwIncentivesController is
   //IStakedAave public immutable PSM;
 
   IERC20 public immutable REWARD_TOKEN;
-  //address public immutable REWARDS_VAULT;
-  //uint256 public immutable EXTRA_PSM_REWARD;
 
   mapping(address => uint256) internal _usersUnclaimedRewards;
 
@@ -70,11 +67,7 @@ contract RnbwIncentivesController is
     uint256 totalSupply
   ) external override {
     uint256 accruedRewards = _updateUserAssetInternal(user, msg.sender, userBalance, totalSupply);
-    /* console.log("user: ",  user);
-    console.log("msg.sender: ", msg.sender);
-    console.log("userBalance: ", userBalance);
-    console.log("totalSupply: ", totalSupply);
-    console.log("accruedRewards: ", accruedRewards); */
+
     if (accruedRewards != 0) {
       _usersUnclaimedRewards[user] = _usersUnclaimedRewards[user].add(accruedRewards);
       emit RewardsAccrued(user, accruedRewards);
