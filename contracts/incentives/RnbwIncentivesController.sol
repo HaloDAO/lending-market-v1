@@ -70,11 +70,7 @@ contract RnbwIncentivesController is
     uint256 totalSupply
   ) external override {
     uint256 accruedRewards = _updateUserAssetInternal(user, msg.sender, userBalance, totalSupply);
-    /* console.log("user: ",  user);
-    console.log("msg.sender: ", msg.sender);
-    console.log("userBalance: ", userBalance);
-    console.log("totalSupply: ", totalSupply);
-    console.log("accruedRewards: ", accruedRewards); */
+
     if (accruedRewards != 0) {
       _usersUnclaimedRewards[user] = _usersUnclaimedRewards[user].add(accruedRewards);
       emit RewardsAccrued(user, accruedRewards);
