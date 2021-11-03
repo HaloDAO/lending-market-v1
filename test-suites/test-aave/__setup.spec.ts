@@ -28,6 +28,7 @@ import {
   deployUniswapRepayAdapter,
   deployFlashLiquidationAdapter,
   authorizeWETHGateway,
+  deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork } from '../../helpers/types';
 import { Signer } from 'ethers';
@@ -214,7 +215,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
 
-  await deployAaveOracle([tokens, aggregators, fallbackOracle.address, mockTokens.WETH.address]);
+  const aaveOracle = await deployAaveOracle([
+    tokens,
+    aggregators,
+    fallbackOracle.address,
+    mockTokens.WETH.address,
+  ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
   const lendingRateOracle = await deployLendingRateOracle();
@@ -242,12 +248,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const config = loadPoolConfig(ConfigNames.Aave);
 
-  const {
-    ATokenNamePrefix,
-    StableDebtTokenNamePrefix,
-    VariableDebtTokenNamePrefix,
-    SymbolPrefix,
-  } = config;
+  const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
+    config;
   const treasuryAddress = await getTreasuryAddress(config);
 
   await initReservesByHelper(
@@ -287,6 +289,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
   await authorizeWETHGateway(gateWay.address, lendingPoolAddress);
+
+  const uiProvider = await deployUiPoolDataProvider([ZERO_ADDRESS, aaveOracle.address]);
+  await insertContractAddressInDb(eContractid.UiPoolDataProvider, uiProvider.address);
 
   console.timeEnd('setup');
 };
