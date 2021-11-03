@@ -2,7 +2,7 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import {SafeMath} from './lib/SafeMath.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {DistributionTypes} from './lib/DistributionTypes.sol';
 import {IRnbwDistributionManager} from './interfaces/IRnbwDistributionManager.sol';
 

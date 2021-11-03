@@ -3,9 +3,9 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {DistributionTypes} from './lib/DistributionTypes.sol';
-import {SafeMath} from './lib/SafeMath.sol';
 
-import {IERC20} from './interfaces/IERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {IAToken} from './interfaces/IAToken.sol';
 import {IRnbwIncentivesController} from './interfaces/IRnbwIncentivesController.sol';
 import {IStakedAave} from './interfaces/IStakedAave.sol';
@@ -70,11 +70,7 @@ contract RnbwIncentivesController is
     uint256 totalSupply
   ) external override {
     uint256 accruedRewards = _updateUserAssetInternal(user, msg.sender, userBalance, totalSupply);
-    /* console.log("user: ",  user);
-    console.log("msg.sender: ", msg.sender);
-    console.log("userBalance: ", userBalance);
-    console.log("totalSupply: ", totalSupply);
-    console.log("accruedRewards: ", accruedRewards); */
+
     if (accruedRewards != 0) {
       _usersUnclaimedRewards[user] = _usersUnclaimedRewards[user].add(accruedRewards);
       emit RewardsAccrued(user, accruedRewards);
