@@ -94,9 +94,4 @@ contract Treasury is Ownable {
     IERC20(rnbw).transfer(vestingContract, rnbwAmount);
     emit RnbwSentToVesting(rnbwAmount, msg.sender);
   }
-
-  modifier onlyEOA() {
-    require(msg.sender == tx.origin, 'Only EOA allowed');
-    _;
-  }
 }
