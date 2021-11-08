@@ -14,24 +14,29 @@ makeSuite('UI integration tests', async (testEnv) => {
    * Markets
    */
   it('App displays market data for each reserve', async () => {
-    const { pool, addressesProvider, uiDataProvider, users } = testEnv;
+    const { addressesProvider, uiDataProvider, users } = testEnv;
 
-    const reservesList = await pool.getReservesList();
+    // Fetch detail of all reserves
+    const {
+      0: rawReservesData,
+      1: userReserves,
+      2: usdPriceEth,
+      3: rawRewardsData,
+    } = await uiDataProvider.getReservesData(addressesProvider.address, users[0].address);
 
-    for (let i = 0; i < reservesList.length; i++) {
-      const reserveData = await pool.getReserveData(reservesList[i]);
-      expect(reserveData.configuration).is.not.null;
-      expect(reserveData.currentLiquidityRate).is.not.null;
-      expect(reserveData.currentVariableBorrowRate).is.not.null;
-      expect(reserveData.currentStableBorrowRate).is.not.null;
-      // const {
-      //   0: rawReservesData,
-      //   1: userReserves,
-      //   2: usdPriceEth,
-      //   3: rawRewardsData,
-      // } = await uiDataProvider.getReservesData(addressesProvider.address, users[0].address);
-      // console.log('userReserves: ', userReserves);
-      // expect(rawReservesData).is.not.null;
+    // Basic assertions
+    expect(rawReservesData).is.not.empty;
+    expect(userReserves).is.not.empty;
+    expect(usdPriceEth).is.not.null;
+    expect(rawRewardsData).is.not.null;
+
+    // Displaying of data on the market table
+    for (let i = 0; i < rawReservesData.length; i++) {
+      expect(rawReservesData[i].symbol).is.not.null; // Asset column
+      // @todo: Market Size column
+      expect(userReserves[i].principalStableDebt).is.not.null; // Total Borrowed column
+      expect(rawReservesData[i].liquidityRate).is.not.null; // Deposit APY column
+      expect(rawReservesData[i].stableBorrowRate).is.not.null; // Borrow APY column
     }
   });
 
@@ -65,21 +70,34 @@ makeSuite('UI integration tests', async (testEnv) => {
   /**
    * Dashboard
    */
-  it.skip('User can set DAI as collateral', async () => {
-    const { users, dai, pool } = testEnv;
+  it('User can set DAI as collateral', async () => {
+    const { users, dai, pool, uiDataProvider, addressesProvider } = testEnv;
 
-    // initially, DAI should not be set as collateral
-    const configBefore = await pool.connect(users[0].signer).getUserConfiguration(users[0].address);
-    console.log('configBefore: ', configBefore.toString(2));
-    // @todo: parse config and assert DAI is NOT set as collateral
+    // verify by default DAI is used as collateral
+    const { 0: userReservesBefore } = await uiDataProvider.getUserReservesData(
+      addressesProvider.address,
+      users[0].address
+    );
+    const daiReserveBefore = userReservesBefore.find(
+      (reserve) => reserve.underlyingAsset === dai.address
+    );
+    expect(daiReserveBefore.usageAsCollateralEnabledOnUser).to.be.true;
 
-    // set DAI as collateral
+    // unset DAI as collateral
+    await pool.connect(users[0].signer).setUserUseReserveAsCollateral(dai.address, false);
+
+    // verify DAI is not used as collateral
+    const { 0: userReservesAfter } = await uiDataProvider.getUserReservesData(
+      addressesProvider.address,
+      users[0].address
+    );
+    const daiReserveAfter = userReservesAfter.find(
+      (reserve) => reserve.underlyingAsset === dai.address
+    );
+    expect(daiReserveAfter.usageAsCollateralEnabledOnUser).to.be.false;
+
+    // Revert to use DAI as collateral
     await pool.connect(users[0].signer).setUserUseReserveAsCollateral(dai.address, true);
-
-    // verify DAI is now set as collateral
-    const configAfter = await pool.connect(users[0].signer).getUserConfiguration(users[0].address);
-    console.log('configAfter: ', configAfter.toString(2));
-    // @todo: parse config and assert DAI is set as collateral
   });
 
   /**
