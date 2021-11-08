@@ -2,11 +2,10 @@ import { makeSuite } from './helpers/make-suite';
 import { expect } from 'chai';
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
 import { AAVE_REFERRAL, MAX_UINT_AMOUNT } from '../../helpers/constants';
-import { formatEther, parseEther } from '@ethersproject/units';
+import { parseEther } from '@ethersproject/units';
 import { RateMode } from '../../helpers/types';
 import { getStableDebtToken } from '../../helpers/contracts-getters';
 import { BigNumber } from '@ethersproject/bignumber';
-import { waitForTx } from '../../helpers/misc-utils';
 
 makeSuite('UI integration tests', async (testEnv) => {
   const ZERO = BigNumber.from('0');
@@ -66,7 +65,7 @@ makeSuite('UI integration tests', async (testEnv) => {
   /**
    * Dashboard
    */
-  it('User can set DAI as collateral', async () => {
+  it.skip('User can set DAI as collateral', async () => {
     const { users, dai, pool } = testEnv;
 
     // initially, DAI should not be set as collateral
@@ -75,9 +74,7 @@ makeSuite('UI integration tests', async (testEnv) => {
     // @todo: parse config and assert DAI is NOT set as collateral
 
     // set DAI as collateral
-    await pool
-      .connect(users[0].signer)
-      .setUserUseReserveAsCollateral(dai.address, users[0].address);
+    await pool.connect(users[0].signer).setUserUseReserveAsCollateral(dai.address, true);
 
     // verify DAI is now set as collateral
     const configAfter = await pool.connect(users[0].signer).getUserConfiguration(users[0].address);
@@ -121,46 +118,35 @@ makeSuite('UI integration tests', async (testEnv) => {
   /**
    * Repay
    */
-  it('User can full repay ETH loan', async () => {
+  it('User can fully repay ETH loan', async () => {
     const { users, pool, weth, helpersContract } = testEnv;
 
-    // get StableDebtToke to check for existing loan
+    // verify debt balance is > 0
     const { stableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       weth.address
     );
     const stableDebtToken = await getStableDebtToken(stableDebtTokenAddress);
-
-    // verify debt balance is > 0
     const debtBalanceBefore = await stableDebtToken.balanceOf(users[0].address);
     expect(debtBalanceBefore).to.be.gt(ZERO);
-    console.log('debtBalanceBefore: ', formatEther(debtBalanceBefore));
 
     // mint some more ETH so user can pay for loan interest
-    const borrowAmount = await convertToCurrencyDecimals(weth.address, '0.01');
-    // const interestAmount = borrowAmount;
-    // await weth.connect(users[0].signer).mint(borrowAmount);
-
-    // make sure user has enough ETH balance to repay fully
-    // const repayAmount = borrowAmount.add(interestAmount);
-    const repayAmount = borrowAmount;
-    const ethBalanceBefore = await weth.balanceOf(users[0].address);
-    expect(ethBalanceBefore).to.be.eq(repayAmount);
+    const interestAmount = await convertToCurrencyDecimals(weth.address, '0.001'); // @todo: how much interest to pay?
+    await weth.connect(users[0].signer).mint(interestAmount);
 
     // user approves ETH spend to repay loan
     await weth.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     // user fully repays ETH
-    await waitForTx(
-      await pool
-        .connect(users[0].signer)
-        .repay(weth.address, repayAmount, RateMode.Stable, users[0].address)
-    );
+    await pool
+      .connect(users[0].signer)
+      .repay(weth.address, MAX_UINT_AMOUNT, RateMode.Stable, users[0].address);
 
-    // user's ETH balance should reset back to 0
+    // borrowed amount should be deducted from user's ETH balance
     const ethBalanceAfter = await weth.balanceOf(users[0].address);
-    expect(ethBalanceAfter).to.be.eq(ZERO);
+    const borrowAmount = await convertToCurrencyDecimals(weth.address, '0.01');
+    expect(ethBalanceAfter).to.be.lt(borrowAmount);
 
-    // verify debt balance is == 0
+    // verify debt balance is now 0
     const debtBalanceAfter = await stableDebtToken.balanceOf(users[0].address);
     expect(debtBalanceAfter).to.be.eq(ZERO);
   });
@@ -168,15 +154,12 @@ makeSuite('UI integration tests', async (testEnv) => {
   /**
    * Withdraw
    */
-  it('User can full withdraw DAI collateral', async () => {
-    const { users, pool, dai, aDai } = testEnv;
+  it('User can fully withdraw DAI collateral', async () => {
+    const { users, pool, dai } = testEnv;
 
     // make sure user has 0 DAI
     const daiBalanceBefore = await dai.balanceOf(users[0].address);
     expect(daiBalanceBefore.toString()).to.be.equal('0');
-
-    // user approves aDAI spend to withdraw DAI
-    // await aDai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     // user withdraws x amount of DAI
     const withdrawAmount = await convertToCurrencyDecimals(dai.address, '1000');
@@ -184,6 +167,6 @@ makeSuite('UI integration tests', async (testEnv) => {
 
     // user gets back x amount of DAI balance after withdrawal
     const daiBalanceAfter = await dai.balanceOf(users[0].address);
-    expect(daiBalanceAfter.toString()).to.be.not.equal('0');
+    expect(daiBalanceAfter).to.be.eq(withdrawAmount);
   });
 });
