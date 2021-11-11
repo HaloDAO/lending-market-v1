@@ -55,9 +55,8 @@ contract Treasury2 is Ownable {
   ) external onlyOwner returns (uint256) {
     // 1 - Withdraw and Convert to USDC
     for (uint256 i = 0; i < _underlyings.length; i++) {
-      uint256 underlyingAmount =
-        ILendingPool(lendingPool).withdraw(_underlyings[i], type(uint256).max, address(this));
-      convertToUsdc(_underlyings[i], underlyingAmount, deadline);
+      uint256 underlyingAmount = ILendingPool(lendingPool).withdraw(_underlyings[i], type(uint256).max, address(this));
+      _convertToUsdc(_underlyings[i], underlyingAmount, deadline);
       // hTHKD -> THKD -> swap to USDC -> USDC swap to RNBW -> sesend sa rainbow pool
     }
 
@@ -72,7 +71,7 @@ contract Treasury2 is Ownable {
   /**
    * @dev helper function to convert all underlying assets into usdc before swapping to RNBW
    **/
-  function convertToUsdc(
+  function _convertToUsdc(
     address _underlying,
     uint256 _underlyingAmount,
     uint256 deadline
