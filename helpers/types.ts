@@ -93,7 +93,8 @@ export enum eContractid {
   VestingContractMock = 'VestingContractMock',
   MockEmissionManager = 'MockEmissionManager',
   CurveMock = 'CurveMock',
-  UniswapMock = 'UniswapMock',
+  UniswapV2Factory = 'UniswapV2Factory',
+  UniswapV2Pair = 'UniswapV2Pair',
   CurveFactoryMock = 'CurveFactoryMock',
 }
 
@@ -312,10 +313,7 @@ export type iMaticPoolAssets<T> = Pick<
   'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'WMATIC' | 'AAVE'
 >;
 
-export type iXDAIPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'STAKE'
->;
+export type iXDAIPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'STAKE'>;
 
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
 

@@ -19,6 +19,8 @@ import {
   getRnbwIncentivesController,
   getTreasury,
   getCurveFactoryMock,
+  getUniswapV2Factory,
+  getVestingContract,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
 import { LendingPool } from '../../../types/LendingPool';
@@ -49,6 +51,7 @@ import {
   RnbwIncentivesController,
   RnbwMock,
   Treasury,
+  UniswapV2Factory,
   VestingContractMock,
 } from '../../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -92,6 +95,7 @@ export interface TestEnv {
   treasuryContract: Treasury;
   vestingContractMock: VestingContractMock;
   curveFactoryMock: CurveFactoryMock;
+  uniswapV2Factory: UniswapV2Factory;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -191,13 +195,14 @@ export async function initializeMakeSuite() {
   }
 
   // TEST ENV
-
   // RNBW Contracts
   testEnv.rnbwContract = await getRnbwMock();
   testEnv.emissionManager = await getMockEmissionManager();
   testEnv.rnbwIncentivesController = await getRnbwIncentivesController();
   testEnv.treasuryContract = await getTreasury();
   testEnv.curveFactoryMock = await getCurveFactoryMock();
+  testEnv.uniswapV2Factory = await getUniswapV2Factory();
+  testEnv.vestingContractMock = await getVestingContract();
 
   // testEnv Atokens
   testEnv.aDai = await getAToken(aDaiAddress);

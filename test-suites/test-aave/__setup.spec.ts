@@ -29,7 +29,6 @@ import {
   deployUniswapRepayAdapter,
   deployFlashLiquidationAdapter,
   deployRnbwMock,
-  deployUniswapMock,
   deployTreasury,
   deployVestingContractMock,
   deployCurveMock,
@@ -37,6 +36,7 @@ import {
   deployMockEmissionManager,
   deployRnbwIncentivesContoller,
   authorizeWETHGateway,
+  deployUniswapV2Factory,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork } from '../../helpers/types';
 import { Signer } from 'ethers';
@@ -44,6 +44,7 @@ import { TokenContractIdHalo, eContractid, tEthereumAddress, AavePools } from '.
 import { MintableERC20 } from '../../types/MintableERC20';
 import { ConfigNames, getReservesConfigByPool, getTreasuryAddress, loadPoolConfig } from '../../helpers/configuration';
 import { initializeMakeSuite } from './helpers/make-suite';
+import { deployMockContract } from '@ethereum-waffle/mock-contract';
 
 import {
   setInitialAssetPricesInOracle,
@@ -264,7 +265,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   // );
   const distributionDuration = 1000000000000;
   const rnbwToken = await deployRnbwMock(['Rainbow', 'RNBW']);
-  const uniswapMock = await deployUniswapMock([rnbwToken.address]);
   const vestingContractMock = await deployVestingContractMock([rnbwToken.address]);
   const oneEther = new BigNumber(Math.pow(10, 18));
   const curveMockDai = await deployCurveMock([mockTokens.USDC.address, mockTokens.DAI.address, oneEther.toFixed()]);
@@ -275,14 +275,20 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
     [mockTokens.DAI.address, mockTokens.XSGD.address],
     [curveMockDai.address, curveMockSGD.address],
   ]);
+
+  // SLP Deployments
+  const uniswapV2Factory = await deployUniswapV2Factory([await deployer.getAddress()]);
+  await uniswapV2Factory.createPair(mockTokens.USDC.address, rnbwToken.address);
+
   const treasury = await deployTreasury([
     lendingPoolAddress,
-    uniswapMock.address,
     rnbwToken.address,
     vestingContractMock.address,
     curveFactoryMock.address,
     mockTokens.USDC.address,
+    await uniswapV2Factory.getPair(mockTokens.USDC.address, rnbwToken.address),
   ]);
+
   const mockEmissionManager = await deployMockEmissionManager();
   const rnbwIncentivesController = await deployRnbwIncentivesContoller([
     rnbwToken.address,
