@@ -3,9 +3,9 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {DistributionTypes} from './lib/DistributionTypes.sol';
-import {SafeMath} from './lib/SafeMath.sol';
 
-import {IERC20} from './interfaces/IERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {IAToken} from './interfaces/IAToken.sol';
 import {IRnbwIncentivesController} from './interfaces/IRnbwIncentivesController.sol';
 import {IStakedAave} from './interfaces/IStakedAave.sol';
@@ -17,11 +17,7 @@ import {RnbwDistributionManager} from './RnbwDistributionManager.sol';
  * @notice Distributor contract for rewards to the Aave protocol
  * @author Aave
  **/
-contract RnbwIncentivesController is
-  IRnbwIncentivesController,
-  VersionedInitializable,
-  RnbwDistributionManager
-{
+contract RnbwIncentivesController is IRnbwIncentivesController, VersionedInitializable, RnbwDistributionManager {
   using SafeMath for uint256;
   uint256 public constant REVISION = 1;
 
@@ -70,11 +66,7 @@ contract RnbwIncentivesController is
     uint256 totalSupply
   ) external override {
     uint256 accruedRewards = _updateUserAssetInternal(user, msg.sender, userBalance, totalSupply);
-    /* console.log("user: ",  user);
-    console.log("msg.sender: ", msg.sender);
-    console.log("userBalance: ", userBalance);
-    console.log("totalSupply: ", totalSupply);
-    console.log("accruedRewards: ", accruedRewards); */
+
     if (accruedRewards != 0) {
       _usersUnclaimedRewards[user] = _usersUnclaimedRewards[user].add(accruedRewards);
       emit RewardsAccrued(user, accruedRewards);
@@ -86,20 +78,13 @@ contract RnbwIncentivesController is
    * @param user The address of the user
    * @return The rewards
    **/
-  function getRewardsBalance(address[] calldata assets, address user)
-    external
-    view
-    override
-    returns (uint256)
-  {
+  function getRewardsBalance(address[] calldata assets, address user) external view override returns (uint256) {
     uint256 unclaimedRewards = _usersUnclaimedRewards[user];
 
-    DistributionTypes.UserStakeInput[] memory userState =
-      new DistributionTypes.UserStakeInput[](assets.length);
+    DistributionTypes.UserStakeInput[] memory userState = new DistributionTypes.UserStakeInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
-      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i])
-        .getScaledUserBalanceAndSupply(user);
+      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i]).getScaledUserBalanceAndSupply(user);
     }
     unclaimedRewards = unclaimedRewards.add(_getUnclaimedRewards(user, userState));
     return unclaimedRewards;
@@ -124,12 +109,10 @@ contract RnbwIncentivesController is
     address user = msg.sender;
     uint256 unclaimedRewards = _usersUnclaimedRewards[user];
 
-    DistributionTypes.UserStakeInput[] memory userState =
-      new DistributionTypes.UserStakeInput[](assets.length);
+    DistributionTypes.UserStakeInput[] memory userState = new DistributionTypes.UserStakeInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
-      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i])
-        .getScaledUserBalanceAndSupply(user);
+      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i]).getScaledUserBalanceAndSupply(user);
     }
 
     uint256 accruedRewards = _claimRewards(user, userState);
