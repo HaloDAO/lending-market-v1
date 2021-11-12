@@ -151,7 +151,7 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
     await expect(
       rnbwIncentivesController.claimRewards([aDai.address], rewardsToClaim, deployer.address, false),
       'Rewards claiming failed'
-    ).to.not.be.reverted;
+    ).to.emit(rnbwIncentivesController, 'RewardsClaimed').to.not.be.reverted;
 
     expect(await rnbwContract.balanceOf(deployer.address)).to.be.equal(rewardsToClaim);
   });
@@ -168,7 +168,7 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
         .connect(secondaryWallet.signer)
         .claimRewards([aDai.address], daiRewards, secondaryWallet.address, false),
       'Rewards claiming failed'
-    ).to.not.be.reverted;
+    ).to.emit(rnbwIncentivesController, 'RewardsClaimed').to.not.be.reverted;
 
     expect(await rnbwContract.balanceOf(secondaryWallet.address)).to.be.equal(daiRewards);
   });
@@ -181,7 +181,7 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
     await expect(
       rnbwIncentivesController.claimRewards([aDai.address], daiRewards, users[3].address, false),
       'Rewards claiming failed'
-    ).to.not.be.reverted;
+    ).to.emit(rnbwIncentivesController, 'RewardsClaimed').to.not.be.reverted;
 
     expect(await rnbwContract.balanceOf(users[3].address)).to.be.equal(daiRewards);
   });

@@ -69,7 +69,7 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
     await expect(
       treasuryContract.buybackRnbw([dai.address], 0, Number(await timeLatest())),
       'Single Token: Buyback failed'
-    ).to.not.be.reverted;
+    ).to.emit(treasuryContract, 'RNBWBoughtAndSentToVesting').to.not.be.reverted;
 
     expect(await Number(formatEther(await rnbwContract.balanceOf(vestingContractMock.address))).toFixed(5)).to.equal(
       TEST_CONSTANTS.EXPECTED_RNBW_IN_VESTING_SINGLE
@@ -91,7 +91,7 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
     await expect(
       treasuryContract.buybackRnbw([dai.address, xsgd.address], 0, Number(await timeLatest())),
       'Multiple Token: Buyback Failed'
-    ).to.not.be.reverted;
+    ).to.emit(treasuryContract, 'RNBWBoughtAndSentToVesting').to.not.be.reverted;
 
     expect(await Number(formatEther(await rnbwContract.balanceOf(vestingContractMock.address))).toFixed(5)).to.equal(
       TEST_CONSTANTS.EXPECTED_RNBW_IN_VESTING_MULTIPLE
