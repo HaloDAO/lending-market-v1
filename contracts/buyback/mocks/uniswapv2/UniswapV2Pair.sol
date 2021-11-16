@@ -5,9 +5,9 @@ pragma solidity =0.6.12;
 import './UniswapV2ERC20.sol';
 import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
-import './interfaces/IERC20.sol';
-import './interfaces/IUniswapV2Factory.sol';
-import './interfaces/IUniswapV2Callee.sol';
+import '../../interfaces/IERC20.sol';
+import '../../interfaces/IUniswapV2Factory.sol';
+import '../../interfaces/IUniswapV2Callee.sol';
 
 interface IMigrator {
   // Return the desired amount of liquidity token that the migrator wants.
@@ -15,7 +15,7 @@ interface IMigrator {
 }
 
 contract UniswapV2Pair is UniswapV2ERC20 {
-  using SafeMathUniswap for uint256;
+  using SafeMath for uint256;
   using UQ112x112 for uint224;
 
   uint256 public constant MINIMUM_LIQUIDITY = 10**3;
@@ -161,31 +161,6 @@ contract UniswapV2Pair is UniswapV2ERC20 {
   }
 
   // this low-level function should be called from a contract which performs important safety checks
-  function burn(address to) external lock returns (uint256 amount0, uint256 amount1) {
-    (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
-    address _token0 = token0; // gas savings
-    address _token1 = token1; // gas savings
-    uint256 balance0 = IERC20Uniswap(_token0).balanceOf(address(this));
-    uint256 balance1 = IERC20Uniswap(_token1).balanceOf(address(this));
-    uint256 liquidity = balanceOf[address(this)];
-
-    bool feeOn = _mintFee(_reserve0, _reserve1);
-    uint256 _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
-    amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
-    amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
-    require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
-    _burn(address(this), liquidity);
-    _safeTransfer(_token0, to, amount0);
-    _safeTransfer(_token1, to, amount1);
-    balance0 = IERC20Uniswap(_token0).balanceOf(address(this));
-    balance1 = IERC20Uniswap(_token1).balanceOf(address(this));
-
-    _update(balance0, balance1, _reserve0, _reserve1);
-    if (feeOn) kLast = uint256(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
-    emit Burn(msg.sender, amount0, amount1, to);
-  }
-
-  // this low-level function should be called from a contract which performs important safety checks
   function swap(
     uint256 amount0Out,
     uint256 amount1Out,
@@ -221,23 +196,5 @@ contract UniswapV2Pair is UniswapV2ERC20 {
 
     _update(balance0, balance1, _reserve0, _reserve1);
     emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
-  }
-
-  // force balances to match reserves
-  function skim(address to) external lock {
-    address _token0 = token0; // gas savings
-    address _token1 = token1; // gas savings
-    _safeTransfer(_token0, to, IERC20Uniswap(_token0).balanceOf(address(this)).sub(reserve0));
-    _safeTransfer(_token1, to, IERC20Uniswap(_token1).balanceOf(address(this)).sub(reserve1));
-  }
-
-  // force reserves to match balances
-  function sync() external lock {
-    _update(
-      IERC20Uniswap(token0).balanceOf(address(this)),
-      IERC20Uniswap(token1).balanceOf(address(this)),
-      reserve0,
-      reserve1
-    );
   }
 }

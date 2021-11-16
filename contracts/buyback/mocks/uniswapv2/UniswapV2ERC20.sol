@@ -2,10 +2,10 @@
 
 pragma solidity =0.6.12;
 
-import './libraries/SafeMath.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 
 contract UniswapV2ERC20 {
-  using SafeMathUniswap for uint256;
+  using SafeMath for uint256;
 
   string public constant name = 'SushiSwap LP Token';
   string public constant symbol = 'SLP';

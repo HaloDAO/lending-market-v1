@@ -2,7 +2,7 @@
 
 pragma solidity =0.6.12;
 
-import './interfaces/IUniswapV2Factory.sol';
+import '../../interfaces/IUniswapV2Factory.sol';
 import './UniswapV2Pair.sol';
 
 contract UniswapV2Factory is IUniswapV2Factory {
@@ -42,20 +42,5 @@ contract UniswapV2Factory is IUniswapV2Factory {
     getPair[token1][token0] = pair; // populate mapping in the reverse direction
     allPairs.push(pair);
     emit PairCreated(token0, token1, pair, allPairs.length);
-  }
-
-  function setFeeTo(address _feeTo) external override {
-    require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
-    feeTo = _feeTo;
-  }
-
-  function setMigrator(address _migrator) external override {
-    require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
-    migrator = _migrator;
-  }
-
-  function setFeeToSetter(address _feeToSetter) external override {
-    require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
-    feeToSetter = _feeToSetter;
   }
 }

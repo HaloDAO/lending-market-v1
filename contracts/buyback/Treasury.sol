@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
@@ -13,7 +13,7 @@ import {ICurveFactory} from './interfaces/ICurveFactory.sol';
 import {IUniswapV2Pair} from './interfaces/IUniswapV2Pair.sol';
 
 contract Treasury is Ownable {
-  event RNBWBoughtAndSentToVesting(uint256 amountBought, address caller);
+  event RNBWBoughtAndSentToVesting(uint256 amountBought, address indexed caller);
 
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
