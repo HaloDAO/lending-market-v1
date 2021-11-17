@@ -32,6 +32,7 @@ import {
   authorizeWETHGateway,
   deployATokenImplementations,
   deployAaveOracle,
+  deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { Signer } from 'ethers';
 import { TokenContractId, eContractid, tEthereumAddress, AavePools } from '../../helpers/types';
@@ -224,7 +225,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     config.OracleQuoteCurrency
   );
 
-  await deployAaveOracle([
+  const aaveOracle = await deployAaveOracle([
     tokens,
     aggregators,
     fallbackOracle.address,
@@ -306,6 +307,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
   await authorizeWETHGateway(gateWay.address, lendingPoolAddress);
+
+  const uiProvider = await deployUiPoolDataProvider([ZERO_ADDRESS, aaveOracle.address]);
+  await insertContractAddressInDb(eContractid.UiPoolDataProvider, uiProvider.address);
 
   console.timeEnd('setup');
 };

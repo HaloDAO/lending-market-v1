@@ -15,6 +15,7 @@ import {
   getUniswapRepayAdapter,
   getFlashLiquidationAdapter,
   getParaSwapLiquiditySwapAdapter,
+  getUiPoolDataProvider,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
 import { LendingPool } from '../../../types/LendingPool';
@@ -39,7 +40,7 @@ import { WETH9Mocked } from '../../../types/WETH9Mocked';
 import { WETHGateway } from '../../../types/WETHGateway';
 import { solidity } from 'ethereum-waffle';
 import { AaveConfig } from '../../../markets/aave';
-import { FlashLiquidationAdapter } from '../../../types';
+import { FlashLiquidationAdapter, UiPoolDataProvider } from '../../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../../helpers/tenderly-utils';
 
@@ -55,6 +56,7 @@ export interface TestEnv {
   deployer: SignerWithAddress;
   users: SignerWithAddress[];
   pool: LendingPool;
+  uiDataProvider: UiPoolDataProvider;
   configurator: LendingPoolConfigurator;
   oracle: PriceOracle;
   helpersContract: AaveProtocolDataProvider;
@@ -82,6 +84,7 @@ const testEnv: TestEnv = {
   deployer: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
   pool: {} as LendingPool,
+  uiDataProvider: {} as UiPoolDataProvider,
   configurator: {} as LendingPoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
@@ -115,6 +118,7 @@ export async function initializeMakeSuite() {
   }
   testEnv.deployer = deployer;
   testEnv.pool = await getLendingPool();
+  testEnv.uiDataProvider = await getUiPoolDataProvider();
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
 
