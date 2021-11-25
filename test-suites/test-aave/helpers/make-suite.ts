@@ -14,6 +14,13 @@ import {
   getUniswapLiquiditySwapAdapter,
   getUniswapRepayAdapter,
   getFlashLiquidationAdapter,
+  getRnbwMock,
+  getMockEmissionManager,
+  getRnbwIncentivesController,
+  getTreasury,
+  getCurveFactoryMock,
+  getUniswapV2Factory,
+  getVestingContract,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
 import { LendingPool } from '../../../types/LendingPool';
@@ -37,7 +44,16 @@ import { WETH9Mocked } from '../../../types/WETH9Mocked';
 import { WETHGateway } from '../../../types/WETHGateway';
 import { solidity } from 'ethereum-waffle';
 import { AaveConfig } from '../../../markets/aave';
-import { FlashLiquidationAdapter } from '../../../types';
+import {
+  CurveFactoryMock,
+  FlashLiquidationAdapter,
+  MockEmissionManager,
+  RnbwIncentivesController,
+  RnbwMock,
+  Treasury,
+  UniswapV2Factory,
+  VestingContractMock,
+} from '../../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../../helpers/tenderly-utils';
 
@@ -51,6 +67,7 @@ export interface SignerWithAddress {
 }
 export interface TestEnv {
   deployer: SignerWithAddress;
+  secondaryWallet: SignerWithAddress;
   users: SignerWithAddress[];
   pool: LendingPool;
   configurator: LendingPoolConfigurator;
@@ -62,12 +79,23 @@ export interface TestEnv {
   aDai: AToken;
   usdc: MintableERC20;
   aave: MintableERC20;
+  xsgd: MintableERC20;
+  aXSGD: AToken;
+  thkd: MintableERC20;
+  aTHKD: AToken;
   addressesProvider: LendingPoolAddressesProvider;
   uniswapLiquiditySwapAdapter: UniswapLiquiditySwapAdapter;
   uniswapRepayAdapter: UniswapRepayAdapter;
   registry: LendingPoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
   flashLiquidationAdapter: FlashLiquidationAdapter;
+  rnbwContract: RnbwMock;
+  emissionManager: MockEmissionManager;
+  rnbwIncentivesController: RnbwIncentivesController;
+  treasuryContract: Treasury;
+  vestingContractMock: VestingContractMock;
+  curveFactoryMock: CurveFactoryMock;
+  uniswapV2Factory: UniswapV2Factory;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -77,6 +105,7 @@ const setBuidlerevmSnapshotId = (id: string) => {
 
 const testEnv: TestEnv = {
   deployer: {} as SignerWithAddress,
+  secondaryWallet: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
   pool: {} as LendingPool,
   configurator: {} as LendingPoolConfigurator,
@@ -94,6 +123,10 @@ const testEnv: TestEnv = {
   flashLiquidationAdapter: {} as FlashLiquidationAdapter,
   registry: {} as LendingPoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
+  xsgd: {} as MintableERC20,
+  aXSGD: {} as AToken,
+  thkd: {} as MintableERC20,
+  aTHKD: {} as AToken,
 } as TestEnv;
 
 export async function initializeMakeSuite() {
@@ -103,6 +136,11 @@ export async function initializeMakeSuite() {
     signer: _deployer,
   };
 
+  const secondaryWallet: SignerWithAddress = {
+    address: await restSigners[0].getAddress(),
+    signer: restSigners[0],
+  };
+
   for (const signer of restSigners) {
     testEnv.users.push({
       signer,
@@ -110,7 +148,7 @@ export async function initializeMakeSuite() {
     });
   }
   testEnv.deployer = deployer;
-  testEnv.secondaryWallet = restSigners[0];
+  testEnv.secondaryWallet = secondaryWallet;
   testEnv.pool = await getLendingPool();
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
@@ -128,21 +166,18 @@ export async function initializeMakeSuite() {
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 
+  // Atoken addresses
   const allTokens = await testEnv.helpersContract.getAllATokens();
   const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
-
   const aXsgdAddress = allTokens.find((aToken) => aToken.symbol === 'aXSGD')?.tokenAddress;
   const aThkdAddress = allTokens.find((aToken) => aToken.symbol === 'aTHKD')?.tokenAddress;
-
   const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
-
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 
+  // Token Addresses
   const daiAddress = reservesTokens.find((token) => token.symbol === 'DAI')?.tokenAddress;
   const usdcAddress = reservesTokens.find((token) => token.symbol === 'USDC')?.tokenAddress;
-
   const xsgdAddress = reservesTokens.find((token) => token.symbol === 'XSGD')?.tokenAddress;
-
   const thkdAddress = reservesTokens.find((token) => token.symbol === 'THKD')?.tokenAddress;
 
   //const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
@@ -159,22 +194,32 @@ export async function initializeMakeSuite() {
     process.exit(1);
   }
 
+  // TEST ENV
+  // RNBW Contracts
+  testEnv.rnbwContract = await getRnbwMock();
+  testEnv.emissionManager = await getMockEmissionManager();
+  testEnv.rnbwIncentivesController = await getRnbwIncentivesController();
+  testEnv.treasuryContract = await getTreasury();
+  testEnv.curveFactoryMock = await getCurveFactoryMock();
+  testEnv.uniswapV2Factory = await getUniswapV2Factory();
+  testEnv.vestingContractMock = await getVestingContract();
+
+  // testEnv Atokens
   testEnv.aDai = await getAToken(aDaiAddress);
   testEnv.aWETH = await getAToken(aWEthAddress);
-
   testEnv.aXSGD = await getAToken(aXsgdAddress);
   testEnv.aTHKD = await getAToken(aThkdAddress);
 
+  // testEnv tokens
   testEnv.dai = await getMintableERC20(daiAddress);
   testEnv.usdc = await getMintableERC20(usdcAddress);
   //testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
+  testEnv.xsgd = await getMintableERC20(xsgdAddress!);
+  testEnv.thkd = await getMintableERC20(thkdAddress!);
 
-  testEnv.xsgd = await getMintableERC20(xsgdAddress);
-  testEnv.thkd = await getWETHMocked(thkdAddress);
-
+  // testEnv Aave contracts
   testEnv.wethGateway = await getWETHGateway();
-
   testEnv.uniswapLiquiditySwapAdapter = await getUniswapLiquiditySwapAdapter();
   testEnv.uniswapRepayAdapter = await getUniswapRepayAdapter();
   testEnv.flashLiquidationAdapter = await getFlashLiquidationAdapter();

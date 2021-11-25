@@ -29,7 +29,6 @@ import {
   deployUniswapRepayAdapter,
   deployFlashLiquidationAdapter,
   deployRnbwMock,
-  deployUniswapMock,
   deployTreasury,
   deployVestingContractMock,
   deployCurveMock,
@@ -37,18 +36,15 @@ import {
   deployMockEmissionManager,
   deployRnbwIncentivesContoller,
   authorizeWETHGateway,
+  deployUniswapV2Factory,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork } from '../../helpers/types';
 import { Signer } from 'ethers';
 import { TokenContractIdHalo, eContractid, tEthereumAddress, AavePools } from '../../helpers/types';
 import { MintableERC20 } from '../../types/MintableERC20';
-import {
-  ConfigNames,
-  getReservesConfigByPool,
-  getTreasuryAddress,
-  loadPoolConfig,
-} from '../../helpers/configuration';
+import { ConfigNames, getReservesConfigByPool, getTreasuryAddress, loadPoolConfig } from '../../helpers/configuration';
 import { initializeMakeSuite } from './helpers/make-suite';
+import { deployMockContract } from '@ethereum-waffle/mock-contract';
 
 import {
   setInitialAssetPricesInOracle,
@@ -119,9 +115,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
 
   const addressesProviderRegistry = await deployLendingPoolAddressesProviderRegistry();
-  await waitForTx(
-    await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
-  );
+  await waitForTx(await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1));
 
   const lendingPoolImpl = await deployLendingPool();
 
@@ -133,16 +127,11 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
 
   const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
-  await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
-  );
+  await waitForTx(await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address));
   const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
     await addressesProvider.getLendingPoolConfigurator()
   );
-  await insertContractAddressInDb(
-    eContractid.LendingPoolConfigurator,
-    lendingPoolConfiguratorProxy.address
-  );
+  await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
 
   // Deploy deployment helpers
   await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address]);
@@ -260,8 +249,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   const admin = await deployer.getAddress();
   console.log('Initialize configuration');
   const config = loadPoolConfig(ConfigNames.Aave);
-  const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
-    config;
+  const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } = config;
   //const treasuryAddress = await getTreasuryAddress(config);
   // await initReservesByHelper(
   //   reservesParams,
@@ -277,27 +265,30 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   // );
   const distributionDuration = 1000000000000;
   const rnbwToken = await deployRnbwMock(['Rainbow', 'RNBW']);
-  const uniswapMock = await deployUniswapMock([rnbwToken.address]);
   const vestingContractMock = await deployVestingContractMock([rnbwToken.address]);
   const oneEther = new BigNumber(Math.pow(10, 18));
-  const curveMockDai = await deployCurveMock([
-    mockTokens.USDC.address,
-    mockTokens.DAI.address,
-    oneEther.toFixed(),
-  ]);
+  const curveMockDai = await deployCurveMock([mockTokens.USDC.address, mockTokens.DAI.address, oneEther.toFixed()]);
+
+  const curveMockSGD = await deployCurveMock([mockTokens.USDC.address, mockTokens.XSGD.address, oneEther.toFixed()]);
   const curveFactoryMock = await deployCurveFactoryMock([
     mockTokens.USDC.address,
-    [mockTokens.DAI.address],
-    [curveMockDai.address],
+    [mockTokens.DAI.address, mockTokens.XSGD.address],
+    [curveMockDai.address, curveMockSGD.address],
   ]);
+
+  // SLP Deployments
+  const uniswapV2Factory = await deployUniswapV2Factory([await deployer.getAddress()]);
+  await uniswapV2Factory.createPair(mockTokens.USDC.address, rnbwToken.address);
+
   const treasury = await deployTreasury([
     lendingPoolAddress,
-    uniswapMock.address,
     rnbwToken.address,
     vestingContractMock.address,
     curveFactoryMock.address,
     mockTokens.USDC.address,
+    await uniswapV2Factory.getPair(mockTokens.USDC.address, rnbwToken.address),
   ]);
+
   const mockEmissionManager = await deployMockEmissionManager();
   const rnbwIncentivesController = await deployRnbwIncentivesContoller([
     rnbwToken.address,
@@ -322,9 +313,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
 
   const collateralManager = await deployLendingPoolCollateralManager();
-  await waitForTx(
-    await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
-  );
+  await waitForTx(await addressesProvider.setLendingPoolCollateralManager(collateralManager.address));
   await deployMockFlashLoanReceiver(addressesProvider.address);
 
   const mockUniswapRouter = await deployMockUniswapRouter();

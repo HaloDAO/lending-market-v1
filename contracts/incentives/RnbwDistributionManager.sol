@@ -44,27 +44,17 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
    * @dev Configures the distribution of rewards for a list of assets
    * @param assetsConfigInput The list of configurations to apply
    **/
-  function configureAssets(DistributionTypes.AssetConfigInput[] calldata assetsConfigInput)
-    external
-    override
-  {
+  function configureAssets(DistributionTypes.AssetConfigInput[] calldata assetsConfigInput) external override {
     require(msg.sender == EMISSION_MANAGER, 'ONLY_EMISSION_MANAGER');
 
     for (uint256 i = 0; i < assetsConfigInput.length; i++) {
       AssetData storage assetConfig = assets[assetsConfigInput[i].underlyingAsset];
 
-      _updateAssetStateInternal(
-        assetsConfigInput[i].underlyingAsset,
-        assetConfig,
-        assetsConfigInput[i].totalStaked
-      );
+      _updateAssetStateInternal(assetsConfigInput[i].underlyingAsset, assetConfig, assetsConfigInput[i].totalStaked);
 
       assetConfig.emissionPerSecond = assetsConfigInput[i].emissionPerSecond;
 
-      emit AssetConfigUpdated(
-        assetsConfigInput[i].underlyingAsset,
-        assetsConfigInput[i].emissionPerSecond
-      );
+      emit AssetConfigUpdated(assetsConfigInput[i].underlyingAsset, assetsConfigInput[i].emissionPerSecond);
     }
   }
 
@@ -87,8 +77,7 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
       return oldIndex;
     }
 
-    uint256 newIndex =
-      _getAssetIndex(oldIndex, assetConfig.emissionPerSecond, lastUpdateTimestamp, totalStaked);
+    uint256 newIndex = _getAssetIndex(oldIndex, assetConfig.emissionPerSecond, lastUpdateTimestamp, totalStaked);
     /* console.log("----------------------");
     console.log(block.timestamp);
     console.log(lastUpdateTimestamp);
@@ -143,20 +132,12 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
    * @param stakes List of structs of the user data related with his stake
    * @return The accrued rewards for the user until the moment
    **/
-  function _claimRewards(address user, DistributionTypes.UserStakeInput[] memory stakes)
-    internal
-    returns (uint256)
-  {
+  function _claimRewards(address user, DistributionTypes.UserStakeInput[] memory stakes) internal returns (uint256) {
     uint256 accruedRewards = 0;
 
     for (uint256 i = 0; i < stakes.length; i++) {
       accruedRewards = accruedRewards.add(
-        _updateUserAssetInternal(
-          user,
-          stakes[i].underlyingAsset,
-          stakes[i].stakedByUser,
-          stakes[i].totalStaked
-        )
+        _updateUserAssetInternal(user, stakes[i].underlyingAsset, stakes[i].stakedByUser, stakes[i].totalStaked)
       );
     }
 
@@ -186,9 +167,7 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
           stakes[i].totalStaked
         );
       //console.log("Asset index: ", assetIndex);
-      accruedRewards = accruedRewards.add(
-        _getRewards(stakes[i].stakedByUser, assetIndex, assetConfig.users[user])
-      );
+      accruedRewards = accruedRewards.add(_getRewards(stakes[i].stakedByUser, assetIndex, assetConfig.users[user]));
     }
     return accruedRewards;
   }
@@ -231,15 +210,11 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
       return currentIndex;
     }
 
-    uint256 currentTimestamp =
-      block.timestamp > DISTRIBUTION_END ? DISTRIBUTION_END : block.timestamp;
+    uint256 currentTimestamp = block.timestamp > DISTRIBUTION_END ? DISTRIBUTION_END : block.timestamp;
     uint256 timeDelta = currentTimestamp.sub(lastUpdateTimestamp);
     //console.log("timeDelta: ", timeDelta);
     //console.log("emissionPerSecond: ", emissionPerSecond);
-    return
-      emissionPerSecond.mul(timeDelta).mul(10**uint256(PRECISION)).div(totalBalance).add(
-        currentIndex
-      );
+    return emissionPerSecond.mul(timeDelta).mul(10**uint256(PRECISION)).div(totalBalance).add(currentIndex);
   }
 
   /**

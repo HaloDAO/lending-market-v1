@@ -16,7 +16,6 @@ import { MintableERC20 } from '../types/MintableERC20';
 import { MockContract } from 'ethereum-waffle';
 import { getReservesConfigByPool } from './configuration';
 import { getFirstSigner } from './contracts-getters';
-import { ZERO_ADDRESS } from './constants';
 import {
   AaveProtocolDataProviderFactory,
   ATokenFactory,
@@ -51,13 +50,13 @@ import {
   WETHGatewayFactory,
   FlashLiquidationAdapterFactory,
   RnbwMockFactory,
-  UniswapMockFactory,
   CurveMockFactory,
   CurveFactoryMockFactory,
-  TreasuryFactory,
   VestingContractMockFactory,
   RnbwIncentivesControllerFactory,
   MockEmissionManagerFactory,
+  UniswapV2FactoryFactory,
+  TreasuryFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -111,19 +110,9 @@ export const deployLendingPoolAddressesProviderRegistry = async (verify?: boolea
   );
 
 export const deployLendingPoolConfigurator = async (verify?: boolean) => {
-  const lendingPoolConfiguratorImpl = await new LendingPoolConfiguratorFactory(
-    await getFirstSigner()
-  ).deploy();
-  await insertContractAddressInDb(
-    eContractid.LendingPoolConfiguratorImpl,
-    lendingPoolConfiguratorImpl.address
-  );
-  return withSaveAndVerify(
-    lendingPoolConfiguratorImpl,
-    eContractid.LendingPoolConfigurator,
-    [],
-    verify
-  );
+  const lendingPoolConfiguratorImpl = await new LendingPoolConfiguratorFactory(await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.LendingPoolConfiguratorImpl, lendingPoolConfiguratorImpl.address);
+  return withSaveAndVerify(lendingPoolConfiguratorImpl, eContractid.LendingPoolConfigurator, [], verify);
 };
 
 export const deployReserveLogicLibrary = async (verify?: boolean) =>
@@ -141,22 +130,13 @@ export const deployGenericLogic = async (reserveLogic: Contract, verify?: boolea
     [eContractid.ReserveLogic]: reserveLogic.address,
   });
 
-  const genericLogicFactory = await DRE.ethers.getContractFactory(
-    genericLogicArtifact.abi,
-    linkedGenericLogicByteCode
-  );
+  const genericLogicFactory = await DRE.ethers.getContractFactory(genericLogicArtifact.abi, linkedGenericLogicByteCode);
 
-  const genericLogic = await (
-    await genericLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
+  const genericLogic = await (await genericLogicFactory.connect(await getFirstSigner()).deploy()).deployed();
   return withSaveAndVerify(genericLogic, eContractid.GenericLogic, [], verify);
 };
 
-export const deployValidationLogic = async (
-  reserveLogic: Contract,
-  genericLogic: Contract,
-  verify?: boolean
-) => {
+export const deployValidationLogic = async (reserveLogic: Contract, genericLogic: Contract, verify?: boolean) => {
   const validationLogicArtifact = await readArtifact(eContractid.ValidationLogic);
 
   const linkedValidationLogicByteCode = linkBytecode(validationLogicArtifact, {
@@ -169,16 +149,12 @@ export const deployValidationLogic = async (
     linkedValidationLogicByteCode
   );
 
-  const validationLogic = await (
-    await validationLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
+  const validationLogic = await (await validationLogicFactory.connect(await getFirstSigner()).deploy()).deployed();
 
   return withSaveAndVerify(validationLogic, eContractid.ValidationLogic, [], verify);
 };
 
-export const deployAaveLibraries = async (
-  verify?: boolean
-): Promise<LendingPoolLibraryAddresses> => {
+export const deployAaveLibraries = async (verify?: boolean): Promise<LendingPoolLibraryAddresses> => {
   const reserveLogic = await deployReserveLogicLibrary(verify);
   const genericLogic = await deployGenericLogic(reserveLogic, verify);
   const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
@@ -208,12 +184,7 @@ export const deployLendingPool = async (verify?: boolean) => {
 };
 
 export const deployPriceOracle = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new PriceOracleFactory(await getFirstSigner()).deploy(),
-    eContractid.PriceOracle,
-    [],
-    verify
-  );
+  withSaveAndVerify(await new PriceOracleFactory(await getFirstSigner()).deploy(), eContractid.PriceOracle, [], verify);
 
 export const deployLendingRateOracle = async (verify?: boolean) =>
   withSaveAndVerify(
@@ -243,19 +214,9 @@ export const deployAaveOracle = async (
   );
 
 export const deployLendingPoolCollateralManager = async (verify?: boolean) => {
-  const collateralManagerImpl = await new LendingPoolCollateralManagerFactory(
-    await getFirstSigner()
-  ).deploy();
-  await insertContractAddressInDb(
-    eContractid.LendingPoolCollateralManagerImpl,
-    collateralManagerImpl.address
-  );
-  return withSaveAndVerify(
-    collateralManagerImpl,
-    eContractid.LendingPoolCollateralManager,
-    [],
-    verify
-  );
+  const collateralManagerImpl = await new LendingPoolCollateralManagerFactory(await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.LendingPoolCollateralManagerImpl, collateralManagerImpl.address);
+  return withSaveAndVerify(collateralManagerImpl, eContractid.LendingPoolCollateralManager, [], verify);
 };
 
 export const deployInitializableAdminUpgradeabilityProxy = async (verify?: boolean) =>
@@ -266,10 +227,7 @@ export const deployInitializableAdminUpgradeabilityProxy = async (verify?: boole
     verify
   );
 
-export const deployMockFlashLoanReceiver = async (
-  addressesProvider: tEthereumAddress,
-  verify?: boolean
-) =>
+export const deployMockFlashLoanReceiver = async (addressesProvider: tEthereumAddress, verify?: boolean) =>
   withSaveAndVerify(
     await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.MockFlashLoanReceiver,
@@ -285,10 +243,7 @@ export const deployWalletBalancerProvider = async (verify?: boolean) =>
     verify
   );
 
-export const deployAaveProtocolDataProvider = async (
-  addressesProvider: tEthereumAddress,
-  verify?: boolean
-) =>
+export const deployAaveProtocolDataProvider = async (addressesProvider: tEthereumAddress, verify?: boolean) =>
   withSaveAndVerify(
     await new AaveProtocolDataProviderFactory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.AaveProtocolDataProvider,
@@ -296,10 +251,7 @@ export const deployAaveProtocolDataProvider = async (
     verify
   );
 
-export const deployMintableERC20 = async (
-  args: [string, string, string],
-  verify?: boolean
-): Promise<MintableERC20> =>
+export const deployMintableERC20 = async (args: [string, string, string], verify?: boolean): Promise<MintableERC20> =>
   withSaveAndVerify(
     await new MintableERC20Factory(await getFirstSigner()).deploy(...args),
     eContractid.MintableERC20,
@@ -409,12 +361,7 @@ export const deployGenericAToken = async (
 };
 
 export const deployGenericATokenImpl = async (verify: boolean) =>
-  withSaveAndVerify(
-    await new ATokenFactory(await getFirstSigner()).deploy(),
-    eContractid.AToken,
-    [],
-    verify
-  );
+  withSaveAndVerify(await new ATokenFactory(await getFirstSigner()).deploy(), eContractid.AToken, [], verify);
 
 export const deployDelegationAwareAToken = async (
   [pool, underlyingAssetAddress, treasuryAddress, incentivesController, name, symbol]: [
@@ -526,13 +473,8 @@ export const deployWETHGateway = async (args: [tEthereumAddress], verify?: boole
     verify
   );
 
-export const authorizeWETHGateway = async (
-  wethGateWay: tEthereumAddress,
-  lendingPool: tEthereumAddress
-) =>
-  await new WETHGatewayFactory(await getFirstSigner())
-    .attach(wethGateWay)
-    .authorizeLendingPool(lendingPool);
+export const authorizeWETHGateway = async (wethGateWay: tEthereumAddress, lendingPool: tEthereumAddress) =>
+  await new WETHGatewayFactory(await getFirstSigner()).attach(wethGateWay).authorizeLendingPool(lendingPool);
 
 export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],
@@ -551,12 +493,7 @@ export const deployMockStableDebtToken = async (
 };
 
 export const deployWETHMocked = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new WETH9MockedFactory(await getFirstSigner()).deploy(),
-    eContractid.WETHMocked,
-    [],
-    verify
-  );
+  withSaveAndVerify(await new WETH9MockedFactory(await getFirstSigner()).deploy(), eContractid.WETHMocked, [], verify);
 
 export const deployMockVariableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],
@@ -575,15 +512,7 @@ export const deployMockVariableDebtToken = async (
 };
 
 export const deployMockAToken = async (
-  args: [
-    tEthereumAddress,
-    tEthereumAddress,
-    tEthereumAddress,
-    tEthereumAddress,
-    string,
-    string,
-    string
-  ],
+  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],
   verify?: boolean
 ) => {
   const instance = await withSaveAndVerify(
@@ -655,16 +584,16 @@ export const deployRnbwMock = async (args: [string, string], verify?: boolean) =
     verify
   );
 
-export const deployUniswapMock = async (args: [tEthereumAddress], verify?: boolean) =>
+export const deployUniswapV2Factory = async (args: [tEthereumAddress], verify?: boolean) =>
   withSaveAndVerify(
-    await new UniswapMockFactory(await getFirstSigner()).deploy(...args),
-    eContractid.UniswapMock,
+    await new UniswapV2FactoryFactory(await getFirstSigner()).deploy(...args),
+    eContractid.UniswapV2Factory,
     args,
     verify
   );
 
 export const deployTreasury = async (
-  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress],
+  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress],
   verify?: boolean
 ) =>
   withSaveAndVerify(
@@ -701,10 +630,7 @@ export const deployRnbwIncentivesContoller = async (
     verify
   );
 
-export const deployCurveMock = async (
-  args: [tEthereumAddress, tEthereumAddress, BigNumber],
-  verify?: boolean
-) =>
+export const deployCurveMock = async (args: [tEthereumAddress, tEthereumAddress, BigNumber], verify?: boolean) =>
   withSaveAndVerify(
     await new CurveMockFactory(await getFirstSigner()).deploy(...args),
     eContractid.CurveMock,

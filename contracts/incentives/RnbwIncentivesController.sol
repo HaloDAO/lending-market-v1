@@ -17,11 +17,7 @@ import {RnbwDistributionManager} from './RnbwDistributionManager.sol';
  * @notice Distributor contract for rewards to the Aave protocol
  * @author Aave
  **/
-contract RnbwIncentivesController is
-  IRnbwIncentivesController,
-  VersionedInitializable,
-  RnbwDistributionManager
-{
+contract RnbwIncentivesController is IRnbwIncentivesController, VersionedInitializable, RnbwDistributionManager {
   using SafeMath for uint256;
   uint256 public constant REVISION = 1;
 
@@ -82,20 +78,13 @@ contract RnbwIncentivesController is
    * @param user The address of the user
    * @return The rewards
    **/
-  function getRewardsBalance(address[] calldata assets, address user)
-    external
-    view
-    override
-    returns (uint256)
-  {
+  function getRewardsBalance(address[] calldata assets, address user) external view override returns (uint256) {
     uint256 unclaimedRewards = _usersUnclaimedRewards[user];
 
-    DistributionTypes.UserStakeInput[] memory userState =
-      new DistributionTypes.UserStakeInput[](assets.length);
+    DistributionTypes.UserStakeInput[] memory userState = new DistributionTypes.UserStakeInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
-      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i])
-        .getScaledUserBalanceAndSupply(user);
+      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i]).getScaledUserBalanceAndSupply(user);
     }
     unclaimedRewards = unclaimedRewards.add(_getUnclaimedRewards(user, userState));
     return unclaimedRewards;
@@ -120,12 +109,10 @@ contract RnbwIncentivesController is
     address user = msg.sender;
     uint256 unclaimedRewards = _usersUnclaimedRewards[user];
 
-    DistributionTypes.UserStakeInput[] memory userState =
-      new DistributionTypes.UserStakeInput[](assets.length);
+    DistributionTypes.UserStakeInput[] memory userState = new DistributionTypes.UserStakeInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
-      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i])
-        .getScaledUserBalanceAndSupply(user);
+      (userState[i].stakedByUser, userState[i].totalStaked) = IAToken(assets[i]).getScaledUserBalanceAndSupply(user);
     }
 
     uint256 accruedRewards = _claimRewards(user, userState);
