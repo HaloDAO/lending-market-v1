@@ -1,11 +1,5 @@
 import BigNumber from 'bignumber.js';
-import {
-  oneEther,
-  oneRay,
-  RAY,
-  ZERO_ADDRESS,
-  MOCK_CHAINLINK_AGGREGATORS_PRICES,
-} from '../../helpers/constants';
+import { oneEther, oneRay, RAY, ZERO_ADDRESS, MOCK_CHAINLINK_AGGREGATORS_PRICES } from '../../helpers/constants';
 import { ICommonConfiguration, ePolygonNetwork } from '../../helpers/types';
 
 // ----------------

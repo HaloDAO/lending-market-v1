@@ -1,4 +1,4 @@
-import { Contract } from 'ethers';
+import { BigNumberish, Contract } from 'ethers';
 import { DRE } from './misc-utils';
 import {
   tEthereumAddress,
@@ -10,6 +10,7 @@ import {
   IReserveParams,
   PoolConfiguration,
   eEthereumNetwork,
+  HaloTokenContractId,
 } from './types';
 import BigNumber from 'bignumber.js';
 import { MintableERC20 } from '../types/MintableERC20';
@@ -422,6 +423,25 @@ export const deployAllMockTokens = async (verify?: boolean) => {
   return tokens;
 };
 
+export const deployAllHaloMockTokens = async (verify?: boolean) => {
+  const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
+
+  const protoConfigData = getReservesConfigByPool(AavePools.proto); // TODO: Change
+
+  for (const tokenSymbol of Object.keys(HaloTokenContractId)) {
+    let decimals = '18';
+
+    let configData = (<any>protoConfigData)[tokenSymbol];
+
+    tokens[tokenSymbol] = await deployMintableERC20(
+      [tokenSymbol, tokenSymbol, configData ? configData.reserveDecimals : decimals],
+      verify
+    );
+    await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
+  }
+  return tokens;
+};
+
 export const deployMockTokens = async (config: PoolConfiguration, verify?: boolean) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
   const defaultDecimals = 18;
@@ -433,7 +453,7 @@ export const deployMockTokens = async (config: PoolConfiguration, verify?: boole
       [
         tokenSymbol,
         tokenSymbol,
-        configData[tokenSymbol as keyof iMultiPoolsAssets<IReserveParams>].reserveDecimals ||
+        configData[tokenSymbol as keyof iMultiPoolsAssets<IReserveParams>]!.reserveDecimals ||
           defaultDecimals.toString(),
       ],
       verify
@@ -630,7 +650,7 @@ export const deployRnbwIncentivesContoller = async (
     verify
   );
 
-export const deployCurveMock = async (args: [tEthereumAddress, tEthereumAddress, BigNumber], verify?: boolean) =>
+export const deployCurveMock = async (args: [tEthereumAddress, tEthereumAddress, string], verify?: boolean) =>
   withSaveAndVerify(
     await new CurveMockFactory(await getFirstSigner()).deploy(...args),
     eContractid.CurveMock,

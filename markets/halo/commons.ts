@@ -9,7 +9,6 @@ import {
 } from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
 
-// TODO: Check AAVE
 // ----------------
 // PROTOCOL GLOBAL PARAMS
 // ----------------
@@ -63,7 +62,7 @@ export const CommonsConfig: ICommonConfiguration = {
     USDT: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
-    AAVE: {
+    RNBW: {
       borrowRate: oneRay.multipliedBy(0.03).toFixed(),
     },
     WBTC: {
@@ -71,6 +70,12 @@ export const CommonsConfig: ICommonConfiguration = {
     },
     BUSD: {
       borrowRate: oneRay.multipliedBy(0.05).toFixed(),
+    },
+    AAVE: {
+      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    },
+    XSGD: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
   },
   /*

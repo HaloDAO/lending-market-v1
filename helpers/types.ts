@@ -38,6 +38,7 @@ export enum AavePools {
   proto = 'proto',
   matic = 'matic',
   amm = 'amm',
+  halo = 'halo',
 }
 
 export enum eContractid {
@@ -189,7 +190,6 @@ export enum ProtocolErrors {
   LPAPR_INVALID_ADDRESSES_PROVIDER_ID = '72',
 
   // old
-
   INVALID_FROM_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
   INVALID_TO_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
   INVALID_OWNER_REVERT_MSG = 'Ownable: caller is not the owner',
@@ -207,6 +207,8 @@ export type tBigNumberTokenSmallUnits = BigNumber;
 export interface iAssetCommon<T> {
   [key: string]: T;
 }
+
+// Main Type Reference
 export interface iAssetBase<T> {
   WETH: T;
   DAI: T;
@@ -217,39 +219,28 @@ export interface iAssetBase<T> {
   USDT: T;
   SUSD: T;
   AAVE: T;
-  BAT: T;
-  MKR: T;
-  LINK: T;
-  KNC: T;
+  //KNC: T;
   WBTC: T;
-  MANA: T;
-  ZRX: T;
-  SNX: T;
   BUSD: T;
-  YFI: T;
-  UNI: T;
   USD: T;
-  REN: T;
-  ENJ: T;
-  UniDAIWETH: T;
-  UniWBTCWETH: T;
-  UniAAVEWETH: T;
-  UniBATWETH: T;
-  UniDAIUSDC: T;
-  UniCRVWETH: T;
-  UniLINKWETH: T;
-  UniMKRWETH: T;
-  UniRENWETH: T;
-  UniSNXWETH: T;
-  UniUNIWETH: T;
-  UniUSDCWETH: T;
-  UniWBTCUSDC: T;
-  UniYFIWETH: T;
-  BptWBTCWETH: T;
-  BptBALWETH: T;
-  WMATIC: T;
-  STAKE: T;
-  xSUSHI: T;
+  WMATIC?: T;
+  RNBW?: T;
+  // UniDAIWETH: T;
+  // UniWBTCWETH: T;
+  // UniAAVEWETH: T;
+  // UniBATWETH: T;
+  // UniDAIUSDC: T;
+  // UniCRVWETH: T;
+  // UniLINKWETH: T;
+  // UniMKRWETH: T;
+  // UniRENWETH: T;
+  // UniSNXWETH: T;
+  // UniUNIWETH: T;
+  // UniUSDCWETH: T;
+  // UniWBTCUSDC: T;
+  // UniYFIWETH: T;
+  // BptWBTCWETH: T;
+  // BptBALWETH: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -258,62 +249,38 @@ export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
 
 export type iAavePoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  | 'DAI'
-  | 'TUSD'
-  | 'USDC'
-  | 'XSGD'
-  | 'THKD'
-  | 'USDT'
-  | 'SUSD'
-  | 'AAVE'
-  | 'BAT'
-  | 'MKR'
-  | 'LINK'
-  | 'KNC'
-  | 'WBTC'
-  | 'MANA'
-  | 'ZRX'
-  | 'SNX'
-  | 'BUSD'
-  | 'WETH'
-  | 'YFI'
-  | 'UNI'
-  | 'REN'
-  | 'ENJ'
-  | 'xSUSHI'
+  'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'AAVE' | 'WBTC' | 'BUSD' | 'WETH' | 'RNBW'
+>;
+
+export type iHaloPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'WBTC' | 'BUSD' | 'WETH' | 'RNBW'
 >;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  | 'DAI'
-  | 'USDC'
-  | 'USDT'
-  | 'WBTC'
-  | 'WETH'
-  | 'UniDAIWETH'
-  | 'UniWBTCWETH'
-  | 'UniAAVEWETH'
-  | 'UniBATWETH'
-  | 'UniDAIUSDC'
-  | 'UniCRVWETH'
-  | 'UniLINKWETH'
-  | 'UniMKRWETH'
-  | 'UniRENWETH'
-  | 'UniSNXWETH'
-  | 'UniUNIWETH'
-  | 'UniUSDCWETH'
-  | 'UniWBTCUSDC'
-  | 'UniYFIWETH'
-  | 'BptWBTCWETH'
-  | 'BptBALWETH'
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH'
+  // | 'UniDAIWETH'
+  // | 'UniWBTCWETH'
+  // | 'UniAAVEWETH'
+  // | 'UniBATWETH'
+  // | 'UniDAIUSDC'
+  // | 'UniCRVWETH'
+  // | 'UniLINKWETH'
+  // | 'UniMKRWETH'
+  // | 'UniRENWETH'
+  // | 'UniSNXWETH'
+  // | 'UniUNIWETH'
+  // | 'UniUSDCWETH'
+  // | 'UniWBTCUSDC'
+  // | 'UniYFIWETH'
+  // | 'BptWBTCWETH'
+  // | 'BptBALWETH'
 >;
 
-export type iMaticPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'WMATIC' | 'AAVE'
->;
+export type iMaticPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE'>;
 
-export type iXDAIPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'STAKE'>;
+export type iXDAIPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH'>;
 
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
 
@@ -321,53 +288,63 @@ export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
 
 export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
-export enum TokenContractId {
+export enum HaloTokenContractId {
   DAI = 'DAI',
   AAVE = 'AAVE',
   TUSD = 'TUSD',
-  BAT = 'BAT',
   WETH = 'WETH',
   USDC = 'USDC',
   USDT = 'USDT',
   SUSD = 'SUSD',
-  ZRX = 'ZRX',
-  MKR = 'MKR',
   WBTC = 'WBTC',
-  LINK = 'LINK',
-  KNC = 'KNC',
-  MANA = 'MANA',
-  REN = 'REN',
-  SNX = 'SNX',
   BUSD = 'BUSD',
   USD = 'USD',
-  YFI = 'YFI',
-  UNI = 'UNI',
-  ENJ = 'ENJ',
-  UniDAIWETH = 'UniDAIWETH',
-  UniWBTCWETH = 'UniWBTCWETH',
-  UniAAVEWETH = 'UniAAVEWETH',
-  UniBATWETH = 'UniBATWETH',
-  UniDAIUSDC = 'UniDAIUSDC',
-  UniCRVWETH = 'UniCRVWETH',
-  UniLINKWETH = 'UniLINKWETH',
-  UniMKRWETH = 'UniMKRWETH',
-  UniRENWETH = 'UniRENWETH',
-  UniSNXWETH = 'UniSNXWETH',
-  UniUNIWETH = 'UniUNIWETH',
-  UniUSDCWETH = 'UniUSDCWETH',
-  UniWBTCUSDC = 'UniWBTCUSDC',
-  UniYFIWETH = 'UniYFIWETH',
-  BptWBTCWETH = 'BptWBTCWETH',
-  BptBALWETH = 'BptBALWETH',
   WMATIC = 'WMATIC',
-  STAKE = 'STAKE',
-  xSUSHI = 'xSUSHI',
+  XSGD = 'XSGD',
+  THKD = 'THKD',
+  RNBW = 'RNBW',
 }
-
-export enum TokenContractIdHalo {
+export enum TokenContractId {
   DAI = 'DAI',
+  AAVE = 'AAVE',
+  TUSD = 'TUSD',
+  // BAT = 'BAT',
   WETH = 'WETH',
   USDC = 'USDC',
+  USDT = 'USDT',
+  SUSD = 'SUSD',
+  // ZRX = 'ZRX',
+  // MKR = 'MKR',
+  WBTC = 'WBTC',
+  // LINK = 'LINK',
+  // KNC = 'KNC',
+  // MANA = 'MANA',
+  // REN = 'REN',
+  // SNX = 'SNX',
+  BUSD = 'BUSD',
+  USD = 'USD',
+  // YFI = 'YFI',
+  // UNI = 'UNI',
+  // ENJ = 'ENJ',
+  // UniDAIWETH = 'UniDAIWETH',
+  // UniWBTCWETH = 'UniWBTCWETH',
+  // UniAAVEWETH = 'UniAAVEWETH',
+  // UniBATWETH = 'UniBATWETH',
+  // UniDAIUSDC = 'UniDAIUSDC',
+  // UniCRVWETH = 'UniCRVWETH',
+  // UniLINKWETH = 'UniLINKWETH',
+  // UniMKRWETH = 'UniMKRWETH',
+  // UniRENWETH = 'UniRENWETH',
+  // UniSNXWETH = 'UniSNXWETH',
+  // UniUNIWETH = 'UniUNIWETH',
+  // UniUSDCWETH = 'UniUSDCWETH',
+  // UniWBTCUSDC = 'UniWBTCUSDC',
+  // UniYFIWETH = 'UniYFIWETH',
+  // BptWBTCWETH = 'BptWBTCWETH',
+  // BptBALWETH = 'BptBALWETH',
+  WMATIC = 'WMATIC',
+  // STAKE = 'STAKE',
+  // xSUSHI = 'xSUSHI',
   XSGD = 'XSGD',
   THKD = 'THKD',
 }
@@ -441,7 +418,8 @@ export interface iXDaiParamsPerNetwork<T> {
 export interface iParamsPerPool<T> {
   [AavePools.proto]: T;
   [AavePools.matic]: T;
-  [AavePools.amm]: T;
+  [AavePools.halo]: T;
+  // [AavePools.amm]: T;
 }
 
 export interface iBasicDistributionParams {
@@ -516,6 +494,10 @@ export interface ICommonConfiguration {
 
 export interface IAaveConfiguration extends ICommonConfiguration {
   ReservesConfig: iAavePoolAssets<IReserveParams>;
+}
+
+export interface IHaloConfiguration extends ICommonConfiguration {
+  ReservesConfig: iHaloPoolAssets<IReserveParams>;
 }
 
 export interface IAmmConfiguration extends ICommonConfiguration {

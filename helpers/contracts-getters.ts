@@ -43,7 +43,7 @@ import {
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
 import { DRE, getDb, notFalsyOrZeroAddress } from './misc-utils';
-import { eContractid, PoolConfiguration, tEthereumAddress, TokenContractId } from './types';
+import { eContractid, HaloTokenContractId, PoolConfiguration, tEthereumAddress, TokenContractId } from './types';
 
 export const getFirstSigner = async () => (await getEthersSigners())[0];
 
@@ -155,6 +155,20 @@ export const getAllMockedTokens = async () => {
   return tokens;
 };
 
+export const getAllHaloMockedTokens = async () => {
+  const db = getDb();
+  const tokens: MockTokenMap = await Object.keys(HaloTokenContractId).reduce<Promise<MockTokenMap>>(
+    async (acc, tokenSymbol) => {
+      const accumulator = await acc;
+      const address = db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value().address;
+      accumulator[tokenSymbol] = await getMintableERC20(address);
+      return Promise.resolve(acc);
+    },
+    Promise.resolve({})
+  );
+  return tokens;
+};
+
 export const getPairsTokenAggregator = (
   allAssetsAddresses: {
     [tokenSymbol: string]: tEthereumAddress;
@@ -163,15 +177,22 @@ export const getPairsTokenAggregator = (
 ): [string[], string[]] => {
   const { ETH, WETH, ...assetsAddressesWithoutEth } = allAssetsAddresses;
 
+  console.log('getPairsTokenAggregator: Obtained all asset addresses');
+
   const pairs = Object.entries(assetsAddressesWithoutEth).map(([tokenSymbol, tokenAddress]) => {
     //if (true/*tokenSymbol !== 'WETH' && tokenSymbol !== 'ETH' && tokenSymbol !== 'LpWETH'*/) {
+
     const aggregatorAddressIndex = Object.keys(aggregatorsAddresses).findIndex((value) => value === tokenSymbol);
+
     const [, aggregatorAddress] = (Object.entries(aggregatorsAddresses) as [string, tEthereumAddress][])[
       aggregatorAddressIndex
     ];
     return [tokenAddress, aggregatorAddress];
+
     //}
   }) as [string, string][];
+
+  console.log('getPairsTokenAggregator: Obtained all pairs');
 
   const mappedPairs = pairs.map(([asset]) => asset);
   const mappedAggregators = pairs.map(([, source]) => source);

@@ -25,8 +25,7 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
   };
 
   it('setups the testing environment ', async () => {
-    const { dai, usdc, xsgd, deployer, pool, curveFactoryMock, rnbwContract, treasuryContract, uniswapV2Factory } =
-      testEnv;
+    const { dai, usdc, xsgd, deployer, pool, curveFactoryMock, rnbwContract, uniswapV2Factory } = testEnv;
 
     await rnbwContract.mint(deployer.address, TEST_CONSTANTS.INTIAL_RNBW_MINT);
     expect(await rnbwContract.balanceOf(deployer.address)).to.equal(TEST_CONSTANTS.INTIAL_RNBW_MINT);
@@ -48,7 +47,7 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
     await xsgd.approve(pool.address, TEST_CONSTANTS.INITIAL_XSGD_MINT);
 
     // Sushi pool mock setup
-    const usdcrnbwpool = await uniswapV2Factory.getPair(usdc.address, rnbwContract.address);
+    const usdcrnbwpool = await uniswapV2Factory.getPair(rnbwContract.address, usdc.address);
 
     await usdc.mint(TEST_CONSTANTS.INITIAL_POOL_LIQUIDITY);
     await usdc.transfer(usdcrnbwpool, TEST_CONSTANTS.INITIAL_POOL_LIQUIDITY);
@@ -59,21 +58,28 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
   });
 
   it('converts a specified aToken fees to RNBW and sends to the vesting contract', async () => {
-    const { dai, aDai, pool, deployer, treasuryContract, rnbwContract, vestingContractMock } = testEnv;
+    const { dai, aDai, pool, deployer, treasuryContract, rnbwContract, vestingContractMock, usdc } = testEnv;
 
-    expect(await rnbwContract.balanceOf(treasuryContract.address)).to.equal(0);
+    expect(await rnbwContract.balanceOf(treasuryContract.address), 'RNBW not equal to zero').to.equal(0);
     await pool.deposit(dai.address, TEST_CONSTANTS.DAI_DEPOSIT, deployer.address, 0);
-    expect(await aDai.balanceOf(deployer.address)).to.equal(TEST_CONSTANTS.DAI_DEPOSIT);
+    expect(await aDai.balanceOf(deployer.address), `deployer not equal to ${TEST_CONSTANTS.DAI_DEPOSIT}`).to.equal(
+      TEST_CONSTANTS.DAI_DEPOSIT
+    );
     await aDai.transfer(treasuryContract.address, TEST_CONSTANTS.DAI_DEPOSIT);
-    expect(await aDai.balanceOf(treasuryContract.address)).to.equal(TEST_CONSTANTS.DAI_DEPOSIT);
+    expect(
+      await aDai.balanceOf(treasuryContract.address),
+      `treasury aDAI is not equal to ${TEST_CONSTANTS.DAI_DEPOSIT}`
+    ).to.equal(TEST_CONSTANTS.DAI_DEPOSIT);
+
     await expect(
       treasuryContract.buybackRnbw([dai.address], 0, Number(await timeLatest())),
       'Single Token: Buyback failed'
-    ).to.emit(treasuryContract, 'RNBWBoughtAndSentToVesting').to.not.be.reverted;
+    ).to.emit(treasuryContract, 'RNBWBoughtAndSentToVesting');
 
-    expect(await Number(formatEther(await rnbwContract.balanceOf(vestingContractMock.address))).toFixed(5)).to.equal(
-      TEST_CONSTANTS.EXPECTED_RNBW_IN_VESTING_SINGLE
-    );
+    expect(
+      await Number(formatEther(await rnbwContract.balanceOf(vestingContractMock.address))).toFixed(5),
+      `vesting contract rnbw balance is not ${TEST_CONSTANTS.EXPECTED_RNBW_IN_VESTING_SINGLE}`
+    ).to.equal(TEST_CONSTANTS.EXPECTED_RNBW_IN_VESTING_SINGLE);
   });
   it('converts multiple aToken fees to RNBW and sends to the vesting contract', async () => {
     const { dai, aDai, xsgd, aXSGD, pool, deployer, treasuryContract, rnbwContract, vestingContractMock } = testEnv;
@@ -127,6 +133,6 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
     await expect(
       treasuryContract.buybackRnbw([thkd.address], 0, Number(await timeLatest())),
       'Underlying token has as curve counterpart'
-    ).to.be.revertedWith('revert 1');
+    ).to.be.revertedWith("reverted with reason string '1'");
   });
 });

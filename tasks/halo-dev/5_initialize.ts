@@ -17,10 +17,14 @@ import { waitForTx, filterMapBy, notFalsyOrZeroAddress } from '../../helpers/mis
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
 import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
-import { getAllMockedTokens, getLendingPoolAddressesProvider, getWETHGateway } from '../../helpers/contracts-getters';
+import {
+  getAllHaloMockedTokens,
+  getLendingPoolAddressesProvider,
+  getWETHGateway,
+} from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
-task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
+task('halo:dev:initialize-lending-pool', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
@@ -29,7 +33,7 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
     const poolConfig = loadPoolConfig(pool);
     const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix, WethGateway } =
       poolConfig;
-    const mockTokens = await getAllMockedTokens();
+    const mockTokens = await getAllHaloMockedTokens();
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
 
     const addressesProvider = await getLendingPoolAddressesProvider();
@@ -40,17 +44,31 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
 
     const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, verify);
 
-    const reservesParams = getReservesConfigByPool(AavePools.proto);
+    const reservesParams = getReservesConfigByPool(AavePools.halo);
 
     const admin = await addressesProvider.getPoolAdmin();
 
     const treasuryAddress = await getTreasuryAddress(poolConfig);
 
     // TODO: Make zero address dynamic, halo constants inside the folder
+
+    const KOVAN_ADDRESSES = {
+      rewardToken: '',
+      emissionManager: '', // deployer first?
+      distributionDuration: '',
+      lendingPoolAddress: '',
+      rnbw: '',
+      xrnbw: '',
+      curveFactory: '',
+      usdc: '',
+      usdcRnbwPair: '',
+    };
     const treasury = await deployTreasury(
       [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS],
       false
     );
+
+    console.log(allTokenAddresses);
 
     const incentiveController = await deployRnbwIncentivesContoller([ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS], false);
 

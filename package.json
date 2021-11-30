@@ -17,6 +17,7 @@
     "hardhat:mumbai": "hardhat --network mumbai",
     "hardhat:matic": "hardhat --network matic",
     "compile": "SKIP_LOAD=true hardhat compile",
+    "recompile": "rm -rf ./artifacts ./cache ./types && yarn run compile",
     "console:fork": "FORK=main hardhat console",
     "test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-aave/*.spec.ts",
     "testhalo": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-aave/_*.spec.ts",
