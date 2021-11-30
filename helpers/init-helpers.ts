@@ -196,7 +196,7 @@ export const initReservesByHelper = async (
       underlyingAssetDecimals: reserveInitDecimals[i],
       interestRateStrategyAddress: strategyAddressPerAsset[reserveSymbols[i]],
       underlyingAsset: reserveTokens[i],
-      treasury: ZERO_ADDRESS, // TODO:
+      treasury: treasuryAddress,
       incentivesController,
       underlyingAssetName: reserveSymbols[i],
       aTokenName: `${aTokenNamePrefix} ${reserveSymbols[i]}`,
