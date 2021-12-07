@@ -31,7 +31,7 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
       assetAddresses.push(assetAddress);
       borrowRates.push(borrowRate);
       symbols.push(assetSymbol);
-    } catch (e) {
+    } catch (e: any) {
       console.log(`its ${assetSymbol}!`);
     }
   }
@@ -69,7 +69,7 @@ export const setInitialAssetPricesInOracle = async (
       const assetAddressIndex = Object.keys(assetsAddresses).findIndex((value) => value === assetSymbol);
       const [, assetAddress] = (Object.entries(assetsAddresses) as [string, string][])[assetAddressIndex];
       await waitForTx(await priceOracleInstance.setAssetPrice(assetAddress, price));
-    } catch (e) {
+    } catch (e: any) {
       console.log(`Its ${assetSymbol}!`);
     }
   }

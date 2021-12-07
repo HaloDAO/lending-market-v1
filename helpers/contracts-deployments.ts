@@ -429,9 +429,8 @@ export const deployAllHaloMockTokens = async (verify?: boolean) => {
   const protoConfigData = getReservesConfigByPool(AavePools.proto); // TODO: Change
 
   for (const tokenSymbol of Object.keys(HaloTokenContractId)) {
-    let decimals = '18';
-
-    let configData = (<any>protoConfigData)[tokenSymbol];
+    const decimals = '18';
+    const configData = (<any>protoConfigData)[tokenSymbol];
 
     tokens[tokenSymbol] = await deployMintableERC20(
       [tokenSymbol, tokenSymbol, configData ? configData.reserveDecimals : decimals],
