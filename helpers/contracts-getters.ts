@@ -39,6 +39,7 @@ import {
   UniswapV2FactoryFactory,
   UniswapV2PairFactory,
   VestingContractMockFactory,
+  UiPoolDataProviderFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -389,5 +390,11 @@ export const getUniswapV2Pair = async (address?: tEthereumAddress) =>
 export const getVestingContract = async (address?: tEthereumAddress) =>
   await VestingContractMockFactory.connect(
     address || (await getDb().get(`${eContractid.VestingContractMock}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getUiPoolDataProvider = async (address?: tEthereumAddress) =>
+  await UiPoolDataProviderFactory.connect(
+    address || (await getDb().get(`${eContractid.UiPoolDataProvider}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );

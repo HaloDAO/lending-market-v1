@@ -42,10 +42,10 @@ require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
   url: NETWORKS_RPC_URL[networkName],
-  hardfork: HARDFORK,
+  // hardfork: HARDFORK,
   blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
-  gasMultiplier: DEFAULT_GAS_MUL,
-  gasPrice: NETWORKS_DEFAULT_GAS[networkName],
+  //gasMultiplier: DEFAULT_GAS_MUL,
+  //gasPrice: NETWORKS_DEFAULT_GAS[networkName],
   chainId: networkId,
   accounts: {
     mnemonic: MNEMONIC,

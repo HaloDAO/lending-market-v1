@@ -22,6 +22,7 @@ task('halo:dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
     const addressesProvider = await getLendingPoolAddressesProvider();
 
     // * * deploys lendingPoolFactory
+    console.log('1');
     const lendingPoolImpl = await deployLendingPool(verify);
 
     // Set lending pool impl to Address Provider
@@ -31,7 +32,7 @@ task('halo:dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
     const lendingPoolProxy = await getLendingPool(address);
 
     await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
-
+    console.log('2');
     const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(verify);
 
     // Set lending pool conf impl to Address Provider
@@ -41,11 +42,13 @@ task('halo:dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
       await addressesProvider.getLendingPoolConfigurator()
     );
     await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
-
+    console.log('3');
     // Deploy deployment helpers
     await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address], verify);
     await deployATokensAndRatesHelper(
       [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
       verify
     );
+
+    console.log('done');
   });

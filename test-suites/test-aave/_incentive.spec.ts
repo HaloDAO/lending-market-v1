@@ -22,15 +22,11 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
   };
 
   it('should set the incentives controller and emission manager properly', async () => {
-    const { emissionManager, rnbwIncentivesController } = testEnv;
+    const { deployer, rnbwIncentivesController } = testEnv;
     expect(
       await rnbwIncentivesController.EMISSION_MANAGER(),
       'Emission manager in incentives controller is not equal to deployed emission manager'
-    ).to.equal(emissionManager.address);
-    expect(
-      await emissionManager.incentivesController(),
-      'Incentives controller inside emission manager is not equal to deployed incentives controller'
-    ).to.equal(rnbwIncentivesController.address);
+    ).to.equal(deployer.address);
   });
 
   // ? - mock xRNBW as reward token instead by changing or need to add vesting contract?
@@ -45,20 +41,18 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
   it('should configure emission manager without revert', async () => {
     const { aDai, aXSGD, emissionManager, rnbwIncentivesController } = testEnv;
 
-    await expect(
-      emissionManager.configure([
-        {
-          emissionPerSecond: TEST_CONSTANTS.EMMISSION_PER_SECOND,
-          totalStaked: 0,
-          underlyingAsset: aDai.address,
-        },
-        {
-          emissionPerSecond: TEST_CONSTANTS.EMMISSION_PER_SECOND,
-          totalStaked: 0,
-          underlyingAsset: aXSGD.address,
-        },
-      ])
-    ).to.not.be.reverted;
+    await rnbwIncentivesController.configureAssets([
+      {
+        emissionPerSecond: TEST_CONSTANTS.EMMISSION_PER_SECOND,
+        totalStaked: 0,
+        underlyingAsset: aDai.address,
+      },
+      {
+        emissionPerSecond: TEST_CONSTANTS.EMMISSION_PER_SECOND,
+        totalStaked: 0,
+        underlyingAsset: aXSGD.address,
+      },
+    ]);
 
     const assetDataDai = await rnbwIncentivesController.assets(aDai.address);
     expect(assetDataDai[0]).to.equal(TEST_CONSTANTS.EMMISSION_PER_SECOND);

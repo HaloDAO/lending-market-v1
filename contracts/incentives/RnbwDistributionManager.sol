@@ -159,13 +159,12 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
 
     for (uint256 i = 0; i < stakes.length; i++) {
       AssetData storage assetConfig = assets[stakes[i].underlyingAsset];
-      uint256 assetIndex =
-        _getAssetIndex(
-          assetConfig.index,
-          assetConfig.emissionPerSecond,
-          assetConfig.lastUpdateTimestamp,
-          stakes[i].totalStaked
-        );
+      uint256 assetIndex = _getAssetIndex(
+        assetConfig.index,
+        assetConfig.emissionPerSecond,
+        assetConfig.lastUpdateTimestamp,
+        stakes[i].totalStaked
+      );
       //console.log("Asset index: ", assetIndex);
       accruedRewards = accruedRewards.add(_getRewards(stakes[i].stakedByUser, assetIndex, assetConfig.users[user]));
     }
@@ -225,5 +224,20 @@ contract RnbwDistributionManager is IRnbwDistributionManager {
    **/
   function getUserAssetData(address user, address asset) public view returns (uint256) {
     return assets[asset].users[user];
+  }
+
+  /**
+   * @dev added from the new version to not break things
+   */
+  function getAssetData(address asset)
+    public
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
+    return (assets[asset].index, assets[asset].emissionPerSecond, assets[asset].lastUpdateTimestamp);
   }
 }

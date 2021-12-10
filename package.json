@@ -90,7 +90,10 @@
     "print-config:kovan": "hardhat --network kovan print-config --pool Aave --data-provider 0xA1901785c29cBd48bfA74e46b67C736b26054fa4",
     "external:deploy-assets-kovan": "npm run compile && hardhat --network kovan external:deploy-new-asset --symbol ${SYMBOL} --verify",
     "external:deploy-assets-main": "npm run compile && hardhat --network main external:deploy-new-asset --symbol ${SYMBOL} --verify",
-    "prepublishOnly": "npm run compile"
+    "prepublishOnly": "npm run compile",
+    "kovan:dev:halo": "hardhat halo:dev:kovan --network kovan",
+    "kovan:dev:halo:configure-incentives": "hardhat external:configure-incentives-emission --network kovan",
+    "kovan:dev:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network kovan"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.4.7",

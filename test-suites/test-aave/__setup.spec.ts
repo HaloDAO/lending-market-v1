@@ -37,9 +37,10 @@ import {
   deployRnbwIncentivesContoller,
   authorizeWETHGateway,
   deployUniswapV2Factory,
+  deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork, HaloTokenContractId } from '../../helpers/types';
-import { Signer } from 'ethers';
+import { ethers, Signer } from 'ethers';
 import { eContractid, tEthereumAddress, AavePools } from '../../helpers/types';
 import { MintableERC20 } from '../../types/MintableERC20';
 import { ConfigNames, getReservesConfigByPool, getTreasuryAddress, loadPoolConfig } from '../../helpers/configuration';
@@ -183,7 +184,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   console.log('Token addresses and aggregators set');
   const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
   console.log('Got pair token Aggregator');
-  await deployAaveOracle([tokens, aggregators, fallbackOracle.address, mockTokens.WETH.address]);
+  const aaveOracle = await deployAaveOracle([tokens, aggregators, fallbackOracle.address, mockTokens.WETH.address]);
   console.log('Aave Oracle deployed');
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
   console.log('Fallback Aave Oracle set in addresses provider');
@@ -210,6 +211,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   //  lendingRateOracle,
   //  aaveAdmin
   //);
+
   const reservesParams = getReservesConfigByPool(AavePools.proto);
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address);
   await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
@@ -259,7 +261,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   const mockEmissionManager = await deployMockEmissionManager([]);
   const rnbwIncentivesController = await deployRnbwIncentivesContoller([
     rnbwToken.address,
-    mockEmissionManager.address,
+    await deployer.getAddress(),
     distributionDuration,
   ]);
   await mockEmissionManager.setIncentivesController(rnbwIncentivesController.address);
@@ -293,6 +295,13 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   await deployUniswapLiquiditySwapAdapter(adapterParams);
   await deployUniswapRepayAdapter(adapterParams);
   await deployFlashLiquidationAdapter(adapterParams);
+
+  const uiPoolDataProvider = await deployUiPoolDataProvider(
+    [rnbwIncentivesController.address, aaveOracle.address],
+    false
+  );
+
+  console.log(await uiPoolDataProvider.getReservesData(addressesProvider.address, await deployer.getAddress())); // TODO: add test
 
   await deployWalletBalancerProvider();
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);

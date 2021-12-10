@@ -2,13 +2,15 @@ import { task } from 'hardhat/config';
 import { checkVerification } from '../../helpers/etherscan-verification';
 import { ConfigNames } from '../../helpers/configuration';
 import { printContracts } from '../../helpers/misc-utils';
+import { getEthersSigners } from '../../helpers/contracts-helpers';
 
-task('halo:dev', 'Deploy development enviroment')
+task('halo:dev:kovan', 'Deploy development enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     const POOL_NAME = ConfigNames.Aave;
 
     // To be used in full kovan deployment also
+
     await localBRE.run('set-DRE');
 
     // Prevent loss of gas verifying all the needed ENVs for Etherscan verification
@@ -18,8 +20,8 @@ task('halo:dev', 'Deploy development enviroment')
 
     console.log('Migration started\n');
 
-    console.log('1. Deploy mock tokens');
-    await localBRE.run('halo:dev:deploy-mock-tokens', { verify });
+    // console.log('1. Deploy mock tokens');
+    // await localBRE.run('halo:dev:deploy-mock-tokens', { verify });
 
     console.log('2. Deploy address provider');
     await localBRE.run('halo:dev:deploy-address-provider', { verify });
