@@ -249,12 +249,12 @@ export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
 
 export type iAavePoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'AAVE' | 'WBTC' | 'BUSD' | 'WETH' | 'RNBW'
+  'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'AAVE' | 'WBTC' | 'BUSD' | 'WETH'
 >;
 
 export type iHaloPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'WBTC' | 'BUSD' | 'WETH' | 'RNBW'
+  'DAI' | 'TUSD' | 'USDC' | 'USDT' | 'SUSD' | 'WBTC' | 'BUSD' | 'WETH'
 >;
 
 export type iLpPoolAssets<T> = Pick<
@@ -308,6 +308,7 @@ export enum HaloTokenContractId {
   THKD = 'THKD',
   RNBW = 'RNBW',
 }
+
 export enum TokenContractId {
   DAI = 'DAI',
   AAVE = 'AAVE',
@@ -317,38 +318,38 @@ export enum TokenContractId {
   USDC = 'USDC',
   USDT = 'USDT',
   SUSD = 'SUSD',
-  // ZRX = 'ZRX',
-  // MKR = 'MKR',
+  ZRX = 'ZRX',
+  MKR = 'MKR',
   WBTC = 'WBTC',
-  // LINK = 'LINK',
-  // KNC = 'KNC',
-  // MANA = 'MANA',
-  // REN = 'REN',
-  // SNX = 'SNX',
+  LINK = 'LINK',
+  KNC = 'KNC',
+  MANA = 'MANA',
+  REN = 'REN',
+  SNX = 'SNX',
   BUSD = 'BUSD',
   USD = 'USD',
-  // YFI = 'YFI',
-  // UNI = 'UNI',
-  // ENJ = 'ENJ',
-  // UniDAIWETH = 'UniDAIWETH',
-  // UniWBTCWETH = 'UniWBTCWETH',
-  // UniAAVEWETH = 'UniAAVEWETH',
-  // UniBATWETH = 'UniBATWETH',
-  // UniDAIUSDC = 'UniDAIUSDC',
-  // UniCRVWETH = 'UniCRVWETH',
-  // UniLINKWETH = 'UniLINKWETH',
-  // UniMKRWETH = 'UniMKRWETH',
-  // UniRENWETH = 'UniRENWETH',
-  // UniSNXWETH = 'UniSNXWETH',
-  // UniUNIWETH = 'UniUNIWETH',
-  // UniUSDCWETH = 'UniUSDCWETH',
-  // UniWBTCUSDC = 'UniWBTCUSDC',
-  // UniYFIWETH = 'UniYFIWETH',
-  // BptWBTCWETH = 'BptWBTCWETH',
-  // BptBALWETH = 'BptBALWETH',
+  YFI = 'YFI',
+  UNI = 'UNI',
+  ENJ = 'ENJ',
+  UniDAIWETH = 'UniDAIWETH',
+  UniWBTCWETH = 'UniWBTCWETH',
+  UniAAVEWETH = 'UniAAVEWETH',
+  UniBATWETH = 'UniBATWETH',
+  UniDAIUSDC = 'UniDAIUSDC',
+  UniCRVWETH = 'UniCRVWETH',
+  UniLINKWETH = 'UniLINKWETH',
+  UniMKRWETH = 'UniMKRWETH',
+  UniRENWETH = 'UniRENWETH',
+  UniSNXWETH = 'UniSNXWETH',
+  UniUNIWETH = 'UniUNIWETH',
+  UniUSDCWETH = 'UniUSDCWETH',
+  UniWBTCUSDC = 'UniWBTCUSDC',
+  UniYFIWETH = 'UniYFIWETH',
+  BptWBTCWETH = 'BptWBTCWETH',
+  BptBALWETH = 'BptBALWETH',
   WMATIC = 'WMATIC',
-  // STAKE = 'STAKE',
-  // xSUSHI = 'xSUSHI',
+  STAKE = 'STAKE',
+  xSUSHI = 'xSUSHI',
   XSGD = 'XSGD',
   THKD = 'THKD',
 }

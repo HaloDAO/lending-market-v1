@@ -3,6 +3,8 @@ import { eContractid, eEthereumNetwork, eNetwork, ePolygonNetwork } from '../../
 import { deployUiPoolDataProvider } from '../../helpers/contracts-deployments';
 import { exit } from 'process';
 import { ethers } from 'ethers';
+import { HaloIncentives } from '../../markets/halo/incentivesEmission';
+import HaloConfig from '../../markets/halo';
 
 task(`deploy-${eContractid.UiPoolDataProvider}`, `Deploys the UiPoolDataProvider contract`)
   .addFlag('verify', 'Verify UiPoolDataProvider contract via Etherscan API.')
@@ -17,12 +19,12 @@ task(`deploy-${eContractid.UiPoolDataProvider}`, `Deploys the UiPoolDataProvider
       [key: string]: { incentivesController: string; aaveOracle: string };
     } = {
       [eEthereumNetwork.kovan]: {
-        incentivesController: '0x8Bfa7b45Ad86df7BeD67E91A676b7495B0402d04',
-        aaveOracle: '0x28408A6fCb70268f3CD7a3af384942DD596fAe27',
-      }, // TODO: Change
+        incentivesController: HaloConfig.IncentivesController[eEthereumNetwork.kovan],
+        aaveOracle: HaloConfig.AaveOracle[eEthereumNetwork.kovan],
+      },
       [eEthereumNetwork.main]: {
-        incentivesController: '0x8Bfa7b45Ad86df7BeD67E91A676b7495B0402d04',
-        aaveOracle: '0xa50ba011c48153de246e5192c8f9258a2ba79ca9',
+        incentivesController: HaloConfig.IncentivesController[eEthereumNetwork.main],
+        aaveOracle: HaloConfig.AaveOracle[eEthereumNetwork.main],
       },
       [ePolygonNetwork.matic]: {
         incentivesController: '0x357D51124f59836DeD84c8a1730D72B749d8BC23',

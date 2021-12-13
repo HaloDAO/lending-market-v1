@@ -93,7 +93,9 @@
     "prepublishOnly": "npm run compile",
     "kovan:dev:halo": "hardhat halo:dev:kovan --network kovan",
     "kovan:dev:halo:configure-incentives": "hardhat external:configure-incentives-emission --network kovan",
-    "kovan:dev:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network kovan"
+    "kovan:dev:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network kovan",
+    "mainnet:halo:configure-incentives": "hardhat external:configure-incentives-emission --network mainnet",
+    "mainnet:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network mainnet"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.4.7",

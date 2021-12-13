@@ -1,4 +1,3 @@
-import { oneRay, ZERO_ADDRESS } from '../../helpers/constants';
 import { IHaloConfiguration, eEthereumNetwork } from '../../helpers/types';
 
 import { CommonsConfig } from './commons';
@@ -8,10 +7,7 @@ import {
   strategySUSD,
   strategyTUSD,
   strategyUSDC,
-  strategyXSGD,
-  strategyTHKD,
   strategyUSDT,
-  strategyAAVE,
   strategyWBTC,
   strategyWETH,
 } from './reservesConfigs';
@@ -22,15 +18,11 @@ import {
 
 export const HaloConfig: IHaloConfiguration = {
   ...CommonsConfig,
-  MarketId: 'Halo genesis market',
+  MarketId: 'HaloDAO Lending Market',
   ProviderId: 1,
   ReservesConfig: {
-    //AAVE: strategyAAVE,
-    RNBW: strategyAAVE,
     BUSD: strategyBUSD,
     DAI: strategyDAI,
-    XSGD: strategyXSGD,
-    THKD: strategyTHKD,
     SUSD: strategySUSD,
     TUSD: strategyTUSD,
     USDC: strategyUSDC,
@@ -54,7 +46,16 @@ export const HaloConfig: IHaloConfiguration = {
       BUSD: '0x75A3207832889d35776479F932417aB340C7caEe',
     },
     [eEthereumNetwork.ropsten]: {},
-    [eEthereumNetwork.main]: {},
+    [eEthereumNetwork.main]: {
+      DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
+      TUSD: '0x0000000000085d4780B73119b644AE5ecd22b376',
+      WETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      WBTC: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+      BUSD: '0x4fabb145d64652a948d72533023f6e7a623c7c53', // To Check
+      SUSD: '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // To Check
+    },
     [eEthereumNetwork.tenderlyMain]: {},
   },
 };
