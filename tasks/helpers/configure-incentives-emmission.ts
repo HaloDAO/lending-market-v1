@@ -45,9 +45,70 @@ const EMISSION_CONFIG = [
   },
 ];
 
-const LENDING_POOL_ADDRESS_PROVIDER = {
-  //main: '0xb53c1a33016b2dc2ff3653530bff1848a515c8c5', // TODO: Change
-  kovan: '0xBcD2560E79B4Aa5c3A73A56Fd556e88e61B0e18F',
+const INCENTIVES_CONTROLLER = {
+  kovan: '0x8Bfa7b45Ad86df7BeD67E91A676b7495B0402d04',
+};
+
+const ASSET_CONFIG = {
+  kovan: [
+    {
+      emissionPerSecond: parseEther('1'),
+      totalStaked: 0,
+      underlyingAsset: '0x8C98CD6686F28b49D28e561d37F017bB456CD8C5', // TODO: Change this, aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('2.2'),
+      totalStaked: 0,
+      underlyingAsset: '0x3d754c7607433b115337F7B0544fb23b356367b5', // TODO: Change this,  aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('1'),
+      totalStaked: 0,
+      underlyingAsset: '0x0C1b4e81fC6B30ead94Cc7C0a643974183be796e', // TODO: Change this, aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('2.2'),
+      totalStaked: 0,
+      underlyingAsset: '0xE2cc327F15f04fb3607F2b7291aE8AB62908Af2B', // TODO: Change this,  aTokenAddress
+    },
+
+    {
+      emissionPerSecond: parseEther('1'),
+      totalStaked: 0,
+      underlyingAsset: '0x5c9A3Fcc66a5d8095c303eDf6e5A5e7f73a8cb85', // TODO: Change this, aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('2.2'),
+      totalStaked: 0,
+      underlyingAsset: '0x4AfCb5323C9B49Cc24792697D44C3b52865764F7', // TODO: Change this,  aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('1'),
+      totalStaked: 0,
+      underlyingAsset: '0xB90221C40cb0f781AdFe6De02c348435a6837a0E', // TODO: Change this, aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('2.2'),
+      totalStaked: 0,
+      underlyingAsset: '0xdB74bF644F5124603973aEB211D10801a9b0BF44', // TODO: Change this,  aTokenAddress
+    },
+
+    {
+      emissionPerSecond: parseEther('1'),
+      totalStaked: 0,
+      underlyingAsset: '0x2c585fF6E0C75677aB5E0C4c46404329917197fE', // TODO: Change this, aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('2.2'),
+      totalStaked: 0,
+      underlyingAsset: '0xe91dcBfcA6818CfE13D397211E053460A94a250D', // TODO: Change this,  aTokenAddress
+    },
+    {
+      emissionPerSecond: parseEther('1'),
+      totalStaked: 0,
+      underlyingAsset: '0xCE507Bd492B840b26d314807b3beC05fe2941200', // TODO: Change this, aTokenAddress
+    },
+  ],
 };
 
 const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
@@ -60,62 +121,17 @@ task('external:configure-incentives-emission', 'Initialize incentives controller
     const network = localBRE.network.name;
 
     const DEPLOYER_ADDRESS = '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd';
-    /*
-    if (!isSymbolValid(symbol, network as eEthereumNetwork)) {
-      throw new Error(
-        `
-WRONG RESERVE ASSET SETUP:
-        The symbol ${symbol} has no reserve Config and/or reserve Asset setup.
-        update /markets/halo/index.ts and add the asset address for ${network} network
-        update /markets/halo/reservesConfigs.ts and add parameters for ${symbol}
-        `
-      );
-   
-    }
-
-    */
     setDRE(localBRE);
 
-    const addressProvider = await getLendingPoolAddressesProvider(LENDING_POOL_ADDRESS_PROVIDER[network]); // TODO: Change this
-    const poolAddress = await addressProvider.getLendingPool();
-    const lendingPool = await getLendingPool(poolAddress);
+    const rnbwIncentivesController = await getRnbwIncentivesController(INCENTIVES_CONTROLLER[network]);
 
-    //console.log(await lendingPool.getReservesList());
-    //const treasuryAddress = await getTreasuryAddress(marketConfigs.HaloConfig);
+    await rnbwIncentivesController.configureAssets(ASSET_CONFIG[network]);
 
-    const rnbwIncentivesController = await getRnbwIncentivesController(''); // TODO: Change this
-
-    await rnbwIncentivesController.configureAssets([
-      {
-        emissionPerSecond: parseEther('1'),
-        totalStaked: 0,
-        underlyingAsset: '0x93d11302bf26E4eFf5F76c15FFB2eA94326Bc1C8', // TODO: Change this, aTokenAddress
-      },
-      {
-        emissionPerSecond: parseEther('2.2'),
-        totalStaked: 0,
-        underlyingAsset: '0x9d643d9632af2eCc20B151C2d354bB38A534a08B', // TODO: Change this,  aTokenAddress
-      },
-    ]);
-
-    const assetDataUSDT = await rnbwIncentivesController.assets('0x93d11302bf26E4eFf5F76c15FFB2eA94326Bc1C8');
+    const assetDataUSDT = await rnbwIncentivesController.assets('0x2c585fF6E0C75677aB5E0C4c46404329917197fE');
 
     console.log(assetDataUSDT);
-    const assetDataUSDC = await rnbwIncentivesController.assets('0x9d643d9632af2eCc20B151C2d354bB38A534a08B');
+    const assetDataUSDC = await rnbwIncentivesController.assets('0xdB74bF644F5124603973aEB211D10801a9b0BF44');
 
     console.log(assetDataUSDC);
-    console.log(await rnbwIncentivesController.getUserUnclaimedRewards('0x235A2ac113014F9dcb8aBA6577F20290832dDEFd'));
-
-    console.log('migrate incentives controlelr');
-
-    /*
-    const uiPool = await getUiPoolDataProvider('0x97C1349D303d0B43Fcc6742f75D6465E2139f052');
-    console.log(await uiPool.getReservesData(ethers.constants.AddressZero, DEPLOYER_ADDRESS));
-
-    //console.log(await lendingPool.getUserConfiguration(DEPLOYER_ADDRESS));
-
-    //const usdt = await getMintableERC20('0x4B466AeAa9c5f639fE7eA5A4692e9ca34afD9CC6');
-    //console.log(await usdt.balanceOf('0x0CED2232A2A6f9d56653A2736442108b2253BDd7'));
-    */
   }
 );

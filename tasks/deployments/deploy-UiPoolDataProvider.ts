@@ -17,11 +17,11 @@ task(`deploy-${eContractid.UiPoolDataProvider}`, `Deploys the UiPoolDataProvider
       [key: string]: { incentivesController: string; aaveOracle: string };
     } = {
       [eEthereumNetwork.kovan]: {
-        incentivesController: '0x0B5a00a5F8Be5FDf1e3F3bc341b485cC7fBCF50e',
-        aaveOracle: '0x71D8B7bf8491F1DE76604eA99A390c44E46dF53E',
+        incentivesController: '0x8Bfa7b45Ad86df7BeD67E91A676b7495B0402d04',
+        aaveOracle: '0x28408A6fCb70268f3CD7a3af384942DD596fAe27',
       }, // TODO: Change
       [eEthereumNetwork.main]: {
-        incentivesController: '0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5',
+        incentivesController: '0x8Bfa7b45Ad86df7BeD67E91A676b7495B0402d04',
         aaveOracle: '0xa50ba011c48153de246e5192c8f9258a2ba79ca9',
       },
       [ePolygonNetwork.matic]: {
@@ -41,12 +41,11 @@ task(`deploy-${eContractid.UiPoolDataProvider}`, `Deploys the UiPoolDataProvider
     }
 
     const oracle = addressesByNetwork[network].aaveOracle;
-    const incentivesController = addressesByNetwork[network].aaveOracle;
+    const incentivesController = addressesByNetwork[network].incentivesController;
 
     console.log(`\n- UiPoolDataProvider deployment`);
 
-    // const uiPoolDataProvider = await deployUiPoolDataProvider([incentivesController, oracle], verify);
-    const uiPoolDataProvider = await deployUiPoolDataProvider([ethers.constants.AddressZero, oracle], verify);
+    const uiPoolDataProvider = await deployUiPoolDataProvider([incentivesController, oracle], verify);
 
     console.log('UiPoolDataProvider deployed at:', uiPoolDataProvider.address);
     console.log(`\tFinished UiPoolDataProvider deployment`);

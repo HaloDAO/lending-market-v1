@@ -212,12 +212,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   //  aaveAdmin
   //);
 
-  const reservesParams = getReservesConfigByPool(AavePools.proto);
+  const reservesParams = getReservesConfigByPool(AavePools.halo);
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address);
   await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
   const admin = await deployer.getAddress();
   console.log('Initialize configuration');
-  const config = loadPoolConfig(ConfigNames.Aave);
+  const config = loadPoolConfig(ConfigNames.Halo);
   const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } = config;
   //const treasuryAddress = await getTreasuryAddress(config);
   // await initReservesByHelper(
@@ -300,8 +300,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
     [rnbwIncentivesController.address, aaveOracle.address],
     false
   );
-
-  console.log(await uiPoolDataProvider.getReservesData(addressesProvider.address, await deployer.getAddress())); // TODO: add test
 
   await deployWalletBalancerProvider();
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);

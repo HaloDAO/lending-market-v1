@@ -36,7 +36,7 @@ export const CommonsConfig: ICommonConfiguration = {
 
   Mocks: {
     AllAssetsInitialPrices: {
-      ...MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
+      ...MOCK_CHAINLINK_AGGREGATORS_PRICES,
     },
     // TODO: Check on the tests
     // AllAssetsInitialPricesHalo: {

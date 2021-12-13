@@ -225,22 +225,22 @@ export interface iAssetBase<T> {
   USD: T;
   WMATIC?: T;
   RNBW?: T;
-  // UniDAIWETH: T;
-  // UniWBTCWETH: T;
-  // UniAAVEWETH: T;
-  // UniBATWETH: T;
-  // UniDAIUSDC: T;
-  // UniCRVWETH: T;
-  // UniLINKWETH: T;
-  // UniMKRWETH: T;
-  // UniRENWETH: T;
-  // UniSNXWETH: T;
-  // UniUNIWETH: T;
-  // UniUSDCWETH: T;
-  // UniWBTCUSDC: T;
-  // UniYFIWETH: T;
-  // BptWBTCWETH: T;
-  // BptBALWETH: T;
+  UniDAIWETH?: T;
+  UniWBTCWETH?: T;
+  UniAAVEWETH?: T;
+  UniBATWETH?: T;
+  UniDAIUSDC?: T;
+  UniCRVWETH?: T;
+  UniLINKWETH?: T;
+  UniMKRWETH?: T;
+  UniRENWETH?: T;
+  UniSNXWETH?: T;
+  UniUNIWETH?: T;
+  UniUSDCWETH?: T;
+  UniWBTCUSDC?: T;
+  UniYFIWETH?: T;
+  BptWBTCWETH?: T;
+  BptBALWETH?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -259,23 +259,27 @@ export type iHaloPoolAssets<T> = Pick<
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH'
-  // | 'UniDAIWETH'
-  // | 'UniWBTCWETH'
-  // | 'UniAAVEWETH'
-  // | 'UniBATWETH'
-  // | 'UniDAIUSDC'
-  // | 'UniCRVWETH'
-  // | 'UniLINKWETH'
-  // | 'UniMKRWETH'
-  // | 'UniRENWETH'
-  // | 'UniSNXWETH'
-  // | 'UniUNIWETH'
-  // | 'UniUSDCWETH'
-  // | 'UniWBTCUSDC'
-  // | 'UniYFIWETH'
-  // | 'BptWBTCWETH'
-  // | 'BptBALWETH'
+  | 'DAI'
+  | 'USDC'
+  | 'USDT'
+  | 'WBTC'
+  | 'WETH'
+  | 'UniDAIWETH'
+  | 'UniWBTCWETH'
+  | 'UniAAVEWETH'
+  | 'UniBATWETH'
+  | 'UniDAIUSDC'
+  | 'UniCRVWETH'
+  | 'UniLINKWETH'
+  | 'UniMKRWETH'
+  | 'UniRENWETH'
+  | 'UniSNXWETH'
+  | 'UniUNIWETH'
+  | 'UniUSDCWETH'
+  | 'UniWBTCUSDC'
+  | 'UniYFIWETH'
+  | 'BptWBTCWETH'
+  | 'BptBALWETH'
 >;
 
 export type iMaticPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE'>;
@@ -419,7 +423,7 @@ export interface iParamsPerPool<T> {
   [AavePools.proto]: T;
   [AavePools.matic]: T;
   [AavePools.halo]: T;
-  // [AavePools.amm]: T;
+  [AavePools.amm]: T;
 }
 
 export interface iBasicDistributionParams {
