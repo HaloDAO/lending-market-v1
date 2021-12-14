@@ -58,11 +58,7 @@ const hardhatFlattener = async (filePath: string) =>
   await DRE.run(TASK_FLATTEN_GET_FLATTENED_SOURCE, { files: [filePath] });
 
 // Verify a smart contract at Polygon Matic network via a GET request to the block explorer
-export const verifyAtPolygon = async (
-  id: string,
-  instance: Contract,
-  args: (string | string[])[]
-) => {
+export const verifyAtPolygon = async (id: string, instance: Contract, args: (string | string[])[]) => {
   /*
     ${net == mumbai or mainnet}
     https://explorer-${net}.maticvigil.com/api
@@ -87,9 +83,7 @@ export const verifyAtPolygon = async (
     1
   );
   try {
-    console.log(
-      `[Polygon Verify] Verifying ${id} with address ${instance.address} at Matic ${net} network`
-    );
+    console.log(`[Polygon Verify] Verifying ${id} with address ${instance.address} at Matic ${net} network`);
     const response = await axios.post(
       `https://explorer-${net}.maticvigil.com/api`,
       {
@@ -120,7 +114,7 @@ export const verifyAtPolygon = async (
     }
 
     throw Error(JSON.stringify(response.data, null, 2));
-  } catch (error) {
+  } catch (error: any) {
     if (error?.message.includes('Smart-contract already verified.')) {
       console.log(
         `[Polygon Verify] Already verified. Check it at: https://explorer-${net}.maticvigil.com/address/${instance.address}/contracts) \n`
@@ -128,9 +122,7 @@ export const verifyAtPolygon = async (
       return;
     }
     console.error('[Polygon Verify] Error:', error.toString());
-    console.log(
-      `[Polygon Verify] Skipping verification for ${id} with ${instance.address} due an unknown error.`
-    );
+    console.log(`[Polygon Verify] Skipping verification for ${id} with ${instance.address} due an unknown error.`);
     console.log(
       `Please proceed with manual verification at https://explorer-${net}.maticvigil.com/address/${instance.address}/contracts`
     );

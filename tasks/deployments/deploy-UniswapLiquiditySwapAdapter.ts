@@ -21,22 +21,21 @@ task(`deploy-${CONTRACT_NAME}`, `Deploys the ${CONTRACT_NAME} contract`)
 
     console.log(`\n- ${CONTRACT_NAME} deployment`);
     /*const args = [
-      '0x88757f2f99175387aB4C6a4b3067c77A695b0349', // lending  provider kovan address
+      '0xBcD2560E79B4Aa5c3A73A56Fd556e88e61B0e18F', // halo lending  provider kovan address
       '0xfcd87315f0e4067070ade8682fcdbc3006631441', // uniswap router address
+      '0x6E7FC5B6E96B125D44eF93BFf86E21A5413C70Cf', // WETH
     ];
     */
-    const uniswapRepayAdapter = await new UniswapLiquiditySwapAdapterFactory(
-      await getFirstSigner()
-    ).deploy(provider, router, weth);
+    const uniswapRepayAdapter = await new UniswapLiquiditySwapAdapterFactory(await getFirstSigner()).deploy(
+      provider,
+      router,
+      weth
+    );
     await uniswapRepayAdapter.deployTransaction.wait();
     console.log(`${CONTRACT_NAME}.address`, uniswapRepayAdapter.address);
 
     if (verify) {
-      await verifyContract(eContractid.UniswapLiquiditySwapAdapter, uniswapRepayAdapter, [
-        provider,
-        router,
-        weth,
-      ]);
+      await verifyContract(eContractid.UniswapLiquiditySwapAdapter, uniswapRepayAdapter, [provider, router, weth]);
     }
 
     console.log(`\tFinished ${CONTRACT_NAME} proxy and implementation deployment`);

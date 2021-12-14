@@ -1,12 +1,5 @@
 import BigNumber from 'bignumber.js';
-import {
-  oneEther,
-  oneRay,
-  RAY,
-  ZERO_ADDRESS,
-  MOCK_CHAINLINK_AGGREGATORS_PRICES,
-  MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
-} from '../../helpers/constants';
+import { oneEther, oneRay, RAY, ZERO_ADDRESS, MOCK_CHAINLINK_AGGREGATORS_PRICES } from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
 
 // ----------------
@@ -36,9 +29,6 @@ export const CommonsConfig: ICommonConfiguration = {
   Mocks: {
     AllAssetsInitialPrices: {
       ...MOCK_CHAINLINK_AGGREGATORS_PRICES,
-    },
-    AllAssetsInitialPricesHalo: {
-      ...MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
@@ -102,23 +92,6 @@ export const CommonsConfig: ICommonConfiguration = {
     },
     BUSD: {
       borrowRate: oneRay.multipliedBy(0.05).toFixed(),
-    },
-  },
-  LendingRateOracleRatesCommonHalo: {
-    WETH: {
-      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
-    },
-    DAI: {
-      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
-    },
-    USDC: {
-      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
-    },
-    XSGD: {
-      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
-    },
-    THKD: {
-      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
   },
   // ----------------
@@ -343,12 +316,9 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ReservesConfig: {},
   ATokenDomainSeparator: {
-    [eEthereumNetwork.coverage]:
-      '0x95b73a72c6ecf4ccbbba5178800023260bad8e75cdccdb8e4827a2977a37c820',
-    [eEthereumNetwork.hardhat]:
-      '0xbae024d959c6a022dc5ed37294cd39c141034b2ae5f02a955cce75c930a81bf5',
-    [eEthereumNetwork.buidlerevm]:
-      '0xbae024d959c6a022dc5ed37294cd39c141034b2ae5f02a955cce75c930a81bf5',
+    [eEthereumNetwork.coverage]: '0x95b73a72c6ecf4ccbbba5178800023260bad8e75cdccdb8e4827a2977a37c820',
+    [eEthereumNetwork.hardhat]: '0xbae024d959c6a022dc5ed37294cd39c141034b2ae5f02a955cce75c930a81bf5',
+    [eEthereumNetwork.buidlerevm]: '0xbae024d959c6a022dc5ed37294cd39c141034b2ae5f02a955cce75c930a81bf5',
     [eEthereumNetwork.kovan]: '',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '',

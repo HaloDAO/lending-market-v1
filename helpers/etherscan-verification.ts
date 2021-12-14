@@ -56,7 +56,7 @@ export const verifyEtherscanContract = async (
       relatedSources: true,
     };
     await runTaskWithRetry('verify', params, times, msDelay, cleanup);
-  } catch (error) {}
+  } catch (error: any) {}
 };
 
 export const runTaskWithRetry = async (
@@ -80,11 +80,9 @@ export const runTaskWithRetry = async (
       cleanup();
     } else {
       cleanup();
-      console.error(
-        '[ETHERSCAN][ERROR] Errors after all the retries, check the logs for more information.'
-      );
+      console.error('[ETHERSCAN][ERROR] Errors after all the retries, check the logs for more information.');
     }
-  } catch (error) {
+  } catch (error: any) {
     counter--;
 
     if (okErrors.some((okReason) => error.message.includes(okReason))) {
@@ -93,10 +91,7 @@ export const runTaskWithRetry = async (
     }
 
     if (fatalErrors.some((fatalError) => error.message.includes(fatalError))) {
-      console.error(
-        '[ETHERSCAN][ERROR] Fatal error detected, skip retries and resume deployment.',
-        error.message
-      );
+      console.error('[ETHERSCAN][ERROR] Fatal error detected, skip retries and resume deployment.', error.message);
       return;
     }
     console.error('[ETHERSCAN][ERROR]', error.message);

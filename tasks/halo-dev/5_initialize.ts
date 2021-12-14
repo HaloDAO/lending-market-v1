@@ -7,6 +7,8 @@ import {
   authorizeWETHGateway,
   deployTreasury,
   deployRnbwIncentivesContoller,
+  deployVestingContractMock,
+  deployCurveFactoryMock,
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
@@ -17,19 +19,27 @@ import { waitForTx, filterMapBy, notFalsyOrZeroAddress } from '../../helpers/mis
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
 import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
-import { getAllMockedTokens, getLendingPoolAddressesProvider, getWETHGateway } from '../../helpers/contracts-getters';
+import {
+  getAllHaloMockedTokens,
+  getCurveFactoryMock,
+  getFirstSigner,
+  getLendingPoolAddressesProvider,
+  getVestingContract,
+  getWETHGateway,
+} from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
-task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
+task('halo:dev:initialize-lending-pool', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>localBRE.network.name;
+    const signer = await getFirstSigner();
     const poolConfig = loadPoolConfig(pool);
     const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix, WethGateway } =
       poolConfig;
-    const mockTokens = await getAllMockedTokens();
+    const mockTokens = await getAllHaloMockedTokens();
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
 
     const addressesProvider = await getLendingPoolAddressesProvider();
@@ -40,19 +50,45 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
 
     const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, verify);
 
-    const reservesParams = getReservesConfigByPool(AavePools.proto);
+    const reservesParams = getReservesConfigByPool(AavePools.halo);
 
     const admin = await addressesProvider.getPoolAdmin();
 
-    const treasuryAddress = await getTreasuryAddress(poolConfig);
+    //const treasuryAddress = await getTreasuryAddress(poolConfig);
+    const lendingPoolAddress = await addressesProvider.getLendingPool();
+    const rewardToken = await deployVestingContractMock([allTokenAddresses['RNBW']], false);
+    const curveFactory = await deployCurveFactoryMock([allTokenAddresses['USDC'], [], []], false);
 
-    // TODO: Make zero address dynamic, halo constants inside the folder
+    // TODO: Make dynamic, for local only. For Kovan, add another const file
+    const HALO_CONTRACT_ADDRESSES = {
+      rewardToken: rewardToken.address, //xrnbw
+      emissionManager: await signer.getAddress(), // deployer first?
+      lendingPoolAddress: lendingPoolAddress,
+      rnbw: allTokenAddresses['RNBW'],
+      xrnbw: rewardToken.address,
+      curveFactory: curveFactory.address,
+      usdc: allTokenAddresses['USDC'],
+      usdcRnbwPair: ZERO_ADDRESS, //mock
+    };
+
+    // HALO Treasury contract
     const treasury = await deployTreasury(
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS],
+      [
+        lendingPoolAddress,
+        HALO_CONTRACT_ADDRESSES.rnbw,
+        HALO_CONTRACT_ADDRESSES.xrnbw,
+        HALO_CONTRACT_ADDRESSES.curveFactory,
+        HALO_CONTRACT_ADDRESSES.usdc,
+        HALO_CONTRACT_ADDRESSES.usdcRnbwPair,
+      ],
       false
     );
 
-    const incentiveController = await deployRnbwIncentivesContoller([ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS], false);
+    // HALO Incentives Controller contract
+    const incentiveController = await deployRnbwIncentivesContoller(
+      [HALO_CONTRACT_ADDRESSES.rewardToken, HALO_CONTRACT_ADDRESSES.emissionManager, '10000'],
+      false
+    );
 
     await initReservesByHelper(
       reservesParams,
@@ -78,8 +114,6 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
     await deployWalletBalancerProvider(verify);
 
     await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
-
-    const lendingPoolAddress = await addressesProvider.getLendingPool();
 
     let gateway = getParamPerNetwork(WethGateway, network);
     if (!notFalsyOrZeroAddress(gateway)) {

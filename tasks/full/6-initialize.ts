@@ -5,22 +5,15 @@ import {
   deployWalletBalancerProvider,
   deployWETHGateway,
   authorizeWETHGateway,
+  deployRnbwIncentivesContoller,
 } from '../../helpers/contracts-deployments';
-import {
-  loadPoolConfig,
-  ConfigNames,
-  getWethAddress,
-  getTreasuryAddress,
-} from '../../helpers/configuration';
+import { loadPoolConfig, ConfigNames, getWethAddress, getTreasuryAddress } from '../../helpers/configuration';
 import { getWETHGateway } from '../../helpers/contracts-getters';
 import { eNetwork, ICommonConfiguration } from '../../helpers/types';
 import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../../helpers/init-helpers';
 import { exit } from 'process';
-import {
-  getAaveProtocolDataProvider,
-  getLendingPoolAddressesProvider,
-} from '../../helpers/contracts-getters';
+import { getAaveProtocolDataProvider, getLendingPoolAddressesProvider } from '../../helpers/contracts-getters';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 
 task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
@@ -55,6 +48,9 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       }
 
       const treasuryAddress = await getTreasuryAddress(poolConfig);
+      const incentives = await deployRnbwIncentivesContoller([ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS], true);
+      console.log('intiializing');
+      console.log('deployed: ', incentives.address);
 
       await initReservesByHelper(
         ReservesConfig,
@@ -64,34 +60,23 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
         VariableDebtTokenNamePrefix,
         SymbolPrefix,
         admin,
-        treasuryAddress,
-        incentivesController,
+        ZERO_ADDRESS,
+        incentives.address,
         verify
       );
       await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
 
-      let collateralManagerAddress = await getParamPerNetwork(
-        LendingPoolCollateralManager,
-        network
-      );
+      let collateralManagerAddress = await getParamPerNetwork(LendingPoolCollateralManager, network);
       if (!notFalsyOrZeroAddress(collateralManagerAddress)) {
         const collateralManager = await deployLendingPoolCollateralManager(verify);
         collateralManagerAddress = collateralManager.address;
       }
       // Seems unnecessary to register the collateral manager in the JSON db
 
-      console.log(
-        '\tSetting lending pool collateral manager implementation with address',
-        collateralManagerAddress
-      );
-      await waitForTx(
-        await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress)
-      );
+      console.log('\tSetting lending pool collateral manager implementation with address', collateralManagerAddress);
+      await waitForTx(await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress));
 
-      console.log(
-        '\tSetting AaveProtocolDataProvider at AddressesProvider at id: 0x01',
-        collateralManagerAddress
-      );
+      console.log('\tSetting AaveProtocolDataProvider at AddressesProvider at id: 0x01', collateralManagerAddress);
       const aaveProtocolDataProvider = await getAaveProtocolDataProvider();
       await waitForTx(
         await addressesProvider.setAddress(

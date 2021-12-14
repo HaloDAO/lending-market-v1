@@ -1,11 +1,6 @@
 // @ts-ignore
 import { HardhatNetworkForkingUserConfig, HardhatUserConfig } from 'hardhat/types';
-import {
-  eEthereumNetwork,
-  ePolygonNetwork,
-  eXDaiNetwork,
-  iParamsPerNetwork,
-} from './helpers/types';
+import { eEthereumNetwork, ePolygonNetwork, eXDaiNetwork, iParamsPerNetwork } from './helpers/types';
 
 require('dotenv').config();
 
@@ -13,9 +8,7 @@ const INFURA_KEY = process.env.INFURA_KEY || '';
 const ALCHEMY_KEY = process.env.ALCHEMY_KEY || '';
 const TENDERLY_FORK_ID = process.env.TENDERLY_FORK_ID || '';
 const FORK = process.env.FORK || '';
-const FORK_BLOCK_NUMBER = process.env.FORK_BLOCK_NUMBER
-  ? parseInt(process.env.FORK_BLOCK_NUMBER)
-  : 0;
+const FORK_BLOCK_NUMBER = process.env.FORK_BLOCK_NUMBER ? parseInt(process.env.FORK_BLOCK_NUMBER) : 0;
 
 const GWEI = 1000 * 1000 * 1000;
 
@@ -52,7 +45,7 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
 };
 
 export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
-  [eEthereumNetwork.kovan]: 1 * GWEI,
+  [eEthereumNetwork.kovan]: 3 * GWEI,
   [eEthereumNetwork.ropsten]: 65 * GWEI,
   [eEthereumNetwork.main]: 65 * GWEI,
   [eEthereumNetwork.coverage]: 65 * GWEI,
