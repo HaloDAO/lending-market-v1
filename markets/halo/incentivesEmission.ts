@@ -1,5 +1,5 @@
-import { IHaloConfiguration, eEthereumNetwork } from '../../helpers/types';
-import { formatEther, parseEther } from '@ethersproject/units';
+import { eEthereumNetwork } from '../../helpers/types';
+import { parseEther } from '@ethersproject/units';
 
 const AtokenAddresses = {
   [eEthereumNetwork.buidlerevm]: {},
@@ -18,7 +18,6 @@ const AtokenAddresses = {
     WBTC: '0xe91dcBfcA6818CfE13D397211E053460A94a250D',
     WETH: '0xCE507Bd492B840b26d314807b3beC05fe2941200',
   },
-
   [eEthereumNetwork.ropsten]: {},
   [eEthereumNetwork.main]: {},
   [eEthereumNetwork.tenderlyMain]: {},

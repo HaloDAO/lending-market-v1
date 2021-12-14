@@ -64,14 +64,4 @@ task('external:lendingpool-action', 'Initialize incentives controller')
         console.log('action not found');
         break;
     }
-
-    //console.log(await lendingPool.getUserAccountData(DEPLOYER_ADDRESS));
-
-    // address, amount, to, 0
-
-    // console.log(await lendingPool.getReserveData(TEST_ASSET));
-
-    //console.log();
-    //
-    //console.log(await lendingPoolOld.getReservesList());
   });
