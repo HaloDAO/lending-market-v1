@@ -9,6 +9,8 @@ import { BuidlerRuntimeEnvironment } from '@nomiclabs/buidler/types';
 import { tEthereumAddress } from './types';
 import { isAddress } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
+import { SignerWithAddress } from '../test-suites/test-aave/helpers/make-suite';
+import { usingTenderly } from './tenderly-utils';
 
 export const toWad = (value: string | number) => new BigNumber(value).times(WAD).toFixed();
 
@@ -38,8 +40,7 @@ export const timeLatest = async () => {
   return new BigNumber(block.timestamp);
 };
 
-export const advanceBlock = async (timestamp: number) =>
-  await DRE.ethers.provider.send('evm_mine', [timestamp]);
+export const advanceBlock = async (timestamp: number) => await DRE.ethers.provider.send('evm_mine', [timestamp]);
 
 export const increaseTime = async (secondsToIncrease: number) => {
   await DRE.ethers.provider.send('evm_increaseTime', [secondsToIncrease]);
@@ -79,9 +80,7 @@ export const filterMapBy = (raw: { [key: string]: any }, fn: (key: string) => bo
 export const chunk = <T>(arr: Array<T>, chunkSize: number): Array<Array<T>> => {
   return arr.reduce(
     (prevVal: any, currVal: any, currIndx: number, array: Array<T>) =>
-      !(currIndx % chunkSize)
-        ? prevVal.concat([array.slice(currIndx, currIndx + chunkSize)])
-        : prevVal,
+      !(currIndx % chunkSize) ? prevVal.concat([array.slice(currIndx, currIndx + chunkSize)]) : prevVal,
     []
   );
 };
@@ -101,9 +100,7 @@ export const printContracts = () => {
 
   const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
 
-  const contractsPrint = entries.map(
-    ([key, value]: [string, DbEntry]) => `${key}: ${value[network].address}`
-  );
+  const contractsPrint = entries.map(([key, value]: [string, DbEntry]) => `${key}: ${value[network].address}`);
 
   console.log('N# Contracts:', entries.length);
   console.log(contractsPrint.join('\n'), '\n');
@@ -115,6 +112,27 @@ export const notFalsyOrZeroAddress = (address: tEthereumAddress | null | undefin
   }
   return isAddress(address) && !isZeroAddress(address);
 };
+
+export const impersonateAddress = async (address: tEthereumAddress): Promise<SignerWithAddress> => {
+  if (!usingTenderly()) {
+    await (DRE as HardhatRuntimeEnvironment).network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [address],
+    });
+  }
+  const signer = await DRE.ethers.provider.getSigner(address);
+
+  return {
+    signer,
+    address,
+  };
+};
+
+export const omit = <T, U extends keyof T>(obj: T, keys: U[]): Omit<T, U> =>
+  (Object.keys(obj) as U[]).reduce(
+    (acc, curr) => (keys.includes(curr) ? acc : { ...acc, [curr]: obj[curr] }),
+    {} as Omit<T, U>
+  );
 
 export const impersonateAccountsHardhat = async (accounts: string[]) => {
   if (process.env.TENDERLY === 'true') {

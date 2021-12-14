@@ -3,9 +3,9 @@ import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import {
   deployLendingPoolCollateralManager,
   deployWalletBalancerProvider,
-  deployWETHGateway,
   authorizeWETHGateway,
   deployRnbwIncentivesContoller,
+  deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { loadPoolConfig, ConfigNames, getWethAddress, getTreasuryAddress } from '../../helpers/configuration';
 import { getWETHGateway } from '../../helpers/contracts-getters';
@@ -43,6 +43,8 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       const testHelpers = await getAaveProtocolDataProvider();
 
       const admin = await addressesProvider.getPoolAdmin();
+      const oracle = await addressesProvider.getPriceOracle();
+
       if (!reserveAssets) {
         throw 'Reserve assets is undefined. Check ReserveAssets configuration at config directory';
       }
@@ -86,6 +88,9 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       );
 
       await deployWalletBalancerProvider(verify);
+
+      const uiPoolDataProvider = await deployUiPoolDataProvider([incentivesController, oracle], verify);
+      console.log('UiPoolDataProvider deployed at:', uiPoolDataProvider.address);
 
       const lendingPoolAddress = await addressesProvider.getLendingPool();
 

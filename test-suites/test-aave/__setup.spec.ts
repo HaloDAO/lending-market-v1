@@ -14,7 +14,6 @@ import {
   deployLendingPoolConfigurator,
   deployLendingPool,
   deployPriceOracle,
-  deployAaveOracle,
   deployLendingPoolCollateralManager,
   deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
@@ -35,13 +34,19 @@ import {
   deployCurveFactoryMock,
   deployMockEmissionManager,
   deployRnbwIncentivesContoller,
+  deployMockParaSwapAugustus,
+  deployMockParaSwapAugustusRegistry,
+  deployParaSwapLiquiditySwapAdapter,
   authorizeWETHGateway,
   deployUniswapV2Factory,
+  deployUiPoolDataProvider,
+  deployATokenImplementations,
+  deployAaveOracle,
   deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork, HaloTokenContractId } from '../../helpers/types';
 import { ethers, Signer } from 'ethers';
-import { eContractid, tEthereumAddress, AavePools } from '../../helpers/types';
+import { TokenContractId, eContractid, tEthereumAddress, AavePools } from '../../helpers/types';
 import { MintableERC20 } from '../../types/MintableERC20';
 import { ConfigNames, getReservesConfigByPool, getTreasuryAddress, loadPoolConfig } from '../../helpers/configuration';
 import { initializeMakeSuite } from './helpers/make-suite';
@@ -55,6 +60,8 @@ import {
 import { waitForTx } from '../../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../../helpers/init-helpers';
 import HaloConfig from '../../markets/halo';
+import AaveConfig from '../../markets/aave';
+import { oneEther, ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getLendingPool,
   getLendingPoolConfiguratorProxy,
@@ -99,6 +106,7 @@ const deployAllMockTokens = async (deployer: Signer) => {
 
 const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVault: Signer) => {
   const aaveAdmin = await deployer.getAddress();
+  const config = loadPoolConfig(ConfigNames.Aave);
 
   const mockTokens = await deployAllMockTokens(deployer);
   console.log('Deployed mocks');
@@ -157,6 +165,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
       USD: USD_ADDRESS,
       RNBW: mockTokens.RNBW.address,
       //WMATIC: mockTokens.WMATIC.address,
+      STAKE: mockTokens.STAKE.address,
+      xSUSHI: mockTokens.xSUSHI.address,
+      WAVAX: mockTokens.WAVAX.address,
     },
     fallbackOracle
   );
@@ -276,6 +287,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
     admin,
     treasury.address,
     rnbwIncentivesController.address,
+    ConfigNames.Aave,
     false
   );
 
@@ -296,6 +308,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   await deployUniswapRepayAdapter(adapterParams);
   await deployFlashLiquidationAdapter(adapterParams);
 
+  const augustus = await deployMockParaSwapAugustus();
+
+  const augustusRegistry = await deployMockParaSwapAugustusRegistry([augustus.address]);
+
+  await deployParaSwapLiquiditySwapAdapter([addressesProvider.address, augustusRegistry.address]);
+
   const uiPoolDataProvider = await deployUiPoolDataProvider(
     [rnbwIncentivesController.address, aaveOracle.address],
     false
@@ -304,6 +322,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   await deployWalletBalancerProvider();
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
   await authorizeWETHGateway(gateWay.address, lendingPoolAddress);
+  await insertContractAddressInDb(eContractid.UiPoolDataProvider, uiPoolDataProvider.address);
   console.timeEnd('setup');
 };
 
@@ -313,7 +332,7 @@ before(async () => {
   const FORK = process.env.FORK;
 
   if (FORK) {
-    await rawBRE.run('aave:mainnet');
+    await rawBRE.run('aave:mainnet', { skipRegistry: true });
   } else {
     console.log('-> Deploying test environment...');
     await buildTestEnv(deployer, secondaryWallet, rewardsVault);

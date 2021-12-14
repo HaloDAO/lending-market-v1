@@ -27,8 +27,14 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
     await localBRE.run('set-DRE');
     const network = <eNetwork>localBRE.network.name;
     const poolConfig = loadPoolConfig(pool);
-    const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix, WethGateway } =
-      poolConfig;
+    const {
+      ATokenNamePrefix,
+      StableDebtTokenNamePrefix,
+      VariableDebtTokenNamePrefix,
+      SymbolPrefix,
+      WethGateway,
+      ReservesConfig,
+    } = poolConfig;
     const mockTokens = await getAllMockedTokens();
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
 
@@ -39,8 +45,6 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
     );
 
     const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, verify);
-
-    const reservesParams = getReservesConfigByPool(AavePools.proto);
 
     const admin = await addressesProvider.getPoolAdmin();
 
@@ -55,7 +59,7 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
     const incentiveController = await deployRnbwIncentivesContoller([ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS], false);
 
     await initReservesByHelper(
-      reservesParams,
+      ReservesConfig,
       protoPoolReservesAddresses,
       ATokenNamePrefix,
       StableDebtTokenNamePrefix,

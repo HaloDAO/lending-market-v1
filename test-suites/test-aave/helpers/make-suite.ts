@@ -21,6 +21,8 @@ import {
   getCurveFactoryMock,
   getUniswapV2Factory,
   getVestingContract,
+  getParaSwapLiquiditySwapAdapter,
+  getUiPoolDataProvider,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
 import { LendingPool } from '../../../types/LendingPool';
@@ -39,6 +41,7 @@ import { LendingPoolAddressesProviderRegistry } from '../../../types/LendingPool
 import { getEthersSigners } from '../../../helpers/contracts-helpers';
 import { UniswapLiquiditySwapAdapter } from '../../../types/UniswapLiquiditySwapAdapter';
 import { UniswapRepayAdapter } from '../../../types/UniswapRepayAdapter';
+import { ParaSwapLiquiditySwapAdapter } from '../../../types/ParaSwapLiquiditySwapAdapter';
 import { getParamPerNetwork } from '../../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../../types/WETH9Mocked';
 import { WETHGateway } from '../../../types/WETHGateway';
@@ -53,7 +56,10 @@ import {
   Treasury,
   UniswapV2Factory,
   VestingContractMock,
+  FlashLiquidationAdapter,
+  UiPoolDataProvider,
 } from '../../../types';
+
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../../helpers/tenderly-utils';
 
@@ -70,6 +76,7 @@ export interface TestEnv {
   secondaryWallet: SignerWithAddress;
   users: SignerWithAddress[];
   pool: LendingPool;
+  uiDataProvider: UiPoolDataProvider;
   configurator: LendingPoolConfigurator;
   oracle: PriceOracle;
   helpersContract: AaveProtocolDataProvider;
@@ -96,6 +103,7 @@ export interface TestEnv {
   vestingContractMock: VestingContractMock;
   curveFactoryMock: CurveFactoryMock;
   uniswapV2Factory: UniswapV2Factory;
+  paraswapLiquiditySwapAdapter: ParaSwapLiquiditySwapAdapter;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -108,6 +116,7 @@ const testEnv: TestEnv = {
   secondaryWallet: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
   pool: {} as LendingPool,
+  uiDataProvider: {} as UiPoolDataProvider,
   configurator: {} as LendingPoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
@@ -121,6 +130,7 @@ const testEnv: TestEnv = {
   uniswapLiquiditySwapAdapter: {} as UniswapLiquiditySwapAdapter,
   uniswapRepayAdapter: {} as UniswapRepayAdapter,
   flashLiquidationAdapter: {} as FlashLiquidationAdapter,
+  paraswapLiquiditySwapAdapter: {} as ParaSwapLiquiditySwapAdapter,
   registry: {} as LendingPoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
   xsgd: {} as MintableERC20,
@@ -150,6 +160,7 @@ export async function initializeMakeSuite() {
   testEnv.deployer = deployer;
   testEnv.secondaryWallet = secondaryWallet;
   testEnv.pool = await getLendingPool();
+  testEnv.uiDataProvider = await getUiPoolDataProvider();
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
 
@@ -223,6 +234,8 @@ export async function initializeMakeSuite() {
   testEnv.uniswapLiquiditySwapAdapter = await getUniswapLiquiditySwapAdapter();
   testEnv.uniswapRepayAdapter = await getUniswapRepayAdapter();
   testEnv.flashLiquidationAdapter = await getFlashLiquidationAdapter();
+
+  testEnv.paraswapLiquiditySwapAdapter = await getParaSwapLiquiditySwapAdapter();
 }
 
 const setSnapshot = async () => {

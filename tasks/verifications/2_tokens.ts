@@ -1,10 +1,5 @@
 import { task } from 'hardhat/config';
-import {
-  loadPoolConfig,
-  ConfigNames,
-  getWethAddress,
-  getTreasuryAddress,
-} from '../../helpers/configuration';
+import { loadPoolConfig, ConfigNames, getTreasuryAddress } from '../../helpers/configuration';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getAddressById,
@@ -44,12 +39,8 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
     for (const entry of Object.entries(getParamPerNetwork(ReserveAssets, network))) {
       const [token, tokenAddress] = entry;
       console.log(`- Verifying ${token} token related contracts`);
-      const {
-        stableDebtTokenAddress,
-        variableDebtTokenAddress,
-        aTokenAddress,
-        interestRateStrategyAddress,
-      } = await lendingPoolProxy.getReserveData(tokenAddress);
+      const { stableDebtTokenAddress, variableDebtTokenAddress, aTokenAddress, interestRateStrategyAddress } =
+        await lendingPoolProxy.getReserveData(tokenAddress);
 
       const tokenConfig = configs.find(([symbol]) => symbol === token);
       if (!tokenConfig) {
@@ -68,11 +59,9 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       console.log;
       // Proxy Stable Debt
       console.log(`\n- Verifying Stable Debt Token proxy...\n`);
-      await verifyContract(
-        eContractid.InitializableAdminUpgradeabilityProxy,
-        await getProxy(stableDebtTokenAddress),
-        [lendingPoolConfigurator.address]
-      );
+      await verifyContract(eContractid.InitializableAdminUpgradeabilityProxy, await getProxy(stableDebtTokenAddress), [
+        lendingPoolConfigurator.address,
+      ]);
 
       // Proxy Variable Debt
       console.log(`\n- Verifying  Debt Token proxy...\n`);
@@ -84,11 +73,9 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
 
       // Proxy aToken
       console.log('\n- Verifying aToken proxy...\n');
-      await verifyContract(
-        eContractid.InitializableAdminUpgradeabilityProxy,
-        await getProxy(aTokenAddress),
-        [lendingPoolConfigurator.address]
-      );
+      await verifyContract(eContractid.InitializableAdminUpgradeabilityProxy, await getProxy(aTokenAddress), [
+        lendingPoolConfigurator.address,
+      ]);
 
       // Strategy Rate
       console.log(`\n- Verifying Strategy rate...\n`);
@@ -137,17 +124,13 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       }
       if (variableDebt) {
         console.log('\n- Verifying VariableDebtToken...\n');
-        await verifyContract(
-          eContractid.VariableDebtToken,
-          await getVariableDebtToken(variableDebt),
-          [
-            lendingPoolProxy.address,
-            tokenAddress,
-            `Aave variable debt bearing ${token}`,
-            `variableDebt${token}`,
-            ZERO_ADDRESS,
-          ]
-        );
+        await verifyContract(eContractid.VariableDebtToken, await getVariableDebtToken(variableDebt), [
+          lendingPoolProxy.address,
+          tokenAddress,
+          `Aave variable debt bearing ${token}`,
+          `variableDebt${token}`,
+          ZERO_ADDRESS,
+        ]);
       } else {
         console.error(`Skipping variable debt verify for ${token}. Missing address at JSON DB.`);
       }
