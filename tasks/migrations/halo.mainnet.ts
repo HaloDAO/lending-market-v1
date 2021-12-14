@@ -10,7 +10,6 @@ task('halo:mainnet', 'Deploy development enviroment')
     const POOL_NAME = ConfigNames.Halo;
 
     await localBRE.run('set-DRE');
-
     // Prevent loss of gas verifying all the needed ENVs for Etherscan verification
     if (verify) {
       checkVerification();
