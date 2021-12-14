@@ -1,5 +1,6 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Build pass](https://github.com/AAVE/protocol-v2/actions/workflows/node.js.yml/badge.svg)](https://github.com/aave/protocol-v2/actions/workflows/node.js.yml)
+
 ```
         .///.                .///.     //.            .//  `/////////////-
        `++:++`              .++:++`    :++`          `++:  `++:......---.`
@@ -224,3 +225,20 @@ await DAI.connect(signer).approve(lendingPool.address, ethers.utils.parseUnits('
 // Deposit 100 DAI
 await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
 ```
+
+## Using lending pool tasks
+
+Run the following command to test lending pool related tasks
+`yarn/npm run hardhat external:lendingpool-action --action {desired action} --amount {amount to use, 0 if getter functions}
+
+list of actions
+`approveToken` - approve token spend to the lending market
+`deposit` - deposit in lending market with the --amount parameter value as amount
+`withdraw` - withdraw in lending market with the --amount parameter value as amount
+`borrow` - borrow in lending market with the --amount parameter value as amount
+`repay` - repay in lending market with the --amount parameter value as amount
+`getUserReserveData` - get user's reserve data
+`getReservesList` - get all reserves list
+`setUserUseReserveAsCollateral` - set current hardcoded asset as a collateral for borrow
+
+note: you can modify the `TEST_ASSET` if you want to use other tokens, default now is USDC

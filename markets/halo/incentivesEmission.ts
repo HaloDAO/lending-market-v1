@@ -87,7 +87,6 @@ export const HaloIncentives = {
         underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].WETH,
       },
     ],
-
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {},
     [eEthereumNetwork.tenderlyMain]: {},

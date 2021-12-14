@@ -7,6 +7,7 @@ import { chooseATokenDeployment } from '../../../helpers/init-helpers';
 import {
   getAaveOracle,
   getAToken,
+  getIErc20Detailed,
   getLendingPool,
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorImpl,
@@ -37,11 +38,15 @@ task('external:lendingpool-action', 'Initialize incentives controller')
     const DEPLOYER_ADDRESS = '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd';
     const TEST_ASSET = marketConfigs.HaloConfig.ReserveAssets[network].USDC;
 
-    console.log(marketConfigs.HaloConfig.LendingPool[network]);
     const lendingPool = await getLendingPool(marketConfigs.HaloConfig.LendingPool[network]);
     const TEST_AMOUNT = parseEther(amount);
+    const token = await getIErc20Detailed(TEST_ASSET);
 
     switch (action) {
+      case 'approveToken':
+        await token.approve(lendingPool.address, ethers.constants.MaxUint256);
+        console.log(`${await token.name()} approved spend in lending market!`);
+        break;
       case 'deposit':
         await lendingPool.deposit(TEST_ASSET, TEST_AMOUNT, DEPLOYER_ADDRESS, 0);
         break;
@@ -60,6 +65,8 @@ task('external:lendingpool-action', 'Initialize incentives controller')
       case 'getReservesList':
         console.log(await lendingPool.getReservesList());
         break;
+      case 'setUserUseReserveAsCollateral':
+        await lendingPool.setUserUseReserveAsCollateral(TEST_ASSET, true);
       default:
         console.log('action not found');
         break;
