@@ -56,7 +56,7 @@ export const HaloConfig: IHaloConfiguration = {
       BUSD: '0x4fabb145d64652a948d72533023f6e7a623c7c53', // To Check
       SUSD: '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // To Check
     },
-    [eEthereumNetwork.tenderlyMain]: {},
+    [eEthereumNetwork.tenderly]: {},
   },
 };
 

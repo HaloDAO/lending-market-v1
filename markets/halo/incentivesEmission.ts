@@ -6,7 +6,7 @@ const AtokenAddresses = {
   [eEthereumNetwork.hardhat]: {},
   [eEthereumNetwork.coverage]: {},
   [eEthereumNetwork.kovan]: {
-    AAVE: '0x8C98CD6686F28b49D28e561d37F017bB456CD8C5',
+    // AAVE: '0x8C98CD6686F28b49D28e561d37F017bB456CD8C5',
     BUSD: '0x3d754c7607433b115337F7B0544fb23b356367b5',
     DAI: '0x0C1b4e81fC6B30ead94Cc7C0a643974183be796e',
     XSGD: '0xE2cc327F15f04fb3607F2b7291aE8AB62908Af2B',
@@ -20,7 +20,7 @@ const AtokenAddresses = {
   },
   [eEthereumNetwork.ropsten]: {},
   [eEthereumNetwork.main]: {},
-  [eEthereumNetwork.tenderlyMain]: {},
+  [eEthereumNetwork.tenderly]: {},
 };
 
 export const HaloIncentives = {
@@ -29,11 +29,6 @@ export const HaloIncentives = {
     [eEthereumNetwork.hardhat]: {},
     [eEthereumNetwork.coverage]: {},
     [eEthereumNetwork.kovan]: [
-      {
-        emissionPerSecond: parseEther('1'),
-        totalStaked: 0,
-        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].AAVE,
-      },
       {
         emissionPerSecond: parseEther('2.2'),
         totalStaked: 0,
@@ -89,6 +84,6 @@ export const HaloIncentives = {
     ],
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {},
-    [eEthereumNetwork.tenderlyMain]: {},
+    [eEthereumNetwork.tenderly]: {},
   },
 };

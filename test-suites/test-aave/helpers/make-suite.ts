@@ -15,7 +15,6 @@ import {
   getUniswapRepayAdapter,
   getFlashLiquidationAdapter,
   getRnbwMock,
-  getMockEmissionManager,
   getRnbwIncentivesController,
   getTreasury,
   getCurveFactoryMock,
@@ -49,7 +48,6 @@ import { solidity } from 'ethereum-waffle';
 import { AaveConfig } from '../../../markets/aave';
 import {
   CurveFactoryMock,
-  FlashLiquidationAdapter,
   MockEmissionManager,
   RnbwIncentivesController,
   RnbwMock,
@@ -179,10 +177,10 @@ export async function initializeMakeSuite() {
 
   // Atoken addresses
   const allTokens = await testEnv.helpersContract.getAllATokens();
-  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
-  const aXsgdAddress = allTokens.find((aToken) => aToken.symbol === 'aXSGD')?.tokenAddress;
-  const aThkdAddress = allTokens.find((aToken) => aToken.symbol === 'aTHKD')?.tokenAddress;
-  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
+  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'hDAI')?.tokenAddress;
+  const aXsgdAddress = allTokens.find((aToken) => aToken.symbol === 'hXSGD')?.tokenAddress;
+  const aThkdAddress = allTokens.find((aToken) => aToken.symbol === 'hTHKD')?.tokenAddress;
+  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'hWETH')?.tokenAddress;
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 
   // Token Addresses
@@ -195,6 +193,7 @@ export async function initializeMakeSuite() {
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
   if (!aDaiAddress || !aWEthAddress) {
+    console.log(`${aDaiAddress} - aDAi, ${aWEthAddress} - aWeth`);
     process.exit(1);
   }
   // if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
@@ -208,7 +207,6 @@ export async function initializeMakeSuite() {
   // TEST ENV
   // RNBW Contracts
   testEnv.rnbwContract = await getRnbwMock();
-  testEnv.emissionManager = await getMockEmissionManager();
   testEnv.rnbwIncentivesController = await getRnbwIncentivesController();
   testEnv.treasuryContract = await getTreasury();
   testEnv.curveFactoryMock = await getCurveFactoryMock();

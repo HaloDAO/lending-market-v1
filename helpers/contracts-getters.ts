@@ -429,9 +429,3 @@ export const getVestingContract = async (address?: tEthereumAddress) =>
     address || (await getDb().get(`${eContractid.VestingContractMock}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
-
-export const getUiPoolDataProvider = async (address?: tEthereumAddress) =>
-  await UiPoolDataProviderFactory.connect(
-    address || (await getDb().get(`${eContractid.UiPoolDataProvider}.${DRE.network.name}`).value()).address,
-    await getFirstSigner()
-  );

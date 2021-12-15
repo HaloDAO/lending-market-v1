@@ -229,13 +229,12 @@ export interface iAssetBase<T> {
   USDC: T;
   USDT: T;
   SUSD: T;
-  AAVE: T;
   //KNC: T;
   WBTC: T;
   BUSD: T;
   USD: T;
-  WMATIC?: T;
   RNBW?: T;
+  AAVE?: T;
   UniDAIWETH?: T;
   UniWBTCWETH?: T;
   UniAAVEWETH?: T;
@@ -314,7 +313,6 @@ export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
 export enum HaloTokenContractId {
   DAI = 'DAI',
-  AAVE = 'AAVE',
   TUSD = 'TUSD',
   WETH = 'WETH',
   USDC = 'USDC',
@@ -323,7 +321,6 @@ export enum HaloTokenContractId {
   WBTC = 'WBTC',
   BUSD = 'BUSD',
   USD = 'USD',
-  WMATIC = 'WMATIC',
   XSGD = 'XSGD',
   THKD = 'THKD',
   RNBW = 'RNBW',

@@ -3,7 +3,6 @@ import { eEthereumNetwork } from '../../../helpers/types';
 import { getTreasuryAddress } from '../../../helpers/configuration';
 import * as marketConfigs from '../../../markets/halo';
 import * as reserveConfigs from '../../../markets/halo/reservesConfigs';
-import { chooseATokenDeployment } from '../../../helpers/init-helpers';
 import {
   getAaveOracle,
   getAToken,

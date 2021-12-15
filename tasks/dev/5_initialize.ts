@@ -68,10 +68,11 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
       admin,
       treasury.address,
       incentiveController.address,
+      ConfigNames.Aave,
       verify
     );
 
-    await configureReservesByHelper(reservesParams, protoPoolReservesAddresses, testHelpers, admin);
+    await configureReservesByHelper(ReservesConfig, protoPoolReservesAddresses, testHelpers, admin);
 
     const collateralManager = await deployLendingPoolCollateralManager(verify);
     await waitForTx(await addressesProvider.setLendingPoolCollateralManager(collateralManager.address));
