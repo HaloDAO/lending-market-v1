@@ -3,12 +3,13 @@ import { eEthereumNetwork } from '../../helpers/types';
 import { getTreasuryAddress } from '../../helpers/configuration';
 import * as marketConfigs from '../../markets/halo';
 import * as reserveConfigs from '../../markets/halo/reservesConfigs';
-import { chooseATokenDeployment } from '../../helpers/init-helpers';
+
 import { getLendingPoolAddressesProvider } from '../../helpers/contracts-getters';
 import {
   deployDefaultReserveInterestRateStrategy,
   deployStableDebtToken,
   deployVariableDebtToken,
+  chooseATokenDeployment,
 } from '../../helpers/contracts-deployments';
 import { setDRE } from '../../helpers/misc-utils';
 import { ZERO_ADDRESS } from '../../helpers/constants';
@@ -45,17 +46,7 @@ WRONG RESERVE ASSET SETUP:
     const addressProvider = await getLendingPoolAddressesProvider(LENDING_POOL_ADDRESS_PROVIDER[network]);
     const poolAddress = await addressProvider.getLendingPool();
     const treasuryAddress = await getTreasuryAddress(marketConfigs.HaloConfig);
-    const aToken = await deployCustomAToken(
-      [
-        poolAddress,
-        reserveAssetAddress,
-        treasuryAddress,
-        ZERO_ADDRESS, // Incentives Controller
-        `Halo interest bearing ${symbol}`,
-        `h${symbol}`,
-      ],
-      verify
-    );
+    const aToken = await deployCustomAToken(verify);
     const stableDebt = await deployStableDebtToken(
       [
         poolAddress,

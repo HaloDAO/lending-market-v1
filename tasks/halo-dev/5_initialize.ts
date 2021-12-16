@@ -100,6 +100,7 @@ task('halo:dev:initialize-lending-pool', 'Initialize lending pool configuration.
       admin,
       treasury.address,
       incentiveController.address,
+      pool,
       verify
     );
 

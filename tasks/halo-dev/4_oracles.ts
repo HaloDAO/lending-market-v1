@@ -8,7 +8,7 @@ import {
 import { ICommonConfiguration, iAssetBase, HaloTokenContractId } from '../../helpers/types';
 import { waitForTx } from '../../helpers/misc-utils';
 import { getAllAggregatorsAddresses, getAllTokenAddresses } from '../../helpers/mock-helpers';
-import { ConfigNames, loadPoolConfig, getWethAddress } from '../../helpers/configuration';
+import { ConfigNames, loadPoolConfig, getWethAddress, getQuoteCurrency } from '../../helpers/configuration';
 import {
   getAllHaloMockedTokens,
   getLendingPoolAddressesProvider,
@@ -21,11 +21,13 @@ task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
     await localBRE.run('set-DRE');
-    const poolConfig = HaloConfig;
+    const poolConfig = loadPoolConfig(pool);
     const {
       Mocks: { AllAssetsInitialPrices },
       ProtocolGlobalParams: { UsdAddress, MockUsdPriceInWei },
       LendingRateOracleRatesCommon,
+      OracleQuoteCurrency,
+      OracleQuoteUnit,
     } = poolConfig as ICommonConfiguration;
 
     const defaultTokenList = {
@@ -49,9 +51,16 @@ task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
     const allAggregatorsAddresses = getAllAggregatorsAddresses(mockAggregators);
 
-    const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
+    const [tokens, aggregators] = getPairsTokenAggregator(
+      allTokenAddresses,
+      allAggregatorsAddresses,
+      OracleQuoteCurrency
+    );
 
-    await deployAaveOracle([tokens, aggregators, fallbackOracle.address, await getWethAddress(poolConfig)], verify);
+    await deployAaveOracle(
+      [tokens, aggregators, fallbackOracle.address, await getQuoteCurrency(poolConfig), OracleQuoteUnit],
+      verify
+    );
     await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
     const lendingRateOracle = await deployLendingRateOracle(verify);

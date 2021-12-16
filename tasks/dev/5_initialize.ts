@@ -5,8 +5,6 @@ import {
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
   authorizeWETHGateway,
-  deployTreasury,
-  deployRnbwIncentivesContoller,
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
@@ -50,14 +48,6 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
 
     const treasuryAddress = await getTreasuryAddress(poolConfig);
 
-    // TODO: Make zero address dynamic, halo constants inside the folder
-    const treasury = await deployTreasury(
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS],
-      false
-    );
-
-    const incentiveController = await deployRnbwIncentivesContoller([ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS], false);
-
     await initReservesByHelper(
       ReservesConfig,
       protoPoolReservesAddresses,
@@ -66,12 +56,11 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
       VariableDebtTokenNamePrefix,
       SymbolPrefix,
       admin,
-      treasury.address,
-      incentiveController.address,
-      ConfigNames.Aave,
+      treasuryAddress,
+      ZERO_ADDRESS,
+      pool,
       verify
     );
-
     await configureReservesByHelper(ReservesConfig, protoPoolReservesAddresses, testHelpers, admin);
 
     const collateralManager = await deployLendingPoolCollateralManager(verify);

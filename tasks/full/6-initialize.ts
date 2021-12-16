@@ -4,10 +4,9 @@ import {
   deployLendingPoolCollateralManager,
   deployWalletBalancerProvider,
   authorizeWETHGateway,
-  deployRnbwIncentivesContoller,
   deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
-import { loadPoolConfig, ConfigNames, getWethAddress, getTreasuryAddress } from '../../helpers/configuration';
+import { loadPoolConfig, ConfigNames, getTreasuryAddress } from '../../helpers/configuration';
 import { getWETHGateway } from '../../helpers/contracts-getters';
 import { eNetwork, ICommonConfiguration } from '../../helpers/types';
 import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
@@ -50,9 +49,6 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       }
 
       const treasuryAddress = await getTreasuryAddress(poolConfig);
-      const incentives = await deployRnbwIncentivesContoller([ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS], true);
-      console.log('intiializing');
-      console.log('deployed: ', incentives.address);
 
       await initReservesByHelper(
         ReservesConfig,
@@ -62,8 +58,9 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
         VariableDebtTokenNamePrefix,
         SymbolPrefix,
         admin,
-        ZERO_ADDRESS,
-        incentives.address,
+        treasuryAddress,
+        incentivesController,
+        pool,
         verify
       );
       await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
