@@ -24,7 +24,9 @@ yarn run external:lendingpool-action
 
 1 - run `yarn run kovan:dev:halo`
 
-2 - change the incentives controller from `./markets/halo/commons.ts` (Line 269)
+2 - change the `IncentivesController` address in `./markets/halo/commons.ts` (Line 269)
+
+  - get address from `deployed-contracts.json` > `RnbwIncentivesController`
 
 3 - run `yarn run kovan:dev:halo:configure-incentives`
 
