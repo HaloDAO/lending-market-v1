@@ -1,3 +1,9 @@
+# Deploying to localhost
+
+1 - run `yarn run hardhat node`
+2 - run `yarn run localhost:dev:halo`
+3 - you can test using `yarn run external:lendingpool-action --network localhost --action {mintToken => approveToken => deposit => borrow => repay => withdraw} --amount {0 when calling a get function}`
+
 # Deploying to Kovan
 
 1 - run `yarn run kovan:dev:halo`
