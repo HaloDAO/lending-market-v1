@@ -1,33 +1,11 @@
 import { task } from 'hardhat/config';
-import { eEthereumNetwork } from '../../../helpers/types';
-import { getTreasuryAddress } from '../../../helpers/configuration';
 import * as marketConfigs from '../../../markets/halo';
-import * as reserveConfigs from '../../../markets/halo/reservesConfigs';
-import {
-  getAaveOracle,
-  getAToken,
-  getIErc20Detailed,
-  getLendingPool,
-  getLendingPoolAddressesProvider,
-  getLendingPoolConfiguratorImpl,
-  getLendingPoolConfiguratorProxy,
-  getMintableERC20,
-  getRnbwIncentivesController,
-  getUiPoolDataProvider,
-} from '../../../helpers/contracts-getters';
-import {
-  deployDefaultReserveInterestRateStrategy,
-  deployStableDebtToken,
-  deployVariableDebtToken,
-  deployRnbwIncentivesContoller,
-} from '../../../helpers/contracts-deployments';
+import { getIErc20Detailed, getLendingPool, getMintableERC20 } from '../../../helpers/contracts-getters';
 import { setDRE } from '../../../helpers/misc-utils';
-import { ZERO_ADDRESS } from '../../../helpers/constants';
 import { formatEther, parseEther } from '@ethersproject/units';
 import { ethers } from 'ethers';
-import { BUIDLEREVM_SUPPORTED_HARDFORKS } from '@nomiclabs/buidler/internal/constants';
 
-task('external:lendingpool-action', 'Initialize incentives controller')
+task('external:lendingpool-action', 'Trigger individual lending pool')
   .addParam('action', 'Pool action to call')
   .addParam('amount', 'Amount to use')
   .setAction(async ({ verify, symbol, action, amount }, localBRE) => {
@@ -39,10 +17,14 @@ task('external:lendingpool-action', 'Initialize incentives controller')
 
     const lendingPool = await getLendingPool(marketConfigs.HaloConfig.LendingPool[network]);
     const TEST_AMOUNT = parseEther(amount);
-    const token = await getIErc20Detailed(TEST_ASSET);
+    const token = await getMintableERC20(TEST_ASSET);
     const TOKEN_NAME = await token.name();
 
     switch (action) {
+      case 'mintToken':
+        await token.mint(amount);
+        console.log(`Minted ${amount} ${TOKEN_NAME}`);
+        break;
       case 'approveToken':
         await token.approve(lendingPool.address, ethers.constants.MaxUint256);
         console.log(`${TOKEN_NAME} approved spend in lending market!`);

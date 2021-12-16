@@ -233,6 +233,7 @@ Run the following command to test lending pool related tasks
 
 list of actions
 `approveToken` - approve token spend to the lending market
+`mintToken` - mint more of test tokens
 `deposit` - deposit in lending market with the --amount parameter value as amount
 `withdraw` - withdraw in lending market with the --amount parameter value as amount
 `borrow` - borrow in lending market with the --amount parameter value as amount
