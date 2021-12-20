@@ -6,8 +6,6 @@ import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {DistributionTypes} from './lib/DistributionTypes.sol';
 import {IRnbwDistributionManager} from './interfaces/IRnbwDistributionManager.sol';
 
-//import "hardhat/console.sol";
-
 /**
  * @title AaveDistributionManager
  * @notice Accounting contract to manage multiple staking distributions

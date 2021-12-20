@@ -95,7 +95,7 @@ contract Treasury is Ownable {
     (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
     uint256 amountInWithFee = amountIn.mul(997);
 
-     IERC20(usdc).safeTransfer(address(pair), amountIn);
+    IERC20(usdc).safeTransfer(address(pair), amountIn);
     if (usdc == pair.token0()) {
       amountOut = amountInWithFee.mul(reserve1).div(reserve0.mul(1000).add(amountInWithFee));
       pair.swap(0, amountOut, to, new bytes(0));
