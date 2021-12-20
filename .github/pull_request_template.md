@@ -12,7 +12,7 @@
 
 - [x] I have followed the guidelines in our Contributing document
 - [x] This PR has a corresponding JIRA ticket
-- [x] My branch conforms with our naming convention i.e. `feature/HDF-XXX-description`
+- [x] My branch conforms with our naming convention i.e. `feature/HDEV-XXX-description`
 - [x] I have written new tests for your core changes, as applicable
 - [x] I have successfully ran tests locally
 - [x] I have formatted my code using format document in VSCode
