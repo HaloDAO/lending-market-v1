@@ -101,7 +101,8 @@
     "prepublishOnly": "npm run compile",
     "kovan:dev:halo": "hardhat halo:dev --withmocktokens false --network kovan",
     "kovan:dev:halo:configure-incentives": "hardhat external:configure-incentives-emission --network kovan",
-    "kovan:dev:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network kovan",
+    "kovan:dev:halo:deploy-uipooldataprovider": "hardhat deploy-UiHaloPoolDataProvider --network kovan",
+    "kovan:dev:halo:deploy-uiincentivedataprovider": "hardhat deploy-UiIncentiveDataProvider --network kovan",
     "mainnet:halo:configure-incentives": "hardhat external:configure-incentives-emission --network mainnet",
     "mainnet:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network mainnet",
     "localhost:dev:halo": "hardhat halo:dev --withmocktokens true --network localhost"

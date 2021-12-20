@@ -61,6 +61,8 @@ import {
   MockEmissionManagerFactory,
   UniswapV2FactoryFactory,
   TreasuryFactory,
+  UiIncentiveDataProvider,
+  UiHaloPoolDataProvider,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -86,6 +88,32 @@ export const deployUiPoolDataProvider = async (
   const id = eContractid.UiPoolDataProvider;
   const args: string[] = [incentivesController, aaveOracle];
   const instance = await deployContract<UiPoolDataProvider>(id, args);
+  if (verify) {
+    await verifyContract(id, instance, args);
+  }
+  return instance;
+};
+
+export const deployHaloUiPoolDataProvider = async (
+  [networkBaseTokenPriceInUsdProxyAggregator, marketReferenceCurrencyPriceInUsdProxyAggregator]: [
+    tEthereumAddress,
+    tEthereumAddress
+  ],
+  verify?: boolean
+) => {
+  const id = eContractid.UiHaloPoolDataProvider;
+  const args: string[] = [networkBaseTokenPriceInUsdProxyAggregator, marketReferenceCurrencyPriceInUsdProxyAggregator];
+  const instance = await deployContract<UiHaloPoolDataProvider>(id, args);
+  if (verify) {
+    await verifyContract(id, instance, args);
+  }
+  return instance;
+};
+
+export const deployUiIncentiveDataProvider = async (verify?: boolean) => {
+  const id = eContractid.UiIncentiveDataProvider;
+  const args: string[] = [];
+  const instance = await deployContract<UiIncentiveDataProvider>(id, args);
   if (verify) {
     await verifyContract(id, instance, args);
   }

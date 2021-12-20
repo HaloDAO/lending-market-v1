@@ -85,6 +85,7 @@ export enum eContractid {
   StableAndVariableTokensHelper = 'StableAndVariableTokensHelper',
   ATokensAndRatesHelper = 'ATokensAndRatesHelper',
   UiPoolDataProvider = 'UiPoolDataProvider',
+  UiIncentiveDataProvider = 'UiIncentiveDataProvider',
   UiHaloPoolDataProvider = 'UiHaloPoolDataProvider',
   WETHGateway = 'WETHGateway',
   WETH = 'WETH',

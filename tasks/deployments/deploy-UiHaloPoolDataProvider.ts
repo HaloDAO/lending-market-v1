@@ -1,6 +1,6 @@
 import { task } from 'hardhat/config';
 import { eAvalancheNetwork, eContractid, eEthereumNetwork, eNetwork, ePolygonNetwork } from '../../helpers/types';
-import { deployUiPoolDataProvider } from '../../helpers/contracts-deployments';
+import { deployHaloUiPoolDataProvider, deployUiPoolDataProvider } from '../../helpers/contracts-deployments';
 import { exit } from 'process';
 import { ethers } from 'ethers';
 import { HaloIncentives } from '../../markets/halo/incentivesEmission';
@@ -37,7 +37,7 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
 
     const ETHUSD_ChainlinkAggregator = addressesByNetwork[network].ethUsdOracle;
 
-    const uiPoolDataProvider = await deployUiPoolDataProvider(
+    const uiPoolDataProvider = await deployHaloUiPoolDataProvider(
       [ETHUSD_ChainlinkAggregator, ETHUSD_ChainlinkAggregator],
       verify
     );

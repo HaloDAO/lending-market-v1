@@ -10,7 +10,6 @@
 
 2 - on a new terminal, run `yarn run localhost:dev:halo`
 
-
 ## Testing
 
 ```
@@ -26,11 +25,15 @@ yarn run external:lendingpool-action
 
 2 - change the `IncentivesController` address in `./markets/halo/commons.ts` (Line 269)
 
-  - get address from `deployed-contracts.json` > `RnbwIncentivesController`
+- get address from `deployed-contracts.json` > `RnbwIncentivesController`
 
-3 - run `yarn run kovan:dev:halo:configure-incentives`
+3 - change atoken addresses by calling `getReservesData`
 
-4 - run `yarn run kovan:dev:halo:deploy-uipooldataprovider`
+4 - change all contracts in `/markets/halo/common.ts`: LendingRateOracle, LendingPoolCollateralManager, LendingPoolConfigurator, LendingPool, WethGateway, AaveOracle, WETH, ReserveFactorTreasuryAddress, IncentivesController
+
+4 - run `yarn run kovan:dev:halo:configure-incentives`
+
+5 - run `yarn run kovan:dev:halo:deploy-uipooldataprovider`
 
 # Deploying to Main Network
 

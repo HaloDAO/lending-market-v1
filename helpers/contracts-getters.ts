@@ -43,6 +43,8 @@ import {
   UniswapV2FactoryFactory,
   UniswapV2PairFactory,
   VestingContractMockFactory,
+  UiHaloPoolDataProviderFactory,
+  UiIncentiveDataProviderFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -73,6 +75,18 @@ export const getLendingPool = async (address?: tEthereumAddress) =>
 export const getUiPoolDataProvider = async (address?: tEthereumAddress) =>
   await UiPoolDataProviderFactory.connect(
     address || (await getDb().get(`${eContractid.UiPoolDataProvider}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getHaloUiPoolDataProvider = async (address?: tEthereumAddress) =>
+  await UiHaloPoolDataProviderFactory.connect(
+    address || (await getDb().get(`${eContractid.UiHaloPoolDataProvider}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getIncentivePoolDataProvider = async (address?: tEthereumAddress) =>
+  await UiIncentiveDataProviderFactory.connect(
+    address || (await getDb().get(`${eContractid.UiIncentiveDataProvider}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
