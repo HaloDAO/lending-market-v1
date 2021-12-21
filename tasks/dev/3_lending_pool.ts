@@ -37,23 +37,15 @@ task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
     const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(verify);
 
     // Set lending pool conf impl to Address Provider
-    await waitForTx(
-      await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
-    );
+    await waitForTx(await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address));
 
     const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
       await addressesProvider.getLendingPoolConfigurator()
     );
-    await insertContractAddressInDb(
-      eContractid.LendingPoolConfigurator,
-      lendingPoolConfiguratorProxy.address
-    );
+    await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
 
     // Deploy deployment helpers
-    await deployStableAndVariableTokensHelper(
-      [lendingPoolProxy.address, addressesProvider.address],
-      verify
-    );
+    await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address], verify);
     await deployATokensAndRatesHelper(
       [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
       verify

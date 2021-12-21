@@ -25,7 +25,7 @@ export const MaticConfig: IMaticConfiguration = {
     USDT: strategyUSDT,
     WBTC: strategyWBTC,
     WETH: strategyWETH,
-    WMATIC: strategyMATIC,
+    // WMATIC: strategyMATIC,
     AAVE: strategyAAVE,
   },
   ReserveAssets: {

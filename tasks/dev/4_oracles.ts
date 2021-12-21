@@ -1,9 +1,5 @@
 import { task } from 'hardhat/config';
-import {
-  deployPriceOracle,
-  deployAaveOracle,
-  deployLendingRateOracle,
-} from '../../helpers/contracts-deployments';
+import { deployPriceOracle, deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments';
 import {
   setInitialAssetPricesInOracle,
   deployAllMockAggregators,
@@ -61,13 +57,7 @@ task('dev:deploy-oracles', 'Deploy oracles for dev environment')
     );
 
     await deployAaveOracle(
-      [
-        tokens,
-        aggregators,
-        fallbackOracle.address,
-        await getQuoteCurrency(poolConfig),
-        OracleQuoteUnit,
-      ],
+      [tokens, aggregators, fallbackOracle.address, await getQuoteCurrency(poolConfig), OracleQuoteUnit],
       verify
     );
     await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));

@@ -27,10 +27,7 @@ task(`deploy-${CONTRACT_NAME}`, `Deploys the ${CONTRACT_NAME} contract`)
     console.log(`${CONTRACT_NAME}.address`, adapter.address);
 
     if (verify) {
-      await verifyContract(eContractid.ParaSwapLiquiditySwapAdapter, adapter, [
-        provider,
-        augustusRegistry,
-      ]);
+      await verifyContract(eContractid.ParaSwapLiquiditySwapAdapter, adapter, [provider, augustusRegistry]);
     }
 
     console.log(`\tFinished ${CONTRACT_NAME} deployment`);

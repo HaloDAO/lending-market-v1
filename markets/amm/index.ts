@@ -23,7 +23,7 @@ import {
   strategyWBTCUSDC,
   strategyYFIWETH,
   strategyBALWETH,
-} from './reservesConfigs';
+} from './reserveConfigs';
 
 // ----------------
 // POOL--SPECIFIC PARAMS

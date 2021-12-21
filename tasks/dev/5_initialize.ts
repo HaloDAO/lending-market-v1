@@ -8,23 +8,14 @@ import {
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
-import {
-  ConfigNames,
-  getReservesConfigByPool,
-  getTreasuryAddress,
-  loadPoolConfig,
-} from '../../helpers/configuration';
+import { ConfigNames, getReservesConfigByPool, getTreasuryAddress, loadPoolConfig } from '../../helpers/configuration';
 
 import { tEthereumAddress, AavePools, eContractid } from '../../helpers/types';
 import { waitForTx, filterMapBy, notFalsyOrZeroAddress } from '../../helpers/misc-utils';
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
 import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
-import {
-  getAllMockedTokens,
-  getLendingPoolAddressesProvider,
-  getWETHGateway,
-} from '../../helpers/contracts-getters';
+import { getAllMockedTokens, getLendingPoolAddressesProvider, getWETHGateway } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
 task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
@@ -73,18 +64,10 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
     await configureReservesByHelper(ReservesConfig, protoPoolReservesAddresses, testHelpers, admin);
 
     const collateralManager = await deployLendingPoolCollateralManager(verify);
-    await waitForTx(
-      await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
-    );
+    await waitForTx(await addressesProvider.setLendingPoolCollateralManager(collateralManager.address));
 
-    const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(
-      addressesProvider.address,
-      verify
-    );
-    await insertContractAddressInDb(
-      eContractid.MockFlashLoanReceiver,
-      mockFlashLoanReceiver.address
-    );
+    const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(addressesProvider.address, verify);
+    await insertContractAddressInDb(eContractid.MockFlashLoanReceiver, mockFlashLoanReceiver.address);
 
     await deployWalletBalancerProvider(verify);
 

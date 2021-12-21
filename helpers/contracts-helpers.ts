@@ -145,8 +145,7 @@ export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: an
 };
 
 export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
-  const { main, ropsten, kovan, coverage, buidlerevm, tenderly } =
-    param as iEthereumParamsPerNetwork<T>;
+  const { main, ropsten, kovan, coverage, buidlerevm, tenderly } = param as iEthereumParamsPerNetwork<T>;
   const { matic, mumbai } = param as iPolygonParamsPerNetwork<T>;
   const { xdai } = param as iXDaiParamsPerNetwork<T>;
   const { avalanche, fuji } = param as iAvalancheParamsPerNetwork<T>;
@@ -192,12 +191,11 @@ export const getOptionalParamAddressPerNetwork = (
   return getParamPerNetwork(param, network);
 };
 
-export const getParamPerPool = <T>(
-  { proto, amm, matic, avalanche }: iParamsPerPool<T>,
-  pool: AavePools
-) => {
+export const getParamPerPool = <T>({ proto, amm, matic, avalanche }: iParamsPerPool<T>, pool: AavePools) => {
   switch (pool) {
     case AavePools.proto:
+      return proto;
+    case AavePools.halo:
       return proto;
     case AavePools.amm:
       return amm;
@@ -289,28 +287,8 @@ export const buildLiquiditySwapParams = (
   useEthPath: boolean[]
 ) => {
   return ethers.utils.defaultAbiCoder.encode(
-    [
-      'address[]',
-      'uint256[]',
-      'bool[]',
-      'uint256[]',
-      'uint256[]',
-      'uint8[]',
-      'bytes32[]',
-      'bytes32[]',
-      'bool[]',
-    ],
-    [
-      assetToSwapToList,
-      minAmountsToReceive,
-      swapAllBalances,
-      permitAmounts,
-      deadlines,
-      v,
-      r,
-      s,
-      useEthPath,
-    ]
+    ['address[]', 'uint256[]', 'bool[]', 'uint256[]', 'uint256[]', 'uint8[]', 'bytes32[]', 'bytes32[]', 'bool[]'],
+    [assetToSwapToList, minAmountsToReceive, swapAllBalances, permitAmounts, deadlines, v, r, s, useEthPath]
   );
 };
 
@@ -357,30 +335,12 @@ export const buildParaSwapLiquiditySwapParams = (
   s: string | Buffer
 ) => {
   return ethers.utils.defaultAbiCoder.encode(
-    [
-      'address',
-      'uint256',
-      'uint256',
-      'bytes',
-      'address',
-      'tuple(uint256,uint256,uint8,bytes32,bytes32)',
-    ],
-    [
-      assetToSwapTo,
-      minAmountToReceive,
-      swapAllBalanceOffset,
-      swapCalldata,
-      augustus,
-      [permitAmount, deadline, v, r, s],
-    ]
+    ['address', 'uint256', 'uint256', 'bytes', 'address', 'tuple(uint256,uint256,uint8,bytes32,bytes32)'],
+    [assetToSwapTo, minAmountToReceive, swapAllBalanceOffset, swapCalldata, augustus, [permitAmount, deadline, v, r, s]]
   );
 };
 
-export const verifyContract = async (
-  id: string,
-  instance: Contract,
-  args: (string | string[])[]
-) => {
+export const verifyContract = async (id: string, instance: Contract, args: (string | string[])[]) => {
   if (usingPolygon()) {
     await verifyAtPolygon(id, instance, args);
   } else {
@@ -392,10 +352,7 @@ export const verifyContract = async (
   return instance;
 };
 
-export const getContractAddressWithJsonFallback = async (
-  id: string,
-  pool: ConfigNames
-): Promise<tEthereumAddress> => {
+export const getContractAddressWithJsonFallback = async (id: string, pool: ConfigNames): Promise<tEthereumAddress> => {
   const poolConfig = loadPoolConfig(pool);
   const network = <eNetwork>DRE.network.name;
   const db = getDb();

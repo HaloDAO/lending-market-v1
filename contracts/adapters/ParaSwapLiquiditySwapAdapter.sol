@@ -16,10 +16,10 @@ import {ReentrancyGuard} from '../dependencies/openzeppelin/contracts/Reentrancy
  * @author Jason Raymond Bell
  */
 contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard {
-  constructor(
-    ILendingPoolAddressesProvider addressesProvider,
-    IParaSwapAugustusRegistry augustusRegistry
-  ) public BaseParaSwapSellAdapter(addressesProvider, augustusRegistry) {
+  constructor(ILendingPoolAddressesProvider addressesProvider, IParaSwapAugustusRegistry augustusRegistry)
+    public
+    BaseParaSwapSellAdapter(addressesProvider, augustusRegistry)
+  {
     // This is only required to initialize BaseParaSwapSellAdapter
   }
 
@@ -63,11 +63,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       bytes memory swapCalldata,
       IParaSwapAugustus augustus,
       PermitSignature memory permitParams
-    ) =
-      abi.decode(
-        params,
-        (IERC20Detailed, uint256, uint256, bytes, IParaSwapAugustus, PermitSignature)
-      );
+    ) = abi.decode(params, (IERC20Detailed, uint256, uint256, bytes, IParaSwapAugustus, PermitSignature));
 
     _swapLiquidity(
       swapAllBalanceOffset,
@@ -108,8 +104,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     IParaSwapAugustus augustus,
     PermitSignature calldata permitParams
   ) external nonReentrant {
-    IERC20WithPermit aToken =
-      IERC20WithPermit(_getReserveData(address(assetToSwapFrom)).aTokenAddress);
+    IERC20WithPermit aToken = IERC20WithPermit(_getReserveData(address(assetToSwapFrom)).aTokenAddress);
 
     if (swapAllBalanceOffset != 0) {
       uint256 balance = aToken.balanceOf(msg.sender);
@@ -117,24 +112,17 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       amountToSwap = balance;
     }
 
-    _pullATokenAndWithdraw(
-      address(assetToSwapFrom),
-      aToken,
-      msg.sender,
-      amountToSwap,
-      permitParams
-    );
+    _pullATokenAndWithdraw(address(assetToSwapFrom), aToken, msg.sender, amountToSwap, permitParams);
 
-    uint256 amountReceived =
-      _sellOnParaSwap(
-        swapAllBalanceOffset,
-        swapCalldata,
-        augustus,
-        assetToSwapFrom,
-        assetToSwapTo,
-        amountToSwap,
-        minAmountToReceive
-      );
+    uint256 amountReceived = _sellOnParaSwap(
+      swapAllBalanceOffset,
+      swapCalldata,
+      augustus,
+      assetToSwapFrom,
+      assetToSwapTo,
+      amountToSwap,
+      minAmountToReceive
+    );
 
     assetToSwapTo.safeApprove(address(LENDING_POOL), 0);
     assetToSwapTo.safeApprove(address(LENDING_POOL), amountReceived);
@@ -166,8 +154,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     IERC20Detailed assetToSwapTo,
     uint256 minAmountToReceive
   ) internal {
-    IERC20WithPermit aToken =
-      IERC20WithPermit(_getReserveData(address(assetToSwapFrom)).aTokenAddress);
+    IERC20WithPermit aToken = IERC20WithPermit(_getReserveData(address(assetToSwapFrom)).aTokenAddress);
     uint256 amountToSwap = flashLoanAmount;
 
     uint256 balance = aToken.balanceOf(initiator);
@@ -179,28 +166,21 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       require(balance >= amountToSwap.add(premium), 'INSUFFICIENT_ATOKEN_BALANCE');
     }
 
-    uint256 amountReceived =
-      _sellOnParaSwap(
-        swapAllBalanceOffset,
-        swapCalldata,
-        augustus,
-        assetToSwapFrom,
-        assetToSwapTo,
-        amountToSwap,
-        minAmountToReceive
-      );
+    uint256 amountReceived = _sellOnParaSwap(
+      swapAllBalanceOffset,
+      swapCalldata,
+      augustus,
+      assetToSwapFrom,
+      assetToSwapTo,
+      amountToSwap,
+      minAmountToReceive
+    );
 
     assetToSwapTo.safeApprove(address(LENDING_POOL), 0);
     assetToSwapTo.safeApprove(address(LENDING_POOL), amountReceived);
     LENDING_POOL.deposit(address(assetToSwapTo), amountReceived, initiator, 0);
 
-    _pullATokenAndWithdraw(
-      address(assetToSwapFrom),
-      aToken,
-      initiator,
-      amountToSwap.add(premium),
-      permitParams
-    );
+    _pullATokenAndWithdraw(address(assetToSwapFrom), aToken, initiator, amountToSwap.add(premium), permitParams);
 
     // Repay flash loan
     assetToSwapFrom.safeApprove(address(LENDING_POOL), 0);

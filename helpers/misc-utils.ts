@@ -40,8 +40,7 @@ export const timeLatest = async () => {
   return new BigNumber(block.timestamp);
 };
 
-export const advanceBlock = async (timestamp: number) =>
-  await DRE.ethers.provider.send('evm_mine', [timestamp]);
+export const advanceBlock = async (timestamp: number) => await DRE.ethers.provider.send('evm_mine', [timestamp]);
 
 export const increaseTime = async (secondsToIncrease: number) => {
   await DRE.ethers.provider.send('evm_increaseTime', [secondsToIncrease]);
@@ -81,9 +80,7 @@ export const filterMapBy = (raw: { [key: string]: any }, fn: (key: string) => bo
 export const chunk = <T>(arr: Array<T>, chunkSize: number): Array<Array<T>> => {
   return arr.reduce(
     (prevVal: any, currVal: any, currIndx: number, array: Array<T>) =>
-      !(currIndx % chunkSize)
-        ? prevVal.concat([array.slice(currIndx, currIndx + chunkSize)])
-        : prevVal,
+      !(currIndx % chunkSize) ? prevVal.concat([array.slice(currIndx, currIndx + chunkSize)]) : prevVal,
     []
   );
 };
@@ -103,9 +100,7 @@ export const printContracts = () => {
 
   const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
 
-  const contractsPrint = entries.map(
-    ([key, value]: [string, DbEntry]) => `${key}: ${value[network].address}`
-  );
+  const contractsPrint = entries.map(([key, value]: [string, DbEntry]) => `${key}: ${value[network].address}`);
 
   console.log('N# Contracts:', entries.length);
   console.log(contractsPrint.join('\n'), '\n');

@@ -19,8 +19,10 @@
     "hardhat:fuji": "hardhat --network fuji",
     "hardhat:avalanche": "hardhat --network avalanche",
     "compile": "SKIP_LOAD=true hardhat compile",
+    "recompile": "rm -rf ./artifacts ./cache ./types && yarn run compile",
     "console:fork": "FORK=main hardhat console",
     "test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-aave/*.spec.ts",
+    "testhalo": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-aave/_*.spec.ts",
     "test-amm": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-amm/*.spec.ts",
     "test-amm-scenarios": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-amm/__setup.spec.ts test-suites/test-amm/scenario.spec.ts",
     "test-scenarios": "npm run compile && npx hardhat test test-suites/test-aave/__setup.spec.ts test-suites/test-aave/scenario.spec.ts",
@@ -96,7 +98,14 @@
     "print-config:kovan": "hardhat --network kovan print-config --pool Aave --data-provider 0xA1901785c29cBd48bfA74e46b67C736b26054fa4",
     "external:deploy-assets-kovan": "npm run compile && hardhat --network kovan external:deploy-new-asset --symbol ${SYMBOL} --verify",
     "external:deploy-assets-main": "npm run compile && hardhat --network main external:deploy-new-asset --symbol ${SYMBOL} --verify",
-    "prepublishOnly": "npm run compile"
+    "prepublishOnly": "npm run compile",
+    "kovan:dev:halo": "hardhat halo:dev --withmocktokens false --network kovan",
+    "kovan:dev:halo:configure-incentives": "hardhat external:configure-incentives-emission --network kovan",
+    "kovan:dev:halo:deploy-uipooldataprovider": "hardhat deploy-UiHaloPoolDataProvider --network kovan",
+    "kovan:dev:halo:deploy-uiincentivedataprovider": "hardhat deploy-UiIncentiveDataProvider --network kovan",
+    "mainnet:halo:configure-incentives": "hardhat external:configure-incentives-emission --network mainnet",
+    "mainnet:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network mainnet",
+    "localhost:dev:halo": "hardhat halo:dev --withmocktokens true --network localhost"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.4.7",

@@ -27,9 +27,7 @@ task('add-market-to-registry', 'Adds address provider to registry')
 
     let providerRegistryAddress = getParamPerNetwork(poolConfig.ProviderRegistry, network);
     let providerRegistryOwner = getParamPerNetwork(poolConfig.ProviderRegistryOwner, network);
-    const currentSignerAddress = await (
-      await (await getFirstSigner()).getAddress()
-    ).toLocaleLowerCase();
+    const currentSignerAddress = await (await (await getFirstSigner()).getAddress()).toLocaleLowerCase();
     let deployed = false;
 
     if (
@@ -47,11 +45,7 @@ task('add-market-to-registry', 'Adds address provider to registry')
       deployed = true;
     }
 
-    if (
-      !providerRegistryOwner ||
-      !isAddress(providerRegistryOwner) ||
-      isZeroAddress(providerRegistryOwner)
-    ) {
+    if (!providerRegistryOwner || !isAddress(providerRegistryOwner) || isZeroAddress(providerRegistryOwner)) {
       throw Error('config.ProviderRegistryOwner is missing or is not an address.');
     }
 
@@ -64,10 +58,7 @@ task('add-market-to-registry', 'Adds address provider to registry')
       signer = DRE.ethers.provider.getSigner(providerRegistryOwner);
       const firstAccount = await getFirstSigner();
       await firstAccount.sendTransaction({ value: parseEther('10'), to: providerRegistryOwner });
-    } else if (
-      !deployed &&
-      providerRegistryOwner.toLocaleLowerCase() !== currentSignerAddress.toLocaleLowerCase()
-    ) {
+    } else if (!deployed && providerRegistryOwner.toLocaleLowerCase() !== currentSignerAddress.toLocaleLowerCase()) {
       console.error('ProviderRegistryOwner config does not match current signer:');
       console.error('Expected:', providerRegistryOwner);
       console.error('Current:', currentSignerAddress);
@@ -77,18 +68,15 @@ task('add-market-to-registry', 'Adds address provider to registry')
     }
 
     // 1. Address Provider Registry instance
-    const addressesProviderRegistry = (
-      await getLendingPoolAddressesProviderRegistry(providerRegistryAddress)
-    ).connect(signer);
+    const addressesProviderRegistry = (await getLendingPoolAddressesProviderRegistry(providerRegistryAddress)).connect(
+      signer
+    );
 
     const addressesProviderInstance = await getLendingPoolAddressesProvider(addressesProvider);
 
     // 2. Set the provider at the Registry
     await waitForTx(
-      await addressesProviderRegistry.registerAddressesProvider(
-        addressesProviderInstance.address,
-        ProviderId
-      )
+      await addressesProviderRegistry.registerAddressesProvider(addressesProviderInstance.address, ProviderId)
     );
     console.log(
       `Added LendingPoolAddressesProvider with address "${addressesProviderInstance.address}" to registry located at ${addressesProviderRegistry.address}`

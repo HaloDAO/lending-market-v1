@@ -60,13 +60,7 @@ task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
         await waitForTx(await aaveOracle.setAssetSources(tokens, aggregators));
       } else {
         aaveOracle = await deployAaveOracle(
-          [
-            tokens,
-            aggregators,
-            fallbackOracleAddress,
-            await getQuoteCurrency(poolConfig),
-            poolConfig.OracleQuoteUnit,
-          ],
+          [tokens, aggregators, fallbackOracleAddress, await getQuoteCurrency(poolConfig), poolConfig.OracleQuoteUnit],
           verify
         );
         await waitForTx(await aaveOracle.setAssetSources(tokens, aggregators));

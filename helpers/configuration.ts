@@ -1,14 +1,8 @@
-import {
-  AavePools,
-  iMultiPoolsAssets,
-  IReserveParams,
-  PoolConfiguration,
-  eNetwork,
-  IBaseConfiguration,
-} from './types';
+import { AavePools, iMultiPoolsAssets, IReserveParams, PoolConfiguration, eNetwork, IBaseConfiguration } from './types';
 import { getEthersSignersAddresses, getParamPerPool } from './contracts-helpers';
 import AaveConfig from '../markets/aave';
 import MaticConfig from '../markets/matic';
+import HaloConfig from '../markets/halo';
 import AvalancheConfig from '../markets/avalanche';
 import AmmConfig from '../markets/amm';
 
@@ -24,12 +18,15 @@ export enum ConfigNames {
   Matic = 'Matic',
   Amm = 'Amm',
   Avalanche = 'Avalanche',
+  Halo = 'Halo',
 }
 
 export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
   switch (configName) {
     case ConfigNames.Aave:
       return AaveConfig;
+    case ConfigNames.Halo:
+      return HaloConfig;
     case ConfigNames.Matic:
       return MaticConfig;
     case ConfigNames.Amm:
@@ -57,6 +54,9 @@ export const getReservesConfigByPool = (pool: AavePools): iMultiPoolsAssets<IRes
       [AavePools.proto]: {
         ...AaveConfig.ReservesConfig,
       },
+      [AavePools.halo]: {
+        ...HaloConfig.ReservesConfig,
+      },
       [AavePools.amm]: {
         ...AmmConfig.ReservesConfig,
       },
@@ -70,9 +70,7 @@ export const getReservesConfigByPool = (pool: AavePools): iMultiPoolsAssets<IRes
     pool
   );
 
-export const getGenesisPoolAdmin = async (
-  config: IBaseConfiguration
-): Promise<tEthereumAddress> => {
+export const getGenesisPoolAdmin = async (config: IBaseConfiguration): Promise<tEthereumAddress> => {
   const currentNetwork = process.env.FORK ? process.env.FORK : DRE.network.name;
   const targetAddress = getParamPerNetwork(config.PoolAdmin, <eNetwork>currentNetwork);
   if (targetAddress) {
@@ -99,10 +97,8 @@ export const getTreasuryAddress = async (config: IBaseConfiguration): Promise<tE
   return getParamPerNetwork(config.ReserveFactorTreasuryAddress, <eNetwork>currentNetwork);
 };
 
-export const getATokenDomainSeparatorPerNetwork = (
-  network: eNetwork,
-  config: IBaseConfiguration
-): tEthereumAddress => getParamPerNetwork<tEthereumAddress>(config.ATokenDomainSeparator, network);
+export const getATokenDomainSeparatorPerNetwork = (network: eNetwork, config: IBaseConfiguration): tEthereumAddress =>
+  getParamPerNetwork<tEthereumAddress>(config.ATokenDomainSeparator, network);
 
 export const getWethAddress = async (config: IBaseConfiguration) => {
   const currentNetwork = process.env.FORK ? process.env.FORK : DRE.network.name;
@@ -138,9 +134,7 @@ export const getLendingRateOracles = (poolConfig: IBaseConfiguration) => {
   } = poolConfig;
 
   const network = process.env.FORK ? process.env.FORK : DRE.network.name;
-  return filterMapBy(LendingRateOracleRatesCommon, (key) =>
-    Object.keys(ReserveAssets[network]).includes(key)
-  );
+  return filterMapBy(LendingRateOracleRatesCommon, (key) => Object.keys(ReserveAssets[network]).includes(key));
 };
 
 export const getQuoteCurrency = async (config: IBaseConfiguration) => {

@@ -54,9 +54,7 @@ makeSuite('UI integration tests', async (testEnv) => {
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     // user deposits x amount to DAI market
-    await pool
-      .connect(users[0].signer)
-      .deposit(dai.address, depositAmount, users[0].address, AAVE_REFERRAL);
+    await pool.connect(users[0].signer).deposit(dai.address, depositAmount, users[0].address, AAVE_REFERRAL);
 
     // user's DAI should be 0 after deposit
     const daiBalance = await dai.balanceOf(users[0].address);
@@ -78,9 +76,7 @@ makeSuite('UI integration tests', async (testEnv) => {
       addressesProvider.address,
       users[0].address
     );
-    const daiReserveBefore = userReservesBefore.find(
-      (reserve) => reserve.underlyingAsset === dai.address
-    );
+    const daiReserveBefore = userReservesBefore.find((reserve) => reserve.underlyingAsset === dai.address);
     expect(daiReserveBefore.usageAsCollateralEnabledOnUser).to.be.true;
 
     // unset DAI as collateral
@@ -91,9 +87,7 @@ makeSuite('UI integration tests', async (testEnv) => {
       addressesProvider.address,
       users[0].address
     );
-    const daiReserveAfter = userReservesAfter.find(
-      (reserve) => reserve.underlyingAsset === dai.address
-    );
+    const daiReserveAfter = userReservesAfter.find((reserve) => reserve.underlyingAsset === dai.address);
     expect(daiReserveAfter.usageAsCollateralEnabledOnUser).to.be.false;
 
     // Revert to use DAI as collateral
@@ -110,9 +104,7 @@ makeSuite('UI integration tests', async (testEnv) => {
     const depositAmount = await convertToCurrencyDecimals(weth.address, '1000');
     await weth.connect(users[1].signer).mint(depositAmount);
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(users[1].signer)
-      .deposit(weth.address, depositAmount, users[1].address, AAVE_REFERRAL);
+    await pool.connect(users[1].signer).deposit(weth.address, depositAmount, users[1].address, AAVE_REFERRAL);
 
     // user should have aDAI from previous test
     const aDaiBalance = await aDai.balanceOf(users[0].address);
@@ -140,9 +132,7 @@ makeSuite('UI integration tests', async (testEnv) => {
     const { users, pool, weth, helpersContract } = testEnv;
 
     // verify debt balance is > 0
-    const { stableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
-      weth.address
-    );
+    const { stableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(weth.address);
     const stableDebtToken = await getStableDebtToken(stableDebtTokenAddress);
     const debtBalanceBefore = await stableDebtToken.balanceOf(users[0].address);
     expect(debtBalanceBefore).to.be.gt(ZERO);
@@ -155,9 +145,7 @@ makeSuite('UI integration tests', async (testEnv) => {
     await weth.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     // user fully repays ETH
-    await pool
-      .connect(users[0].signer)
-      .repay(weth.address, MAX_UINT_AMOUNT, RateMode.Stable, users[0].address);
+    await pool.connect(users[0].signer).repay(weth.address, MAX_UINT_AMOUNT, RateMode.Stable, users[0].address);
 
     // borrowed amount should be deducted from user's ETH balance
     const ethBalanceAfter = await weth.balanceOf(users[0].address);

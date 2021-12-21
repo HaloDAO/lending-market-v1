@@ -15,12 +15,7 @@ import {
   getLendingPoolConfiguratorProxy,
 } from '../../helpers/contracts-getters';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-  loadPoolConfig,
-  ConfigNames,
-  getGenesisPoolAdmin,
-  getEmergencyAdmin,
-} from '../../helpers/configuration';
+import { loadPoolConfig, ConfigNames, getGenesisPoolAdmin, getEmergencyAdmin } from '../../helpers/configuration';
 
 task('full:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
@@ -63,27 +58,19 @@ task('full:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
         lendingPoolConfiguratorImplAddress
       );
       // Set lending pool conf impl to Address Provider
-      await waitForTx(
-        await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImplAddress)
-      );
+      await waitForTx(await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImplAddress));
 
       const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
         await addressesProvider.getLendingPoolConfigurator()
       );
 
-      await insertContractAddressInDb(
-        eContractid.LendingPoolConfigurator,
-        lendingPoolConfiguratorProxy.address
-      );
+      await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
       const admin = await DRE.ethers.getSigner(await getEmergencyAdmin(poolConfig));
       // Pause market during deployment
       await waitForTx(await lendingPoolConfiguratorProxy.connect(admin).setPoolPause(true));
 
       // Deploy deployment helpers
-      await deployStableAndVariableTokensHelper(
-        [lendingPoolProxy.address, addressesProvider.address],
-        verify
-      );
+      await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address], verify);
       await deployATokensAndRatesHelper(
         [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
         verify

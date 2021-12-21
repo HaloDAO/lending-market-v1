@@ -15,8 +15,7 @@ export const WAD_RAY_RATIO = Math.pow(10, 9).toString();
 export const oneEther = new BigNumber(Math.pow(10, 18));
 export const oneUsd = new BigNumber(Math.pow(10, 8));
 export const oneRay = new BigNumber(Math.pow(10, 27));
-export const MAX_UINT_AMOUNT =
-  '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+export const MAX_UINT_AMOUNT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 export const ONE_YEAR = '31536000';
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const ONE_ADDRESS = '0x0000000000000000000000000000000000000001';
@@ -72,6 +71,25 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   WMATIC: oneEther.multipliedBy('0.003620948469').toFixed(),
   STAKE: oneEther.multipliedBy('0.003620948469').toFixed(),
   xSUSHI: oneEther.multipliedBy('0.00913428586').toFixed(),
+  XSGD: oneEther.multipliedBy('0.00023421').toFixed(),
+  THKD: oneEther.multipliedBy('0.00014912').toFixed(),
   WAVAX: oneEther.multipliedBy('0.006051936629').toFixed(),
+  USD: '5848466240000000',
+};
+
+export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
+  //  AAVE: oneEther.multipliedBy('0.003620948469').toFixed(),
+  WBTC: oneEther.multipliedBy('47.332685').toFixed(),
+  DAI: oneEther.multipliedBy('0.00031912').toFixed(),
+  USDC: oneEther.multipliedBy('0.00031912').toFixed(),
+  WETH: oneEther.toFixed(),
+  XSGD: oneEther.multipliedBy('0.00023421').toFixed(),
+  BUSD: oneEther.multipliedBy('0.00736484').toFixed(),
+  USDT: oneEther.multipliedBy('0.00369068412860').toFixed(),
+  SUSD: oneEther.multipliedBy('0.00364714136416').toFixed(),
+  TUSD: oneEther.multipliedBy('0.00364714136416').toFixed(),
+  THKD: oneEther.multipliedBy('0.00014912').toFixed(),
+  WMATIC: oneEther.multipliedBy('0.003620948469').toFixed(),
+  RNBW: oneEther.multipliedBy('0.003620948469').toFixed(), //mock
   USD: '5848466240000000',
 };
