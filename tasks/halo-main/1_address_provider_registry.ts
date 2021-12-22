@@ -7,7 +7,7 @@ import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { printContracts, waitForTx } from '../../helpers/misc-utils';
 import { HaloConfig } from '../../markets/halo';
 
-task('halo:dev:deploy-address-provider', 'Deploy address provider, registry and fee provider for dev enviroment')
+task('halo:mainnet-1', 'Deploy address provider, registry and fee provider for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -32,7 +32,10 @@ task('halo:dev:deploy-address-provider', 'Deploy address provider, registry and 
      *
      */
     const addressesProviderRegistry = await deployLendingPoolAddressesProviderRegistry(verify);
-    await waitForTx(await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 0));
+    await waitForTx(await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1));
 
-    printContracts();
+    console.log(`
+    Address Provider: ${addressesProvider.address}
+    Address Provider Registry: ${addressesProviderRegistry.address}
+    `);
   });

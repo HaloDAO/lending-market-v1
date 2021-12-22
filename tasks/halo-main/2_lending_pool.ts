@@ -14,7 +14,7 @@ import {
 } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
-task('halo:dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
+task('halo:mainnet-2', 'Deploy lending pool for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -41,12 +41,10 @@ task('halo:dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
     );
     await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
 
-    // Deploy deployment helpers
+    // Deploy deployment helper contracts
     await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address], verify);
     await deployATokensAndRatesHelper(
       [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
       verify
     );
-
-    printContracts();
   });

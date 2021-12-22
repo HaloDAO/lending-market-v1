@@ -190,6 +190,7 @@ export const CommonsConfig: ICommonConfiguration = {
       USDC: '0x64EaC61A2DFda2c3Fa04eED49AA33D021AeC8838',
       USDT: '0x0bF499444525a23E7Bb61997539725cA2e928138',
       USD: '0x9326BFA02ADD2366b30bacB125260Af641031331',
+      WBTC: '0xF7904a295A029a3aBDFFB6F12755974a958C7C25',
     },
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {
@@ -200,7 +201,8 @@ export const CommonsConfig: ICommonConfiguration = {
       USDC: '0x986b5E1e1755e3C2440e960477f25201B0a8bbD4',
       USDT: '0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46',
       WBTC: '0xdeb288F737066589598e9214E782fa5A8eD689e8',
-      USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // TODO: Check
+      USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
+      WETH: '',
     },
     [eEthereumNetwork.tenderly]: {},
   },

@@ -1,37 +1,16 @@
 import { task } from 'hardhat/config';
 import { deployPriceOracle, deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments';
-import {
-  setInitialAssetPricesInOracle,
-  deployAllMockAggregators,
-  setInitialMarketRatesInRatesOracleByHelper,
-} from '../../helpers/oracles-helpers';
-import {
-  ICommonConfiguration,
-  iAssetBase,
-  HaloTokenContractId,
-  HaloTokenMainetContractId,
-  SymbolMap,
-} from '../../helpers/types';
-import { waitForTx } from '../../helpers/misc-utils';
-import { getAllAggregatorsAddresses, getAllTokenAddresses } from '../../helpers/mock-helpers';
-import {
-  ConfigNames,
-  loadPoolConfig,
-  getWethAddress,
-  getQuoteCurrency,
-  getLendingRateOracles,
-} from '../../helpers/configuration';
-import {
-  getAllHaloMockedTokens,
-  getAllHaloTokens,
-  getLendingPoolAddressesProvider,
-  getPairsTokenAggregator,
-} from '../../helpers/contracts-getters';
+import { setInitialMarketRatesInRatesOracleByHelper } from '../../helpers/oracles-helpers';
+import { eNetwork, ICommonConfiguration, SymbolMap } from '../../helpers/types';
+import { DRE, printContracts, waitForTx } from '../../helpers/misc-utils';
+import { ConfigNames, loadPoolConfig, getQuoteCurrency, getLendingRateOracles } from '../../helpers/configuration';
+import { getLendingPoolAddressesProvider, getPairsTokenAggregator } from '../../helpers/contracts-getters';
 import HaloConfig from '../../markets/halo';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { parseEther } from 'ethers/lib/utils';
+import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 
-task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
+task('halo:mainnet-3', 'Deploy oracles for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
@@ -49,7 +28,6 @@ task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
     const addressesProvider = await getLendingPoolAddressesProvider();
     const admin = await addressesProvider.getPoolAdmin();
 
-    // 1 - Get custom configuration for mainet support
     const tokensToWatch: SymbolMap<string> = {
       ...reserveAssets,
       USD: UsdAddress,
@@ -63,11 +41,14 @@ task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
       poolConfig.OracleQuoteCurrency
     );
 
-    const fallbackOracle = await deployPriceOracle(verify);
-    await waitForTx(await fallbackOracle.setEthUsdPrice(parseEther('4044')));
-
     const aaveOracle = await deployAaveOracle(
-      [tokens, aggregators, fallbackOracle.address, await getQuoteCurrency(poolConfig), poolConfig.OracleQuoteUnit],
+      [
+        tokens,
+        aggregators,
+        HALO_CONTRACT_ADDRESSES[network].fallbackPriceOracle,
+        await getQuoteCurrency(poolConfig),
+        poolConfig.OracleQuoteUnit,
+      ],
       verify
     );
 
@@ -90,8 +71,4 @@ task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
       lendingRateOracle,
       admin
     );
-
-    const allReservesAddresses = {
-      ...tokensAddressesWithoutUsd,
-    };
   });

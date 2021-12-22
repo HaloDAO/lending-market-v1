@@ -38,6 +38,7 @@ if (!SKIP_LOAD) {
     'deployments',
     'helpers',
     'halo-dev',
+    'halo-main',
     'helpers/halo-helpers',
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
