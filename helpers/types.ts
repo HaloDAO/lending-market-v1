@@ -268,10 +268,7 @@ export type iAavePoolAssets<T> = Pick<
   'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'AAVE' | 'WBTC' | 'BUSD' | 'WETH'
 >;
 
-export type iHaloPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'TUSD' | 'USDC' | 'USDT' | 'SUSD' | 'WBTC' | 'BUSD' | 'WETH'
->;
+export type iHaloPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH'>;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -326,6 +323,15 @@ export enum HaloTokenContractId {
   XSGD = 'XSGD',
   THKD = 'THKD',
   RNBW = 'RNBW',
+}
+
+export enum HaloTokenMainetContractId {
+  DAI = 'DAI',
+  WETH = 'WETH',
+  USDC = 'USDC',
+  USDT = 'USDT',
+  WBTC = 'WBTC',
+  USD = 'USD',
 }
 
 export enum TokenContractId {
