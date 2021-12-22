@@ -78,7 +78,8 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
 };
 
 export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
-  //  AAVE: oneEther.multipliedBy('0.003620948469').toFixed(),
+  AAVE: oneEther.multipliedBy('0.003620948469').toFixed(),
+  LINK: oneEther.multipliedBy('0.009955').toFixed(),
   WBTC: oneEther.multipliedBy('47.332685').toFixed(),
   DAI: oneEther.multipliedBy('0.00031912').toFixed(),
   USDC: oneEther.multipliedBy('0.00031912').toFixed(),

@@ -1,7 +1,9 @@
 import { IHaloConfiguration, eEthereumNetwork } from '../../helpers/types';
+import { strategyLINK } from '../aave/reservesConfigs';
 
 import { CommonsConfig } from './commons';
 import {
+  strategyAAVE,
   strategyBUSD,
   strategyDAI,
   strategySUSD,
@@ -21,6 +23,8 @@ export const HaloConfig: IHaloConfiguration = {
   MarketId: 'HaloDAO Lending Market',
   ProviderId: 1,
   ReservesConfig: {
+    AAVE: strategyAAVE,
+    LINK: strategyLINK,
     BUSD: strategyBUSD,
     DAI: strategyDAI,
     SUSD: strategySUSD,

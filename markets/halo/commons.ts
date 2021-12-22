@@ -62,6 +62,12 @@ export const CommonsConfig: ICommonConfiguration = {
     XSGD: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
+    AAVE: {
+      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    },
+    LINK: {
+      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    },
   },
 
   // ----------------

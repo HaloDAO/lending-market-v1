@@ -188,19 +188,13 @@ export async function initializeMakeSuite() {
   const usdcAddress = reservesTokens.find((token) => token.symbol === 'USDC')?.tokenAddress;
   const xsgdAddress = reservesTokens.find((token) => token.symbol === 'XSGD')?.tokenAddress;
   const thkdAddress = reservesTokens.find((token) => token.symbol === 'THKD')?.tokenAddress;
-
-  //const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
+  const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
   if (!aDaiAddress || !aWEthAddress) {
-    console.log(`${aDaiAddress} - aDAi, ${aWEthAddress} - aWeth`);
     process.exit(1);
   }
-  // if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
-  //   process.exit(1);
-  // }
-
-  if (!daiAddress || !usdcAddress || !wethAddress) {
+  if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
     process.exit(1);
   }
 
@@ -222,7 +216,7 @@ export async function initializeMakeSuite() {
   // testEnv tokens
   testEnv.dai = await getMintableERC20(daiAddress);
   testEnv.usdc = await getMintableERC20(usdcAddress);
-  //testEnv.aave = await getMintableERC20(aaveAddress);
+  testEnv.aave = await getMintableERC20(aaveAddress!);
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.xsgd = await getMintableERC20(xsgdAddress!);
   testEnv.thkd = await getMintableERC20(thkdAddress!);

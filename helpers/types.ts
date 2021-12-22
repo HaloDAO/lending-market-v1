@@ -235,6 +235,7 @@ export interface iAssetBase<T> {
   WBTC: T;
   BUSD: T;
   USD: T;
+  LINK?: T;
   RNBW?: T;
   AAVE?: T;
   UniDAIWETH?: T;
@@ -270,7 +271,7 @@ export type iAavePoolAssets<T> = Pick<
 
 export type iHaloPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'TUSD' | 'USDC' | 'USDT' | 'SUSD' | 'WBTC' | 'BUSD' | 'WETH'
+  'DAI' | 'TUSD' | 'USDC' | 'USDT' | 'SUSD' | 'WBTC' | 'BUSD' | 'WETH' | 'AAVE' | 'LINK'
 >;
 
 export type iLpPoolAssets<T> = Pick<
@@ -307,7 +308,7 @@ export type iAvalanchePoolAssets<T> = Pick<
   'WETH' | 'DAI' | 'USDT' | 'AAVE' | 'WBTC' | 'WAVAX' | 'USDC'
 >;
 
-export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
+export type iMultiPoolsAssets<T> = iAssetCommon<T> | iHaloPoolAssets<T>;
 
 export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
 
@@ -326,6 +327,8 @@ export enum HaloTokenContractId {
   XSGD = 'XSGD',
   THKD = 'THKD',
   RNBW = 'RNBW',
+  LINK = 'LINK',
+  AAVE = 'AAVE',
 }
 
 export enum TokenContractId {

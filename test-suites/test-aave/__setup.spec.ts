@@ -77,7 +77,7 @@ const LENDING_RATE_ORACLE_RATES_COMMON = HaloConfig.LendingRateOracleRatesCommon
 const deployAllMockTokens = async (deployer: Signer) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
 
-  const protoConfigData = getReservesConfigByPool(AavePools.proto);
+  const protoConfigData = getReservesConfigByPool(AavePools.halo);
   for (const tokenSymbol of Object.keys(HaloTokenContractId)) {
     if (tokenSymbol === 'WETH') {
       tokens[tokenSymbol] = await deployWETHMocked();
@@ -105,7 +105,8 @@ const deployAllMockTokens = async (deployer: Signer) => {
 
 const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVault: Signer) => {
   const aaveAdmin = await deployer.getAddress();
-  //const config = loadPoolConfig(ConfigNames.Aave);
+
+  const config = loadPoolConfig(ConfigNames.Halo);
 
   const mockTokens = await deployAllMockTokens(deployer);
   console.log('Deployed mocks');
@@ -158,12 +159,13 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
       USDC: mockTokens.USDC.address,
       USDT: mockTokens.USDT.address,
       SUSD: mockTokens.SUSD.address,
-      //AAVE: mockTokens.AAVE.address,
       WBTC: mockTokens.WBTC.address,
       BUSD: mockTokens.BUSD.address,
       USD: USD_ADDRESS,
       RNBW: mockTokens.RNBW.address,
-      //WMATIC: mockTokens.WMATIC.address,
+      // WMATIC: mockTokens.WMATIC.address,
+      AAVE: mockTokens.AAVE.address,
+      LINK: mockTokens.LINK.address,
       //STAKE: mockTokens.STAKE.address,
       //xSUSHI: mockTokens.xSUSHI.address,
       //WAVAX: mockTokens.WAVAX.address,
@@ -173,7 +175,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
 
   console.log('Oracles deployed');
 
-  const mockAggregators = await deployAllMockAggregators(MOCK_CHAINLINK_AGGREGATORS_PRICES);
+  //TODO: DOuble check
+  const mockAggregators = await deployAllMockAggregators(ALL_ASSETS_INITIAL_PRICES);
   console.log('Mock aggs deployed');
 
   const allTokenAddresses = Object.entries(mockTokens).reduce(
@@ -223,12 +226,19 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer, rewardsVa
   console.log('Initial market rates in rates oracle set');
 
   const reservesParams = getReservesConfigByPool(AavePools.halo);
+
+  //const reservesParams = {
+  //  ...config.ReservesConfig,
+  //};
+
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address);
   await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
+  await deployATokenImplementations(ConfigNames.Halo, reservesParams, false);
+
   const admin = await deployer.getAddress();
 
   console.log('Initialize configuration');
-  const config = loadPoolConfig(ConfigNames.Halo);
+
   const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } = config;
 
   const distributionDuration = '1000000000000';
