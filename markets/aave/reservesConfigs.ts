@@ -72,30 +72,6 @@ export const strategyUSDC: IReserveParams = {
   reserveFactor: '1000',
 };
 
-export const strategyXSGD: IReserveParams = {
-  strategy: rateStrategyStableThree,
-  baseLTVAsCollateral: '8000',
-  liquidationThreshold: '8500',
-  liquidationBonus: '10500',
-  borrowingEnabled: true,
-  stableBorrowRateEnabled: true,
-  reserveDecimals: '6',
-  aTokenImpl: eContractid.AToken,
-  reserveFactor: '1000'
-};
-
-export const strategyTHKD: IReserveParams = {
-  strategy: rateStrategyStableThree,
-  baseLTVAsCollateral: '8000',
-  liquidationThreshold: '8500',
-  liquidationBonus: '10500',
-  borrowingEnabled: true,
-  stableBorrowRateEnabled: true,
-  reserveDecimals: '6',
-  aTokenImpl: eContractid.AToken,
-  reserveFactor: '1000'
-};
-
 export const strategyUSDT: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '0',
@@ -287,4 +263,28 @@ export const strategyXSUSHI: IReserveParams = {
   reserveDecimals: '18',
   aTokenImpl: eContractid.AToken,
   reserveFactor: '3500',
+};
+
+export const strategyXSGD: IReserveParams = {
+  strategy: rateStrategyStableThree,
+  baseLTVAsCollateral: '8000',
+  liquidationThreshold: '8500',
+  liquidationBonus: '10500',
+  borrowingEnabled: true,
+  stableBorrowRateEnabled: true,
+  reserveDecimals: '6',
+  aTokenImpl: eContractid.AToken,
+  reserveFactor: '1000',
+};
+
+export const strategyTHKD: IReserveParams = {
+  strategy: rateStrategyStableThree,
+  baseLTVAsCollateral: '8000',
+  liquidationThreshold: '8500',
+  liquidationBonus: '10500',
+  borrowingEnabled: true,
+  stableBorrowRateEnabled: true,
+  reserveDecimals: '6',
+  aTokenImpl: eContractid.AToken,
+  reserveFactor: '1000',
 };

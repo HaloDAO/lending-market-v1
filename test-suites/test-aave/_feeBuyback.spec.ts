@@ -25,7 +25,7 @@ makeSuite('Fee BuyBack', (testEnv: TestEnv) => {
   };
 
   it('setups the testing environment ', async () => {
-    const { dai, usdc, xsgd, deployer, pool, curveFactoryMock, rnbwContract, uniswapV2Factory } = testEnv;
+    const { dai, usdc, deployer, xsgd, pool, curveFactoryMock, rnbwContract, uniswapV2Factory } = testEnv;
 
     await rnbwContract.mint(deployer.address, TEST_CONSTANTS.INTIAL_RNBW_MINT);
     expect(await rnbwContract.balanceOf(deployer.address)).to.equal(TEST_CONSTANTS.INTIAL_RNBW_MINT);

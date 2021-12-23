@@ -28,7 +28,8 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     const name = await aDai.name();
 
-    expect(name).to.be.equal('Halo interest bearing DAI');
+    // expect(name).to.be.equal('Halo interest bearing DAI');
+    expect(name).to.be.equal('Aave interest bearing DAI');
 
     const fromBalance = await aDai.balanceOf(users[0].address);
     const toBalance = await aDai.balanceOf(users[1].address);
