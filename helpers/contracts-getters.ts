@@ -457,6 +457,3 @@ export const getVestingContract = async (address?: tEthereumAddress) =>
     address || (await getDb().get(`${eContractid.VestingContractMock}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
-function HaloMainetTokenContractId(HaloMainetTokenContractId: any) {
-  throw new Error('Function not implemented.');
-}
