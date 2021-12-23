@@ -39,17 +39,17 @@ yarn run external:lendingpool-action
 
 ### Main Deployment
 
-1 - Deploy addresses provider, execute `yarn run hardhat halo:mainnet-1 --network mainnet --verify`
+1 - Deploy addresses provider, execute `yarn hardhat halo:mainnet-1 --network mainnet --verify`
 
-2 - Deploy lending pool, execute `yarn run hardhat halo:mainnet-2 --network mainnet --verify`
+2 - Deploy lending pool, execute `yarn hardhat halo:mainnet-2 --network mainnet --verify`
 
-3 - Deploy oracles, execute `yarn run hardhat halo:mainnet-3 --network mainnet --pool Halo --verify`
+3 - Deploy oracles, execute `yarn hardhat halo:mainnet-3 --network mainnet --verify`
 
-4 - Deploy WETH Gateway, execute `yarn run hardhat halo:mainnet-4 --network mainnet --pool Halo --verify`
+4 - Deploy WETH Gateway, execute `yarn hardhat halo:mainnet-4 --network mainnet --verify`
 
 5 - Change WETHGateway in`./markets/halo/commons.ts` (Line 143)
 
-6 - Initialize contracts, execute `yarn run hardhat halo:mainnet-5 --network mainnet --pool Halo --verify`
+6 - Initialize contracts, execute `yarn run hardhat halo:mainnet-5 --network mainnet --verify`
 
 7 - Deploy UI Provider Contracts, execute `yarn run hardhat halo:mainnet-6 --network mainnet --verify`
 
