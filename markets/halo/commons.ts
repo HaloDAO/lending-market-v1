@@ -1,5 +1,12 @@
 import BigNumber from 'bignumber.js';
-import { oneEther, oneRay, RAY, ZERO_ADDRESS, MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO } from '../../helpers/constants';
+import {
+  oneEther,
+  oneRay,
+  RAY,
+  ZERO_ADDRESS,
+  MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
+  MOCK_CHAINLINK_AGGREGATORS_PRICES,
+} from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
 
 // ----------------
@@ -27,7 +34,7 @@ export const CommonsConfig: ICommonConfiguration = {
   // ----------------
   Mocks: {
     AllAssetsInitialPrices: {
-      ...MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
+      ...MOCK_CHAINLINK_AGGREGATORS_PRICES,
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
