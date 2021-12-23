@@ -1,5 +1,12 @@
 import BigNumber from 'bignumber.js';
-import { oneEther, oneRay, RAY, ZERO_ADDRESS, MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO } from '../../helpers/constants';
+import {
+  oneEther,
+  oneRay,
+  RAY,
+  ZERO_ADDRESS,
+  MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
+  MOCK_CHAINLINK_AGGREGATORS_PRICES,
+} from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
 
 // ----------------
@@ -27,7 +34,7 @@ export const CommonsConfig: ICommonConfiguration = {
   // ----------------
   Mocks: {
     AllAssetsInitialPrices: {
-      ...MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO,
+      ...MOCK_CHAINLINK_AGGREGATORS_PRICES,
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
@@ -38,30 +45,30 @@ export const CommonsConfig: ICommonConfiguration = {
     DAI: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
-    TUSD: {
-      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
-    },
+    //TUSD: {
+    //  borrowRate: oneRay.multipliedBy(0.035).toFixed(),
+    //},
     USDC: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
-    SUSD: {
-      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
-    },
+    //SUSD: {
+    //  borrowRate: oneRay.multipliedBy(0.035).toFixed(),
+    //},
     USDT: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
-    RNBW: {
-      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
-    },
+    //RNBW: {
+    //  borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    //},
     WBTC: {
       borrowRate: oneRay.multipliedBy(0.03).toFixed(),
     },
-    BUSD: {
-      borrowRate: oneRay.multipliedBy(0.05).toFixed(),
-    },
-    //XSGD: {
-    //  borrowRate: oneRay.multipliedBy(0.039).toFixed(),
-    //},
+    // BUSD: {
+    //   borrowRate: oneRay.multipliedBy(0.05).toFixed(),
+    // },
+    // XSGD: {
+    //   borrowRate: oneRay.multipliedBy(0.039).toFixed(),
+    // },
   },
 
   // ----------------
@@ -147,7 +154,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
-    [eEthereumNetwork.kovan]: '0xfB56E8841C55DaA9A2A556BB8df24329E376a9A1',
+    [eEthereumNetwork.kovan]: '0x2921B1CCf02F109f137dEC988A29562D6fBbc3D1',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '',
     [eEthereumNetwork.tenderly]: '',
@@ -184,23 +191,25 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.hardhat]: {},
     [eEthereumNetwork.buidlerevm]: {},
     [eEthereumNetwork.kovan]: {
-      BUSD: '0xbF7A18ea5DE0501f7559144e702b29c55b055CcB',
+      // BUSD: '0xbF7A18ea5DE0501f7559144e702b29c55b055CcB',
       DAI: '0x22B58f1EbEDfCA50feF632bD73368b2FdA96D541',
-      TUSD: '0x7aeCF1c19661d12E962b69eBC8f6b2E63a55C660',
+      //TUSD: '0x7aeCF1c19661d12E962b69eBC8f6b2E63a55C660',
       USDC: '0x64EaC61A2DFda2c3Fa04eED49AA33D021AeC8838',
       USDT: '0x0bF499444525a23E7Bb61997539725cA2e928138',
       USD: '0x9326BFA02ADD2366b30bacB125260Af641031331',
+      WBTC: '0xF7904a295A029a3aBDFFB6F12755974a958C7C25',
     },
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {
-      BUSD: '0x614715d2Af89E6EC99A233818275142cE88d1Cfd',
+      //BUSD: '0x614715d2Af89E6EC99A233818275142cE88d1Cfd',
       DAI: '0x773616E4d11A78F511299002da57A0a94577F1f4',
-      SUSD: '0x8e0b7e6062272B5eF4524250bFFF8e5Bd3497757',
-      TUSD: '0x3886BA987236181D98F2401c507Fb8BeA7871dF2',
+      //SUSD: '0x8e0b7e6062272B5eF4524250bFFF8e5Bd3497757',
+      //TUSD: '0x3886BA987236181D98F2401c507Fb8BeA7871dF2',
       USDC: '0x986b5E1e1755e3C2440e960477f25201B0a8bbD4',
       USDT: '0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46',
       WBTC: '0xdeb288F737066589598e9214E782fa5A8eD689e8',
-      USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // TODO: Check
+      USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
+      WETH: '',
     },
     [eEthereumNetwork.tenderly]: {},
   },
