@@ -193,20 +193,6 @@ export const getAllHaloMockedTokens = async () => {
   return tokens;
 };
 
-export const getAllHaloTokens = async () => {
-  const db = getDb();
-  const tokens: MockTokenMap = await Object.keys(HaloMainetTokenContractId).reduce<Promise<MockTokenMap>>(
-    async (acc, tokenSymbol) => {
-      const accumulator = await acc;
-      const address = db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value().address;
-      accumulator[tokenSymbol] = await getMintableERC20(address);
-      return Promise.resolve(acc);
-    },
-    Promise.resolve({})
-  );
-  return tokens;
-};
-
 export const getQuoteCurrencies = (oracleQuoteCurrency: string): string[] => {
   switch (oracleQuoteCurrency) {
     case 'USD':
