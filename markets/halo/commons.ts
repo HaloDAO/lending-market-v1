@@ -38,30 +38,30 @@ export const CommonsConfig: ICommonConfiguration = {
     DAI: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
-    TUSD: {
-      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
-    },
+    //TUSD: {
+    //  borrowRate: oneRay.multipliedBy(0.035).toFixed(),
+    //},
     USDC: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
-    SUSD: {
-      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
-    },
+    //SUSD: {
+    //  borrowRate: oneRay.multipliedBy(0.035).toFixed(),
+    //},
     USDT: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
-    RNBW: {
-      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
-    },
+    //RNBW: {
+    //  borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    //},
     WBTC: {
       borrowRate: oneRay.multipliedBy(0.03).toFixed(),
     },
-    BUSD: {
-      borrowRate: oneRay.multipliedBy(0.05).toFixed(),
-    },
-    XSGD: {
-      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
-    },
+    // BUSD: {
+    //   borrowRate: oneRay.multipliedBy(0.05).toFixed(),
+    // },
+    // XSGD: {
+    //   borrowRate: oneRay.multipliedBy(0.039).toFixed(),
+    // },
   },
 
   // ----------------

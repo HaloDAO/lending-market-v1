@@ -61,6 +61,7 @@ task('halo:mainnet-3', 'Deploy oracles for dev enviroment')
       lendingRateOracle,
       admin
     );
+
     await waitForTx(await aaveOracle.setAssetSources(tokens, aggregators));
     await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
     await waitForTx(await addressesProvider.setLendingRateOracle(lendingRateOracle.address));
