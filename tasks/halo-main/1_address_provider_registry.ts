@@ -4,7 +4,7 @@ import {
   deployLendingPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-deployments';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
-import { printContracts, waitForTx } from '../../helpers/misc-utils';
+import { waitForTx } from '../../helpers/misc-utils';
 import { HaloConfig } from '../../markets/halo';
 
 task('halo:mainnet-1', 'Deploy address provider, registry and fee provider for prod enviroment')

@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import {
   deployLendingPoolCollateralManager,
-  deployMockFlashLoanReceiver,
+  // deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
   authorizeWETHGateway,
@@ -10,16 +10,11 @@ import {
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
-import { ConfigNames, getReservesConfigByPool, loadPoolConfig } from '../../helpers/configuration';
-import { tEthereumAddress, AavePools, eContractid } from '../../helpers/types';
-import { waitForTx, filterMapBy, notFalsyOrZeroAddress, printContracts } from '../../helpers/misc-utils';
+import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
+import { eContractid } from '../../helpers/types';
+import { waitForTx, notFalsyOrZeroAddress } from '../../helpers/misc-utils';
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
-import { getAllTokenAddresses } from '../../helpers/mock-helpers';
-import {
-  getAllHaloMockedTokens,
-  getLendingPoolAddressesProvider,
-  getWETHGateway,
-} from '../../helpers/contracts-getters';
+import { getLendingPoolAddressesProvider, getWETHGateway } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 

@@ -1,7 +1,6 @@
 import { task } from 'hardhat/config';
 import { loadPoolConfig, ConfigNames, getWrappedNativeTokenAddress } from '../../helpers/configuration';
 import { deployWETHGateway } from '../../helpers/contracts-deployments';
-import { printContracts } from '../../helpers/misc-utils';
 
 const CONTRACT_NAME = 'WETHGateway';
 

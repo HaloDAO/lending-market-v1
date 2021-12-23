@@ -7,7 +7,7 @@ import {
   deployStableAndVariableTokensHelper,
 } from '../../helpers/contracts-deployments';
 import { eContractid } from '../../helpers/types';
-import { printContracts, waitForTx } from '../../helpers/misc-utils';
+import { waitForTx } from '../../helpers/misc-utils';
 import {
   getLendingPoolAddressesProvider,
   getLendingPool,

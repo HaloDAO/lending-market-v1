@@ -1,13 +1,11 @@
 import { task } from 'hardhat/config';
-import { deployPriceOracle, deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments';
+import { deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments';
 import { setInitialMarketRatesInRatesOracleByHelper } from '../../helpers/oracles-helpers';
 import { eNetwork, ICommonConfiguration, SymbolMap } from '../../helpers/types';
-import { DRE, printContracts, waitForTx } from '../../helpers/misc-utils';
+import { DRE, waitForTx } from '../../helpers/misc-utils';
 import { ConfigNames, loadPoolConfig, getQuoteCurrency, getLendingRateOracles } from '../../helpers/configuration';
 import { getLendingPoolAddressesProvider, getPairsTokenAggregator } from '../../helpers/contracts-getters';
-import HaloConfig from '../../markets/halo';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
-import { parseEther } from 'ethers/lib/utils';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 
 task('halo:mainnet-3', 'Deploy oracles for prod enviroment')
