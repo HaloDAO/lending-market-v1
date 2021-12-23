@@ -25,12 +25,11 @@ import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 
 task('halo:mainnet-5', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ verify, pool }, localBRE) => {
+  .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>localBRE.network.name;
 
-    const poolConfig = loadPoolConfig(pool);
+    const poolConfig = loadPoolConfig(ConfigNames.Halo);
     const {
       ATokenNamePrefix,
       StableDebtTokenNamePrefix,
@@ -63,9 +62,9 @@ task('halo:mainnet-5', 'Initialize lending pool configuration.')
     );
 
     // HALO Incentives Controller contract
-    // TODO: Check emission per second
+    // Distribution end set to 100 years
     const incentiveController = await deployRnbwIncentivesContoller(
-      [HALO_CONTRACT_ADDRESSES[network].rewardToken, HALO_CONTRACT_ADDRESSES[network].emissionManager, '10000'],
+      [HALO_CONTRACT_ADDRESSES[network].rewardToken, HALO_CONTRACT_ADDRESSES[network].emissionManager, '3153600000'],
       false
     );
 
@@ -80,7 +79,7 @@ task('halo:mainnet-5', 'Initialize lending pool configuration.')
       admin,
       treasury.address,
       incentiveController.address,
-      pool,
+      ConfigNames.Halo,
       verify
     );
 
@@ -93,7 +92,7 @@ task('halo:mainnet-5', 'Initialize lending pool configuration.')
     // const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(addressesProvider.address, verify);
     // await insertContractAddressInDb(eContractid.MockFlashLoanReceiver, mockFlashLoanReceiver.address);
 
-    await deployWalletBalancerProvider(verify);
+    const walletBalanceProvider = await deployWalletBalancerProvider(verify);
     await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
 
     let gateway = getParamPerNetwork(WethGateway, network);
@@ -102,4 +101,11 @@ task('halo:mainnet-5', 'Initialize lending pool configuration.')
       gateway = (await getWETHGateway()).address;
       await authorizeWETHGateway(gateway, lendingPoolAddress);
     }
+
+    console.log(`
+    AaveProtocolDataProvider: ${testHelpers.address}
+    Halo Treasury: ${treasury.address}
+    Halo IncentivesController: ${incentiveController.address}
+    WalletBalanceProvider: ${walletBalanceProvider.address}
+    `);
   });

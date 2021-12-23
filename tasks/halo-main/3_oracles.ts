@@ -10,17 +10,16 @@ import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { parseEther } from 'ethers/lib/utils';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 
-task('halo:mainnet-3', 'Deploy oracles for dev enviroment')
+task('halo:mainnet-3', 'Deploy oracles for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ verify, pool }, localBRE) => {
+  .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>DRE.network.name;
-    const poolConfig = loadPoolConfig(pool);
+    const poolConfig = loadPoolConfig(ConfigNames.Halo);
     const {
       ProtocolGlobalParams: { UsdAddress },
       ReserveAssets,
-      FallbackOracle,
+      //FallbackOracle,
       ChainlinkAggregator,
     } = poolConfig as ICommonConfiguration;
 
@@ -72,4 +71,9 @@ task('halo:mainnet-3', 'Deploy oracles for dev enviroment')
       lendingRateOracle,
       admin
     );
+
+    console.log(`
+    AaveOracle: ${aaveOracle.address}
+    LendingRateOracle: ${lendingRateOracle.address}
+    `);
   });

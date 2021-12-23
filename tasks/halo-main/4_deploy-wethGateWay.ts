@@ -6,11 +6,10 @@ import { printContracts } from '../../helpers/misc-utils';
 const CONTRACT_NAME = 'WETHGateway';
 
 task(`halo:mainnet-4`, `Deploys the ${CONTRACT_NAME} contract`)
-  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .addFlag('verify', `Verify ${CONTRACT_NAME} contract via Etherscan API.`)
-  .setAction(async ({ verify, pool }, localBRE) => {
+  .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
-    const poolConfig = loadPoolConfig(pool);
+    const poolConfig = loadPoolConfig(ConfigNames.Halo);
     const Weth = await getWrappedNativeTokenAddress(poolConfig);
 
     const wethGateWay = await deployWETHGateway([Weth], verify);
