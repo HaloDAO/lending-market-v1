@@ -14,14 +14,13 @@ import {
   getUniswapLiquiditySwapAdapter,
   getUniswapRepayAdapter,
   getFlashLiquidationAdapter,
+  getParaSwapLiquiditySwapAdapter,
   getRnbwMock,
   getRnbwIncentivesController,
   getTreasury,
   getCurveFactoryMock,
   getUniswapV2Factory,
   getVestingContract,
-  getParaSwapLiquiditySwapAdapter,
-  getUiPoolDataProvider,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
 import { LendingPool } from '../../../types/LendingPool';
@@ -29,6 +28,15 @@ import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvide
 import { MintableERC20 } from '../../../types/MintableERC20';
 import { AToken } from '../../../types/AToken';
 import { LendingPoolConfigurator } from '../../../types/LendingPoolConfigurator';
+import {
+  CurveFactoryMock,
+  MockEmissionManager,
+  RnbwIncentivesController,
+  RnbwMock,
+  Treasury,
+  UniswapV2Factory,
+  VestingContractMock,
+} from '../../../types';
 
 import chai from 'chai';
 // @ts-ignore
@@ -46,18 +54,7 @@ import { WETH9Mocked } from '../../../types/WETH9Mocked';
 import { WETHGateway } from '../../../types/WETHGateway';
 import { solidity } from 'ethereum-waffle';
 import { AaveConfig } from '../../../markets/aave';
-import {
-  CurveFactoryMock,
-  MockEmissionManager,
-  RnbwIncentivesController,
-  RnbwMock,
-  Treasury,
-  UniswapV2Factory,
-  VestingContractMock,
-  FlashLiquidationAdapter,
-  UiPoolDataProvider,
-} from '../../../types';
-
+import { FlashLiquidationAdapter, UiHaloPoolDataProvider, UiPoolDataProvider } from '../../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../../helpers/tenderly-utils';
 
@@ -71,10 +68,8 @@ export interface SignerWithAddress {
 }
 export interface TestEnv {
   deployer: SignerWithAddress;
-  secondaryWallet: SignerWithAddress;
   users: SignerWithAddress[];
   pool: LendingPool;
-  uiDataProvider: UiPoolDataProvider;
   configurator: LendingPoolConfigurator;
   oracle: PriceOracle;
   helpersContract: AaveProtocolDataProvider;
@@ -84,16 +79,14 @@ export interface TestEnv {
   aDai: AToken;
   usdc: MintableERC20;
   aave: MintableERC20;
-  xsgd: MintableERC20;
-  aXSGD: AToken;
-  thkd: MintableERC20;
-  aTHKD: AToken;
   addressesProvider: LendingPoolAddressesProvider;
   uniswapLiquiditySwapAdapter: UniswapLiquiditySwapAdapter;
   uniswapRepayAdapter: UniswapRepayAdapter;
   registry: LendingPoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
   flashLiquidationAdapter: FlashLiquidationAdapter;
+  paraswapLiquiditySwapAdapter: ParaSwapLiquiditySwapAdapter;
+  uiDataProvider: UiHaloPoolDataProvider;
   rnbwContract: RnbwMock;
   emissionManager: MockEmissionManager;
   rnbwIncentivesController: RnbwIncentivesController;
@@ -101,7 +94,11 @@ export interface TestEnv {
   vestingContractMock: VestingContractMock;
   curveFactoryMock: CurveFactoryMock;
   uniswapV2Factory: UniswapV2Factory;
-  paraswapLiquiditySwapAdapter: ParaSwapLiquiditySwapAdapter;
+  secondaryWallet: SignerWithAddress;
+  xsgd: MintableERC20;
+  aXSGD: AToken;
+  thkd: MintableERC20;
+  aTHKD: AToken;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -111,10 +108,8 @@ const setBuidlerevmSnapshotId = (id: string) => {
 
 const testEnv: TestEnv = {
   deployer: {} as SignerWithAddress,
-  secondaryWallet: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
   pool: {} as LendingPool,
-  uiDataProvider: {} as UiPoolDataProvider,
   configurator: {} as LendingPoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
@@ -155,14 +150,21 @@ export async function initializeMakeSuite() {
       address: await signer.getAddress(),
     });
   }
+
+  // PROTOCOL TEST ENV
   testEnv.deployer = deployer;
   testEnv.secondaryWallet = secondaryWallet;
   testEnv.pool = await getLendingPool();
-  testEnv.uiDataProvider = await getUiPoolDataProvider();
-
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
-
   testEnv.addressesProvider = await getLendingPoolAddressesProvider();
+
+  // HALO TEST ENV
+  testEnv.rnbwContract = await getRnbwMock();
+  testEnv.rnbwIncentivesController = await getRnbwIncentivesController();
+  testEnv.treasuryContract = await getTreasury();
+  testEnv.curveFactoryMock = await getCurveFactoryMock();
+  testEnv.uniswapV2Factory = await getUniswapV2Factory();
+  testEnv.vestingContractMock = await getVestingContract();
 
   if (process.env.FORK) {
     testEnv.registry = await getLendingPoolAddressesProviderRegistry(
@@ -175,60 +177,41 @@ export async function initializeMakeSuite() {
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 
-  // Atoken addresses
   const allTokens = await testEnv.helpersContract.getAllATokens();
-  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'hDAI')?.tokenAddress;
-  const aXsgdAddress = allTokens.find((aToken) => aToken.symbol === 'hXSGD')?.tokenAddress;
-  const aThkdAddress = allTokens.find((aToken) => aToken.symbol === 'hTHKD')?.tokenAddress;
-  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'hWETH')?.tokenAddress;
+  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
+  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
+  const aXsgdAddress = allTokens.find((aToken) => aToken.symbol === 'aXSGD')?.tokenAddress;
+  const aThkdAddress = allTokens.find((aToken) => aToken.symbol === 'aTHKD')?.tokenAddress;
+
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 
-  // Token Addresses
   const daiAddress = reservesTokens.find((token) => token.symbol === 'DAI')?.tokenAddress;
   const usdcAddress = reservesTokens.find((token) => token.symbol === 'USDC')?.tokenAddress;
+  const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
+  const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
   const xsgdAddress = reservesTokens.find((token) => token.symbol === 'XSGD')?.tokenAddress;
   const thkdAddress = reservesTokens.find((token) => token.symbol === 'THKD')?.tokenAddress;
 
-  //const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
-  const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
-
   if (!aDaiAddress || !aWEthAddress) {
-    console.log(`${aDaiAddress} - aDAi, ${aWEthAddress} - aWeth`);
     process.exit(1);
   }
-  // if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
-  //   process.exit(1);
-  // }
-
-  if (!daiAddress || !usdcAddress || !wethAddress) {
+  if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
     process.exit(1);
   }
 
-  // TEST ENV
-  // RNBW Contracts
-  testEnv.rnbwContract = await getRnbwMock();
-  testEnv.rnbwIncentivesController = await getRnbwIncentivesController();
-  testEnv.treasuryContract = await getTreasury();
-  testEnv.curveFactoryMock = await getCurveFactoryMock();
-  testEnv.uniswapV2Factory = await getUniswapV2Factory();
-  testEnv.vestingContractMock = await getVestingContract();
-
-  // testEnv Atokens
   testEnv.aDai = await getAToken(aDaiAddress);
   testEnv.aWETH = await getAToken(aWEthAddress);
   testEnv.aXSGD = await getAToken(aXsgdAddress);
   testEnv.aTHKD = await getAToken(aThkdAddress);
 
-  // testEnv tokens
   testEnv.dai = await getMintableERC20(daiAddress);
   testEnv.usdc = await getMintableERC20(usdcAddress);
-  //testEnv.aave = await getMintableERC20(aaveAddress);
+  testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.xsgd = await getMintableERC20(xsgdAddress!);
   testEnv.thkd = await getMintableERC20(thkdAddress!);
-
-  // testEnv Aave contracts
   testEnv.wethGateway = await getWETHGateway();
+
   testEnv.uniswapLiquiditySwapAdapter = await getUniswapLiquiditySwapAdapter();
   testEnv.uniswapRepayAdapter = await getUniswapRepayAdapter();
   testEnv.flashLiquidationAdapter = await getFlashLiquidationAdapter();

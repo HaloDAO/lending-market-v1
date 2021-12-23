@@ -1,9 +1,4 @@
-import {
-  oneRay,
-  ZERO_ADDRESS,
-  MOCK_CHAINLINK_AGGREGATORS_PRICES,
-  oneEther,
-} from '../../helpers/constants';
+import { oneRay, ZERO_ADDRESS, MOCK_CHAINLINK_AGGREGATORS_PRICES, oneEther } from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
 
 // ----------------
@@ -98,6 +93,9 @@ export const CommonsConfig: ICommonConfiguration = {
     },
     BUSD: {
       borrowRate: oneRay.multipliedBy(0.05).toFixed(),
+    },
+    XSGD: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
   },
   // ----------------

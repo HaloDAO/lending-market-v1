@@ -7,20 +7,13 @@ import {
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
 } from './contracts-getters';
-import { BigNumber, BigNumberish, ethers, Signer } from 'ethers';
 import { getContractAddressWithJsonFallback, rawInsertContractAddressInDb } from './contracts-helpers';
-
+import { BigNumberish } from 'ethers';
 import { ConfigNames } from './configuration';
-import {
-  deployDefaultReserveInterestRateStrategy,
-  deployDelegationAwareATokenImpl,
-  deployGenericATokenImpl,
-  deployGenericStableDebtToken,
-  deployGenericVariableDebtToken,
-  deployRateStrategy,
-} from './contracts-deployments';
+import { deployRateStrategy } from './contracts-deployments';
 
 export const getATokenExtraParams = async (aTokenName: string, tokenAddress: tEthereumAddress) => {
+  console.log(aTokenName);
   switch (aTokenName) {
     default:
       return '0x10';
@@ -44,9 +37,6 @@ export const initReservesByHelper = async (
 
   // CHUNK CONFIGURATION
   const initChunks = 1;
-
-  let reserveTokens: string[] = [];
-  let reserveInitDecimals: string[] = [];
 
   // Initialize variables for future reserves initialization
   let reserveSymbols: string[] = [];
@@ -81,35 +71,8 @@ export const initReservesByHelper = async (
   ];
   let rateStrategies: Record<string, typeof strategyRates> = {};
   let strategyAddresses: Record<string, tEthereumAddress> = {};
-  let strategyAddressPerAsset: Record<string, string> = {};
-  let aTokenType: Record<string, string> = {};
-  let delegationAwareATokenImplementationAddress = '';
-  let aTokenImplementationAddress = '';
-  let stableDebtTokenImplementationAddress = '';
-  let variableDebtTokenImplementationAddress = '';
 
   const reserves = Object.entries(reservesParams);
-
-  //const reserves = Object.entries(reservesParams).filter(
-  //  ([_, { aTokenImpl }]) => aTokenImpl === eContractid.DelegationAwareAToken || aTokenImpl === eContractid.AToken
-  //) as [string, IReserveParams][];
-
-  stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken()).address;
-  variableDebtTokenImplementationAddress = await (await deployGenericVariableDebtToken()).address;
-
-  const aTokenImplementation = await deployGenericATokenImpl(verify);
-  aTokenImplementationAddress = aTokenImplementation.address;
-  rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
-
-  const delegatedAwareReserves = Object.entries(reservesParams).filter(
-    ([_, { aTokenImpl }]) => aTokenImpl === eContractid.DelegationAwareAToken
-  ) as [string, IReserveParams][];
-
-  if (delegatedAwareReserves.length > 0) {
-    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl(verify);
-    const delegationAwareATokenImplementationAddress = delegationAwareATokenImplementation.address;
-    rawInsertContractAddressInDb(`delegationAwareATokenImpl`, delegationAwareATokenImplementationAddress);
-  }
 
   for (let [symbol, params] of reserves) {
     if (!tokenAddresses[symbol]) {
@@ -136,68 +99,41 @@ export const initReservesByHelper = async (
         stableRateSlope1,
         stableRateSlope2,
       ];
-      // strategyAddresses[strategy.name] = await deployRateStrategy(strategy.name, rateStrategies[strategy.name], verify);
-
-      strategyAddresses[strategy.name] = (
-        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name], verify)
-      ).address;
+      strategyAddresses[strategy.name] = await deployRateStrategy(strategy.name, rateStrategies[strategy.name], verify);
 
       // This causes the last strategy to be printed twice, once under "DefaultReserveInterestRateStrategy"
       // and once under the actual `strategyASSET` key.
       rawInsertContractAddressInDb(strategy.name, strategyAddresses[strategy.name]);
     }
-    strategyAddressPerAsset[symbol] = strategyAddresses[strategy.name];
-    console.log('Strategy address for asset %s: %s', symbol, strategyAddressPerAsset[symbol]);
-
-    if (aTokenImpl === eContractid.AToken) {
-      aTokenType[symbol] = 'generic';
-    } else if (aTokenImpl === eContractid.DelegationAwareAToken) {
-      aTokenType[symbol] = 'delegation aware';
-    }
-    reserveInitDecimals.push(reserveDecimals);
-    reserveTokens.push(tokenAddresses[symbol]);
-
     // Prepare input parameters
     reserveSymbols.push(symbol);
-  }
-
-  for (let i = 0; i < reserveSymbols.length; i++) {
-    let aTokenToUse: string;
-    if (aTokenType[reserveSymbols[i]] === 'generic') {
-      aTokenToUse = aTokenImplementationAddress;
-    } else {
-      aTokenToUse = delegationAwareATokenImplementationAddress;
-    }
-
     initInputParams.push({
-      aTokenImpl: aTokenToUse,
-      stableDebtTokenImpl: stableDebtTokenImplementationAddress,
-      variableDebtTokenImpl: variableDebtTokenImplementationAddress,
-      underlyingAssetDecimals: reserveInitDecimals[i],
-      interestRateStrategyAddress: strategyAddressPerAsset[reserveSymbols[i]],
-      underlyingAsset: reserveTokens[i],
+      aTokenImpl: await getContractAddressWithJsonFallback(aTokenImpl, poolName),
+      stableDebtTokenImpl: await getContractAddressWithJsonFallback(eContractid.StableDebtToken, poolName),
+      variableDebtTokenImpl: await getContractAddressWithJsonFallback(eContractid.VariableDebtToken, poolName),
+      underlyingAssetDecimals: reserveDecimals,
+      interestRateStrategyAddress: strategyAddresses[strategy.name],
+      underlyingAsset: tokenAddresses[symbol],
       treasury: treasuryAddress,
       incentivesController: incentivesController,
-      underlyingAssetName: reserveSymbols[i],
-      aTokenName: `${aTokenNamePrefix} ${reserveSymbols[i]}`,
-      aTokenSymbol: `${symbolPrefix}${reserveSymbols[i]}`,
-      variableDebtTokenName: `${variableDebtTokenNamePrefix} ${symbolPrefix}${reserveSymbols[i]}`,
-      variableDebtTokenSymbol: `variableDebt${symbolPrefix}${reserveSymbols[i]}`,
-      stableDebtTokenName: `${stableDebtTokenNamePrefix} ${reserveSymbols[i]}`,
-      stableDebtTokenSymbol: `stableDebt${symbolPrefix}${reserveSymbols[i]}`,
-      params: '0x10',
+      underlyingAssetName: symbol,
+      aTokenName: `${aTokenNamePrefix} ${symbol}`,
+      aTokenSymbol: `a${symbolPrefix}${symbol}`,
+      variableDebtTokenName: `${variableDebtTokenNamePrefix} ${symbolPrefix}${symbol}`,
+      variableDebtTokenSymbol: `variableDebt${symbolPrefix}${symbol}`,
+      stableDebtTokenName: `${stableDebtTokenNamePrefix} ${symbol}`,
+      stableDebtTokenSymbol: `stableDebt${symbolPrefix}${symbol}`,
+      params: await getATokenExtraParams(aTokenImpl, tokenAddresses[symbol]),
     });
   }
 
   // Deploy init reserves per chunks
-
   const chunkedSymbols = chunk(reserveSymbols, initChunks);
   const chunkedInitInputParams = chunk(initInputParams, initChunks);
 
   const configurator = await getLendingPoolConfiguratorProxy();
 
   console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
-
   for (let chunkIndex = 0; chunkIndex < chunkedInitInputParams.length; chunkIndex++) {
     const tx3 = await waitForTx(await configurator.batchInitReserve(chunkedInitInputParams[chunkIndex]));
 
