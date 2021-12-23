@@ -225,38 +225,47 @@ export interface iAssetCommon<T> {
 export interface iAssetBase<T> {
   WETH: T;
   DAI: T;
-  XSGD: T;
-  THKD: T;
   TUSD: T;
   USDC: T;
   USDT: T;
   SUSD: T;
-  //KNC: T;
+  AAVE: T;
+  BAT: T;
+  MKR: T;
+  LINK: T;
+  KNC: T;
   WBTC: T;
+  MANA: T;
+  ZRX: T;
+  SNX: T;
   BUSD: T;
+  YFI: T;
+  UNI: T;
   USD: T;
-  RNBW?: T;
-  AAVE?: T;
-  UniDAIWETH?: T;
-  UniWBTCWETH?: T;
-  UniAAVEWETH?: T;
-  UniBATWETH?: T;
-  UniDAIUSDC?: T;
-  UniCRVWETH?: T;
-  UniLINKWETH?: T;
-  UniMKRWETH?: T;
-  UniRENWETH?: T;
-  UniSNXWETH?: T;
-  UniUNIWETH?: T;
-  UniUSDCWETH?: T;
-  UniWBTCUSDC?: T;
-  UniYFIWETH?: T;
-  BptWBTCWETH?: T;
-  BptBALWETH?: T;
-  WMATIC?: T;
-  STAKE?: T;
-  xSUSHI?: T;
-  WAVAX?: T;
+  REN: T;
+  ENJ: T;
+  UniDAIWETH: T;
+  UniWBTCWETH: T;
+  UniAAVEWETH: T;
+  UniBATWETH: T;
+  UniDAIUSDC: T;
+  UniCRVWETH: T;
+  UniLINKWETH: T;
+  UniMKRWETH: T;
+  UniRENWETH: T;
+  UniSNXWETH: T;
+  UniUNIWETH: T;
+  UniUSDCWETH: T;
+  UniWBTCUSDC: T;
+  UniYFIWETH: T;
+  BptWBTCWETH: T;
+  BptBALWETH: T;
+  WMATIC: T;
+  STAKE: T;
+  xSUSHI: T;
+  WAVAX: T;
+  XSGD: T;
+  THKD: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -265,7 +274,29 @@ export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
 
 export type iAavePoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'TUSD' | 'USDC' | 'XSGD' | 'THKD' | 'USDT' | 'SUSD' | 'AAVE' | 'WBTC' | 'BUSD' | 'WETH'
+  | 'DAI'
+  | 'TUSD'
+  | 'USDC'
+  | 'USDT'
+  | 'SUSD'
+  | 'AAVE'
+  | 'BAT'
+  | 'MKR'
+  | 'LINK'
+  | 'KNC'
+  | 'WBTC'
+  | 'MANA'
+  | 'ZRX'
+  | 'SNX'
+  | 'BUSD'
+  | 'WETH'
+  | 'YFI'
+  | 'UNI'
+  | 'REN'
+  | 'ENJ'
+  | 'xSUSHI'
+  | 'XSGD'
+  | 'THKD'
 >;
 
 export type iHaloPoolAssets<T> = Pick<
@@ -332,7 +363,7 @@ export enum TokenContractId {
   DAI = 'DAI',
   AAVE = 'AAVE',
   TUSD = 'TUSD',
-  // BAT = 'BAT',
+  BAT = 'BAT',
   WETH = 'WETH',
   USDC = 'USDC',
   USDT = 'USDT',

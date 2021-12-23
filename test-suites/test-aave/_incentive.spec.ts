@@ -39,7 +39,7 @@ makeSuite('Incentives Controller', (testEnv: TestEnv) => {
   });
 
   it('should configure emission manager without revert', async () => {
-    const { aDai, aXSGD, emissionManager, rnbwIncentivesController } = testEnv;
+    const { aDai, aXSGD, rnbwIncentivesController } = testEnv;
 
     await rnbwIncentivesController.configureAssets([
       {
