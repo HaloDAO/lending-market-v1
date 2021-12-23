@@ -92,10 +92,8 @@ task('halo:mainnet-5', 'Initialize lending pool configuration.')
 
     let gateway = getParamPerNetwork(WethGateway, network);
 
-    if (!notFalsyOrZeroAddress(gateway)) {
-      gateway = (await getWETHGateway()).address;
-      await authorizeWETHGateway(gateway, lendingPoolAddress);
-    }
+    await authorizeWETHGateway(gateway, lendingPoolAddress);
+    console.log('WETH Gateway Authorized');
 
     console.log(`
     AaveProtocolDataProvider: ${testHelpers.address}
