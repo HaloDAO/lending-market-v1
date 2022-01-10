@@ -39,21 +39,19 @@ yarn run external:lendingpool-action
 
 ### Main Deployment
 
-0 - Check gas fees and amount needed for deployment
+1 - Deploy addresses provider, execute `yarn hardhat halo:mainnet-1 --network mainnet --verify`
 
-1 - Deploy addresses provider, execute `yarn hardhat halo:mainnet-addressproviders-1 --network main --verify`, update `markets/halo/commons.ts`
+2 - Deploy lending pool, execute `yarn hardhat halo:mainnet-2 --network mainnet --verify`
 
-2 - Deploy lending pool, execute `yarn hardhat halo:mainnet-lendingpool-2 --network main --verify`, add new addresses in the `markets/halo/commons.ts`
+3 - Deploy oracles, execute `yarn hardhat halo:mainnet-3 --network mainnet --verify`
 
-3 - Deploy oracles, execute `yarn hardhat halo:mainnet-oracles-3 --network main --verify`, add new addresses in the `markets/halo/commons.ts`
-
-4 - Deploy WETH Gateway, execute `yarn hardhat halo:mainnet-wethgateway-4 --network main --verify`
+4 - Deploy WETH Gateway, execute `yarn hardhat halo:mainnet-4 --network mainnet --verify`
 
 5 - Change WETHGateway in`./markets/halo/commons.ts` (Line 143)
 
-6 - Initialize contracts, execute `yarn run hardhat halo:mainnet-initialize-5 --network main --verify`
+6 - Initialize contracts, execute `yarn run hardhat halo:mainnet-5 --network mainnet --verify`
 
-7 - Deploy UI Provider Contracts, execute `yarn run hardhat halo:mainnet-dataproviders-6 --network main --verify`
+7 - Deploy UI Provider Contracts, execute `yarn run hardhat halo:mainnet-6 --network mainnet --verify`
 
 ### (Optional) for now
 

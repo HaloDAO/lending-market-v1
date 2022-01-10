@@ -7,7 +7,7 @@ import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { waitForTx } from '../../helpers/misc-utils';
 import { HaloConfig } from '../../markets/halo';
 
-task('halo:mainnet-addressproviders-1', 'Deploy address provider, registry and fee provider for prod enviroment')
+task('halo:mainnet-1', 'Deploy address provider, registry and fee provider for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');

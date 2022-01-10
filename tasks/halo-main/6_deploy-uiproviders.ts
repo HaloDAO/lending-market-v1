@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { eContractid } from '../../helpers/types';
 
-task('halo:mainnet-dataproviders-6', 'Initialize Data Providers')
+task('halo:mainnet-6', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');

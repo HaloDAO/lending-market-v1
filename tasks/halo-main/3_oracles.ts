@@ -8,7 +8,7 @@ import { getLendingPoolAddressesProvider, getPairsTokenAggregator } from '../../
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 
-task('halo:mainnet-oracles-3', 'Deploy oracles for prod enviroment')
+task('halo:mainnet-3', 'Deploy oracles for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -49,10 +49,7 @@ task('halo:mainnet-oracles-3', 'Deploy oracles for prod enviroment')
       verify
     );
 
-    console.log('deployed aave oracle');
-
     const lendingRateOracle = await deployLendingRateOracle(verify);
-    console.log('lending rate oracle deployed');
     const { USD, ...tokensAddressesWithoutUsd } = tokensToWatch;
 
     await setInitialMarketRatesInRatesOracleByHelper(
@@ -62,14 +59,9 @@ task('halo:mainnet-oracles-3', 'Deploy oracles for prod enviroment')
       admin
     );
 
-    console.log('set initial market rates in oracle');
-
     await waitForTx(await aaveOracle.setAssetSources(tokens, aggregators));
-    console.log('asset sources set in aave oracle');
     await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
-    console.log('set oracle price');
     await waitForTx(await addressesProvider.setLendingRateOracle(lendingRateOracle.address));
-    console.log('set lending rate oracle');
 
     await setInitialMarketRatesInRatesOracleByHelper(
       lendingRateOracles,
