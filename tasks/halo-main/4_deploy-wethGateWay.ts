@@ -4,7 +4,7 @@ import { deployWETHGateway } from '../../helpers/contracts-deployments';
 
 const CONTRACT_NAME = 'WETHGateway';
 
-task(`halo:mainnet-4`, `Deploys the ${CONTRACT_NAME} contract`)
+task(`halo:mainnet-wethgateway-4`, `Deploys the ${CONTRACT_NAME} contract`)
   .addFlag('verify', `Verify ${CONTRACT_NAME} contract via Etherscan API.`)
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');

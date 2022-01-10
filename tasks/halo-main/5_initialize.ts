@@ -18,7 +18,7 @@ import { getLendingPoolAddressesProvider, getWETHGateway } from '../../helpers/c
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo/constants';
 
-task('halo:mainnet-5', 'Initialize lending pool configuration.')
+task('halo:mainnet-initialize-5', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');

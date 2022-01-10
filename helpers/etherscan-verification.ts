@@ -101,6 +101,11 @@ export const runTaskWithRetry = async (
       console.log('[ETHERSCAN][WARNING] Trying to verify via uploading all sources.');
       delete params.relatedSources;
     }
+    if (error.message.includes('Source code exceeds max')) {
+      // do not run retry if source code exceeds max
+      return;
+    }
+
     await runTaskWithRetry(task, params, counter, msDelay, cleanup);
   }
 };

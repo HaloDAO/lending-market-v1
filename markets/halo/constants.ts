@@ -20,7 +20,7 @@ export const HALO_CONTRACT_ADDRESSES = {
   [eEthereumNetwork.main]: {
     rewardToken: '0x47BE779De87de6580d0548cde80710a93c502405',
     emissionManager: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
-    lendingPoolAddress: '',
+    lendingPoolAddress: '0xC73b2c6ab14F25e1EAd3DE75b4F6879DEde3968E',
     rnbw: '0xe94b97b6b43639e238c851a7e693f50033efd75c',
     xrnbw: '0x47BE779De87de6580d0548cde80710a93c502405',
     curveFactory: '0xFA505d02269bF4Ea59355a4e37fBd882122717e5',
