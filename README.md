@@ -223,14 +223,72 @@ Run the following command to test lending pool related tasks
 `yarn/npm run hardhat external:lendingpool-action --action {desired action} --amount {amount to use, 0 if getter functions}
 
 list of actions
-`approveToken` - approve token spend to the lending market
-`mintToken` - mint more of test tokens
-`deposit` - deposit in lending market with the --amount parameter value as amount
-`withdraw` - withdraw in lending market with the --amount parameter value as amount
-`borrow` - borrow in lending market with the --amount parameter value as amount
-`repay` - repay in lending market with the --amount parameter value as amount
-`getUserReserveData` - get user's reserve data
-`getReservesList` - get all reserves list
-`setUserUseReserveAsCollateral` - set current hardcoded asset as a collateral for borrow
+
+- `approveToken` - approve token spend to the lending market
+- `mintToken` - mint more of test tokens
+- `deposit` - deposit in lending market with the --amount parameter value as amount
+- `withdraw` - withdraw in lending market with the --amount parameter value as amount
+- `borrow` - borrow in lending market with the --amount parameter value as amount
+- `repay` - repay in lending market with the --amount parameter value as amount
+- `getUserReserveData` - get user's reserve data
+- `getReservesList` - get all reserves list
+- `setUserUseReserveAsCollateral` - set current hardcoded asset as a collateral for borrow
 
 note: you can modify the `TEST_ASSET` if you want to use other tokens, default now is USDC
+
+## Adding a new asset in the market
+
+1 - run deploy-new-asset-halo
+
+- For kovan: `yarn run external:halo:deploy-assets-kovan --symbol {the asset symbol from market config}`
+- For main network: `yarn run external:halo:deploy-assets-main --symbol {the asset symbol from market config}`
+
+2 - call batchInit reserve from lendingPoolConfigurator
+
+example:
+
+```
+ await lendingPoolConfigurator.batchInitReserve([
+        {
+          aTokenImpl: '0x26389fa054eE9612f03f44D8d1892B7c185d6b56',
+          stableDebtTokenImpl: '0x8cD0a986AB77603792E37EaD51889515c0e7A577',
+          variableDebtTokenImpl: '0xaB5b278C66e73fdA2594d1bb91D0A6fd48158861',
+          underlyingAssetDecimals: '18',
+          interestRateStrategyAddress: '0xf0DBcaEd71D3A60380a862D143176a06F3aa4Fb7',
+          underlyingAsset: '0x1363b62C9A82007e409876A71B524bD63dDc67Dd',
+          treasury: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
+          incentivesController: '0x11Fc815c42F3eAc9fC181e2e215a1A339493f5e8',
+          underlyingAssetName: 'WETH2',
+          aTokenName: 'hWETH2',
+          aTokenSymbol: 'hWETH2',
+          variableDebtTokenName: 'variableWETH2',
+          variableDebtTokenSymbol: 'variableWETH2',
+          stableDebtTokenName: 'stbWETH2',
+          stableDebtTokenSymbol: 'stbWETH2',
+          params: '0x10',
+        },
+      ])
+```
+
+3 - call configureReserves from AtokensAndRatesHelper
+
+example:
+
+```
+ await addressProvider.setPoolAdmin(ATOKENHELPER);
+
+    const reserveConfig = [
+      {
+        asset: '0x1363b62C9A82007e409876A71B524bD63dDc67Dd',
+        baseLTV: '8000',
+        liquidationThreshold: '8250',
+        liquidationBonus: '10500',
+        reserveFactor: '1000',
+        stableBorrowingEnabled: true,
+        borrowingEnabled: true,
+      },
+    ];
+
+    console.log(await configurator.configureReserves(reserveConfig));
+    await addressProvider.setPoolAdmin('0x235A2ac113014F9dcb8aBA6577F20290832dDEFd');
+```
