@@ -1,47 +1,38 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Build pass](https://github.com/AAVE/protocol-v2/actions/workflows/node.js.yml/badge.svg)](https://github.com/aave/protocol-v2/actions/workflows/node.js.yml)
 
 ```
-        .///.                .///.     //.            .//  `/////////////-
-       `++:++`              .++:++`    :++`          `++:  `++:......---.`
-      `/+: -+/`            `++- :+/`    /+/         `/+/   `++.
-      /+/   :+/            /+:   /+/    `/+/        /+/`   `++.
-  -::/++::`  /+:       -::/++::` `/+:    `++:      :++`    `++/:::::::::.
-  -:+++::-`  `/+:      --++/---`  `++-    .++-    -++.     `++/:::::::::.
-   -++.       .++-      -++`       .++.    .++.  .++-      `++.
-  .++-         -++.    .++.         -++.    -++``++-       `++.
- `++:           :++`  .++-           :++`    :+//+:        `++:----------`
- -/:             :/-  -/:             :/.     ://:         `/////////////-
+██╗  ██╗ █████╗ ██╗      ██████╗ ██████╗  █████╗  ██████╗
+██║  ██║██╔══██╗██║     ██╔═══██╗██╔══██╗██╔══██╗██╔═══██╗
+███████║███████║██║     ██║   ██║██║  ██║███████║██║   ██║
+██╔══██║██╔══██║██║     ██║   ██║██║  ██║██╔══██║██║   ██║
+██║  ██║██║  ██║███████╗╚██████╔╝██████╔╝██║  ██║╚██████╔╝
+╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝
 ```
 
-# Aave Protocol v2
+# HaloDAO Lending Market V1
 
-This repository contains the smart contracts source code and markets configuration for Aave Protocol V2. The repository uses Docker Compose and Hardhat as development enviroment for compilation, testing and deployment tasks.
+This repository contains the smart contracts source code and markets configuration for HaloDAO Lending Market. The repository uses Docker Compose and Hardhat as development enviroment for compilation, testing and deployment tasks.
 
-## What is Aave?
+## What is HaloDAO?
 
-Aave is a decentralized non-custodial liquidity markets protocol where users can participate as depositors or borrowers. Depositors provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.
+HaloDAO aims to incentivize and build asset-backed stablecoin liquidity by establishing the foundational money lego of DeFi. However, rather than using ETH or BTC to generate synthetic USD stablecoins as initial protocols have done, HaloDAO will;
+
+- Build an Automated Market Maker (AMM) to enable efficient trades between stablecoins
+- Build a Lending Market to allow more capital efficient lending and borrowing of stablecoins
+
+One effect of launching two fundamental money legos under one protocol is the ability to replicate the early "recycling" of superfluid capital that contributed to the rapid rise of Total Value Locked (TVL) in DeFi. HaloDAO aims to replicate this behavior specifically for stablecoin liquidity.
 
 ## Documentation
 
-The documentation of Aave V2 is in the following [Aave V2 documentation](https://docs.aave.com/developers/v/2.0/) link. At the documentation you can learn more about the protocol, see the contract interfaces, integration guides and audits.
-
-For getting the latest contracts addresses, please check the [Deployed contracts](https://docs.aave.com/developers/v/2.0/deployed-contracts/deployed-contracts) page at the documentation to stay up to date.
-
-A more detailed and technical description of the protocol can be found in this repository, [here](./aave-v2-whitepaper.pdf)
+Please check the latest documentation [here](https://docs.halodao.com/).
 
 ## Audits
 
-- MixBytes (16/09/2020 - 03/12/2020): [report](./audits/Mixbytes-aave-v2-03-12-2020.pdf)
-- PeckShield (29/09/2020 - 03/12/2020) : [report](./audits/Peckshield-aave-v2-03-12-2020-EN.pdf) (Also available in Chinese in the same folder)
-- CertiK (28/09/2020 - 02/12/2020): [report](./audits/Certik-aave-v2-03-12-2020.pdf)
-- Consensys Diligence (09/09/2020 - 09/10/2020): [report](https://consensys.net/diligence/audits/2020/09/aave-protocol-v2/)
-- Certora, formal verification (02/08/2020 - 29/10/2020): [report](./audits/Certora-FV-aave-v2-03-12-2020.pdf)
-- SigmaPrime (January 2021): [report](./audits/SigmaPrime-aave-v2-01-2021.pdf)
+- (pending)
 
 ## Connect with the community
 
-You can join at the [Discord](http://aave.com/discord) channel or at the [Governance Forum](https://governance.aave.com/) for asking questions about the protocol or talk about Aave with other peers.
+You can join at the [Discord](https://discord.com/invite/halodao) channel or at the [Governance Forum](https://snapshot.org/#/halodao.eth) for asking questions about the protocol or talk about HaloDAO Lending Market with other peers.
 
 ## Getting Started
 
@@ -103,9 +94,9 @@ TENDERLY_USERNAME=""
 
 ## Markets configuration
 
-The configurations related with the Aave Markets are located at `markets` directory. You can follow the `IAaveConfiguration` interface to create new Markets configuration or extend the current Aave configuration.
+The configurations related with the HaloDAO Lending Market Markets are located at `markets` directory. You can follow the `IAaveConfiguration` interface to create new Markets configuration or extend the current HaloDAO Lending Market configuration.
 
-Each market should have his own Market configuration file, and their own set of deployment tasks, using the Aave market config and tasks as a reference.
+Each market should have his own Market configuration file, and their own set of deployment tasks, using the HaloDAO Lending Market market config and tasks as a reference.
 
 ## Test
 
@@ -124,7 +115,7 @@ npm run test
 
 ## Deployments
 
-For deploying Aave Protocol V2, you can use the available scripts located at `package.json`. For a complete list, run `npm run` to see all the tasks.
+For deploying HaloDAO Lending Market, you can use the available scripts located at `package.json`. For a complete list, run `npm run` to see all the tasks.
 
 ### Kovan deployment
 
@@ -141,15 +132,15 @@ npm run aave:kovan:full:migration
 
 ### Mainnet fork deployment
 
-You can deploy Aave Protocol v2 in a forked Mainnet chain using Hardhat built-in fork feature:
+You can deploy HaloDAO Lending Market in a forked Mainnet chain using Hardhat built-in fork feature:
 
 ```
 docker-compose run contracts-env npm run aave:fork:main
 ```
 
-### Deploy Aave into a Mainnet Fork via console
+### Deploy HaloDAO Lending Market into a Mainnet Fork via console
 
-You can deploy Aave into the Hardhat console in fork mode, to interact with the protocol inside the fork or for testing purposes.
+You can deploy HaloDAO Lending Market into the Hardhat console in fork mode, to interact with the protocol inside the fork or for testing purposes.
 
 Run the console in Mainnet fork mode:
 
@@ -157,10 +148,10 @@ Run the console in Mainnet fork mode:
 docker-compose run contracts-env npm run console:fork
 ```
 
-At the Hardhat console, interact with the Aave protocol in Mainnet fork mode:
+At the Hardhat console, interact with the HaloDAO Lending Market protocol in Mainnet fork mode:
 
 ```
-// Deploy the Aave protocol in fork mode
+// Deploy the HaloDAO Lending Market protocol in fork mode
 await run('aave:mainnet')
 
 // Or your custom Hardhat task
@@ -191,9 +182,9 @@ await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('
 
 ```
 
-## Interact with Aave in Mainnet via console
+## Interact with HaloDAO Lending Market in Mainnet via console
 
-You can interact with Aave at Mainnet network using the Hardhat console, in the scenario where the frontend is down or you want to interact directly. You can check the deployed addresses at https://docs.aave.com/developers/deployed-contracts.
+You can interact with HaloDAO Lending Market at Mainnet network using the Hardhat console, in the scenario where the frontend is down or you want to interact directly. You can check the deployed addresses at https://docs.aave.com/developers/deployed-contracts.
 
 Run the Hardhat console pointing to the Mainnet network:
 
@@ -207,7 +198,7 @@ At the Hardhat console, you can interact with the protocol:
 // Load the HRE into helpers to access signers
 run("set-DRE")
 
-// Import getters to instance any Aave contract
+// Import getters to instance any HaloDAO Lending Market contract
 const contractGetters = require('./helpers/contracts-getters');
 
 // Load the first signer
