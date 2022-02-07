@@ -3,24 +3,16 @@ import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import {
   deployLendingPoolCollateralManager,
   deployWalletBalancerProvider,
-  deployWETHGateway,
   authorizeWETHGateway,
+  deployUiPoolDataProvider,
 } from '../../helpers/contracts-deployments';
-import {
-  loadPoolConfig,
-  ConfigNames,
-  getWethAddress,
-  getTreasuryAddress,
-} from '../../helpers/configuration';
+import { loadPoolConfig, ConfigNames, getTreasuryAddress } from '../../helpers/configuration';
 import { getWETHGateway } from '../../helpers/contracts-getters';
 import { eNetwork, ICommonConfiguration } from '../../helpers/types';
 import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../../helpers/init-helpers';
 import { exit } from 'process';
-import {
-  getAaveProtocolDataProvider,
-  getLendingPoolAddressesProvider,
-} from '../../helpers/contracts-getters';
+import { getAaveProtocolDataProvider, getLendingPoolAddressesProvider } from '../../helpers/contracts-getters';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 
 task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
@@ -50,6 +42,8 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       const testHelpers = await getAaveProtocolDataProvider();
 
       const admin = await addressesProvider.getPoolAdmin();
+      const oracle = await addressesProvider.getPriceOracle();
+
       if (!reserveAssets) {
         throw 'Reserve assets is undefined. Check ReserveAssets configuration at config directory';
       }
@@ -66,32 +60,22 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
         admin,
         treasuryAddress,
         incentivesController,
+        pool,
         verify
       );
       await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
 
-      let collateralManagerAddress = await getParamPerNetwork(
-        LendingPoolCollateralManager,
-        network
-      );
+      let collateralManagerAddress = await getParamPerNetwork(LendingPoolCollateralManager, network);
       if (!notFalsyOrZeroAddress(collateralManagerAddress)) {
         const collateralManager = await deployLendingPoolCollateralManager(verify);
         collateralManagerAddress = collateralManager.address;
       }
       // Seems unnecessary to register the collateral manager in the JSON db
 
-      console.log(
-        '\tSetting lending pool collateral manager implementation with address',
-        collateralManagerAddress
-      );
-      await waitForTx(
-        await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress)
-      );
+      console.log('\tSetting lending pool collateral manager implementation with address', collateralManagerAddress);
+      await waitForTx(await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress));
 
-      console.log(
-        '\tSetting AaveProtocolDataProvider at AddressesProvider at id: 0x01',
-        collateralManagerAddress
-      );
+      console.log('\tSetting AaveProtocolDataProvider at AddressesProvider at id: 0x01', collateralManagerAddress);
       const aaveProtocolDataProvider = await getAaveProtocolDataProvider();
       await waitForTx(
         await addressesProvider.setAddress(
@@ -101,6 +85,9 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       );
 
       await deployWalletBalancerProvider(verify);
+
+      const uiPoolDataProvider = await deployUiPoolDataProvider([incentivesController, oracle], verify);
+      console.log('UiPoolDataProvider deployed at:', uiPoolDataProvider.address);
 
       const lendingPoolAddress = await addressesProvider.getLendingPool();
 

@@ -1,5 +1,6 @@
 import { task } from 'hardhat/config';
 import {
+  deployATokenImplementations,
   deployATokensAndRatesHelper,
   deployLendingPool,
   deployLendingPoolConfigurator,
@@ -13,13 +14,15 @@ import {
   getLendingPoolConfiguratorProxy,
 } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
+import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
 task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify }, localBRE) => {
+  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
+  .setAction(async ({ verify, pool }, localBRE) => {
     await localBRE.run('set-DRE');
-
     const addressesProvider = await getLendingPoolAddressesProvider();
+    const poolConfig = loadPoolConfig(pool);
 
     const lendingPoolImpl = await deployLendingPool(verify);
 
@@ -34,25 +37,18 @@ task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
     const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(verify);
 
     // Set lending pool conf impl to Address Provider
-    await waitForTx(
-      await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
-    );
+    await waitForTx(await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address));
 
     const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
       await addressesProvider.getLendingPoolConfigurator()
     );
-    await insertContractAddressInDb(
-      eContractid.LendingPoolConfigurator,
-      lendingPoolConfiguratorProxy.address
-    );
+    await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
 
     // Deploy deployment helpers
-    await deployStableAndVariableTokensHelper(
-      [lendingPoolProxy.address, addressesProvider.address],
-      verify
-    );
+    await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address], verify);
     await deployATokensAndRatesHelper(
       [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
       verify
     );
+    await deployATokenImplementations(pool, poolConfig.ReservesConfig, verify);
   });

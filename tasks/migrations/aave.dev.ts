@@ -23,8 +23,10 @@ task('aave:dev', 'Deploy development enviroment')
     console.log('2. Deploy address provider');
     await localBRE.run('dev:deploy-address-provider', { verify });
 
+    console.log('Done deploying address provider');
+
     console.log('3. Deploy lending pool');
-    await localBRE.run('dev:deploy-lending-pool', { verify });
+    await localBRE.run('dev:deploy-lending-pool', { verify, pool: POOL_NAME });
 
     console.log('4. Deploy oracles');
     await localBRE.run('dev:deploy-oracles', { verify, pool: POOL_NAME });

@@ -14,9 +14,9 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
 
     const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
 
-    await expect(
-      stableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_LENDING_POOL);
+    await expect(stableDebtContract.mint(deployer.address, deployer.address, '1', '1')).to.be.revertedWith(
+      CT_CALLER_MUST_BE_LENDING_POOL
+    );
   });
 
   it('Tries to invoke burn not being the LendingPool', async () => {
@@ -29,9 +29,8 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
 
     const name = await stableDebtContract.name();
 
+    // expect(name).to.be.equal('Halo stable debt bearing DAI');
     expect(name).to.be.equal('Aave stable debt bearing DAI');
-    await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_LENDING_POOL
-    );
+    await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(CT_CALLER_MUST_BE_LENDING_POOL);
   });
 });
