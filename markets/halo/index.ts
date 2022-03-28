@@ -40,7 +40,7 @@ export const HaloConfig: IHaloConfiguration = {
       USDC: '0x4B466AeAa9c5f639fE7eA5A4692e9ca34afD9CC6',
       USDT: '0x98388b94c7bEF52CD361fcf037c7249BB6D4282b',
       WBTC: '0xeD57b6849762Ead86f71b41eEC743cE261639Aa8',
-      XSGD: '0xeE669c1959437ae6Ac3b3dcFB9336698693dF81f'
+      XSGD: '0x0B7b473BbAA4cfADee68EC227C802e75823666F3'
     },
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {
