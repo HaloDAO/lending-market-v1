@@ -16,7 +16,7 @@ import { ZERO_ADDRESS } from '../../helpers/constants';
 
 const LENDING_POOL_ADDRESS_PROVIDER = {
   main: '0xC73b2c6ab14F25e1EAd3DE75b4F6879DEde3968E',
-  kovan: '0x8eBFB2FC668a0ccCC8ADa5133c721a34060D1cDe',
+  kovan: '0x737a452ec095D0fd6740E0190670847841cE7F93', //'0x8eBFB2FC668a0ccCC8ADa5133c721a34060D1cDe',
 };
 
 const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
@@ -46,6 +46,12 @@ WRONG RESERVE ASSET SETUP:
     const addressProvider = await getLendingPoolAddressesProvider(LENDING_POOL_ADDRESS_PROVIDER[network]);
     const poolAddress = await addressProvider.getLendingPool();
     const treasuryAddress = await getTreasuryAddress(marketConfigs.HaloConfig);
+    console.log(`Deploying ${symbol} reserve asset`);
+    console.log(`deployCustomAToken: ${deployCustomAToken}`);
+    console.log(`addressProvider: ${addressProvider}`);
+    console.log(`Pool address: ${poolAddress}`);
+    console.log(`reserveAssetAddress: ${reserveAssetAddress}`);
+
     const aToken = await deployCustomAToken(verify);
     const stableDebt = await deployStableDebtToken(
       [

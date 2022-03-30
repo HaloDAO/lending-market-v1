@@ -106,7 +106,7 @@
     "mainnet:halo:configure-incentives": "hardhat external:configure-incentives-emission --network mainnet",
     "mainnet:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network mainnet",
     "localhost:dev:halo": "hardhat halo:dev --withmocktokens true --network localhost",
-    "external:halo:deploy-assets-kovan": "npm run compile && hardhat --network kovan external:deploy-new-asset-halo --symbol ${SYMBOL} --verify",
+    "external:halo:deploy-assets-kovan": "hardhat --network kovan external:deploy-new-asset-halo --symbol HLPPHP",
     "external:halo:deploy-assets-main": "npm run compile && hardhat --network main external:deploy-new-asset-halo --symbol ${SYMBOL} --verify"
   },
   "devDependencies": {
@@ -115,6 +115,7 @@
     "@nomiclabs/buidler-etherscan": "^2.1.0",
     "@nomiclabs/buidler-waffle": "2.0.0",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
     "@openzeppelin/contracts": "3.1.0",
     "@tenderly/hardhat-tenderly": "1.1.0-beta.5",

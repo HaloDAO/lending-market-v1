@@ -238,12 +238,25 @@ note: you can modify the `TEST_ASSET` if you want to use other tokens, default n
 
 ## Adding a new asset in the market
 
-1 - run deploy-new-asset-halo
+1 - add asset address on ReserveAssets found in ./markets/halo/index.ts
+2 - add strategy in ./markets/halo/reservesConfigs (if applicable)
+3 - add the new strategy in the Reserves Config key of the  HaloConfig  object declared in  ./markets/halo/index.ts
 
-- For kovan: `yarn run external:halo:deploy-assets-kovan --symbol {the asset symbol from market config}`
-- For main network: `yarn run external:halo:deploy-assets-main --symbol {the asset symbol from market config}`
+4 - Update iAssetBase for new assets that we need to add in /helpers/types.ts
+5 - register oracle in AaveOracle through setAssetSources().
 
-2 - call batchInit reserve from lendingPoolConfigurator
+
+  Kovan: '0x2A26137812Ce58488EBc5cB372273Aa43Dc01351'
+  Main: '0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC'
+6 -  run deploy new asset task
+
+
+
+yarn external:halo:deploy-assets-kovan
+yarn external:halo:deploy-assets-main
+
+// note i think u need to change the symbol in package.json
+
 
 example:
 
