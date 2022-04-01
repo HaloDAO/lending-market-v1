@@ -106,7 +106,7 @@
     "mainnet:halo:configure-incentives": "hardhat external:configure-incentives-emission --network mainnet",
     "mainnet:halo:deploy-uipooldataprovider": "hardhat deploy-UiPoolDataProvider --network mainnet",
     "localhost:dev:halo": "hardhat halo:dev --withmocktokens true --network localhost",
-    "external:halo:deploy-assets-kovan": "hardhat --network kovan external:deploy-new-asset-halo --symbol HLPPHP",
+    "external:halo:deploy-assets-kovan": "hardhat --network kovan external:deploy-new-asset-halo --symbol ${SYMBOL}",
     "external:halo:deploy-assets-main": "npm run compile && hardhat --network main external:deploy-new-asset-halo --symbol ${SYMBOL} --verify"
   },
   "devDependencies": {
