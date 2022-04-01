@@ -75,8 +75,8 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   THKD: oneEther.multipliedBy('0.00014912').toFixed(),
   WAVAX: oneEther.multipliedBy('0.006051936629').toFixed(),
   USD: '5848466240000000',
-  FXPHP: oneEther.multipliedBy('0.00023421').toFixed(),
-  HLPPHP: oneEther.multipliedBy('0.00023421').toFixed(),
+  fxPHP: oneEther.multipliedBy('0.00023421').toFixed(),
+  HLP_PHP_USDC: oneEther.multipliedBy('0.00023421').toFixed(),
 };
 
 export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
@@ -94,6 +94,6 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
   WMATIC: oneEther.multipliedBy('0.003620948469').toFixed(),
   RNBW: oneEther.multipliedBy('0.003620948469').toFixed(), //mock
   USD: '5848466240000000',
-  FXPHP: oneEther.multipliedBy('0.00023421').toFixed(),
-  HLPPHP: oneEther.multipliedBy('0.00023421').toFixed(),
+  fxPHP: oneEther.multipliedBy('0.00023421').toFixed(),
+  HLP_PHP_USDC: oneEther.multipliedBy('0.00023421').toFixed(),
 };

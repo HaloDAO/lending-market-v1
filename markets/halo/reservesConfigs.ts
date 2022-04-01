@@ -301,7 +301,7 @@ export const strategyXSUSHI: IReserveParams = {
   reserveFactor: '3500',
 };
 
-export const strategyFXPHP: IReserveParams = {
+export const strategyfxPHP: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8500',
@@ -313,7 +313,7 @@ export const strategyFXPHP: IReserveParams = {
   reserveFactor: '1000'
 };
 
-export const strategyHLPPHP: IReserveParams = {
+export const strategyHLP_PHP_USDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8500',

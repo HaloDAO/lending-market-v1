@@ -266,8 +266,8 @@ export interface iAssetBase<T> {
   WAVAX: T;
   XSGD: T;
   THKD: T;
-  FXPHP: T;
-  HLPPHP: T;
+  fxPHP: T;
+  HLP_PHP_USDC: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -303,7 +303,7 @@ export type iAavePoolAssets<T> = Pick<
 
 export type iHaloPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'XSGD' | 'FXPHP' | 'HLPPHP'
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'XSGD' | 'fxPHP' | 'HLP_PHP_USDC'
 >;
 
 export type iLpPoolAssets<T> = Pick<
