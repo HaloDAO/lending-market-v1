@@ -15,35 +15,12 @@ export const haloContractAddresses = (network: string) => {
 
 export const underlyingAssetAddress = (network: string, symbol: string) => {
   //@todo: add curve support
-  switch (symbol.toUpperCase()) {
-    case 'FXPHP':
-      return haloContractAddresses(network).tokens.fxPHP!;
-    case 'XSGD':
-      return haloContractAddresses(network).tokens.XSGD!;
-    case 'UST':
-      return haloContractAddresses(network).tokens.UST!;
-    case 'USDC':
-      return haloContractAddresses(network).tokens.USDC!;
-    case 'EURS':
-      return haloContractAddresses(network).tokens.EURS!;
-    case 'XIDR':
-      return haloContractAddresses(network).tokens.XIDR!;
-    default:
-      return '';
-  }
+  const tokens = haloContractAddresses(network).tokens;
+  return symbol.toLowerCase() === 'fxphp' ? tokens.fxPHP : tokens[symbol.toUpperCase()] ?? '';
 };
 
 export const priceOracleAddress = (network: string, symbol: string) => {
-  switch (symbol.toUpperCase()) {
-    case 'FXPHP':
-      return haloContractAddresses(network).lendingMarket!.priceOracles.fxPHP!;
-    case 'XSGD':
-      return haloContractAddresses(network).lendingMarket!.priceOracles.XSGD!;
-    case 'UST':
-      return haloContractAddresses(network).lendingMarket!.priceOracles.UST!;
-    case 'HLP_PHP_USD':
-      return haloContractAddresses(network).lendingMarket!.priceOracles.HLP_PHP_USD!;
-    default:
-      return '';
-  }
+  const priceOracles = haloContractAddresses(network).lendingMarket!.priceOracles;
+  console.log(priceOracles);
+  return symbol.toLowerCase() === 'fxphp' ? priceOracles.fxPHP : priceOracles[symbol.toUpperCase()] ?? '';
 };

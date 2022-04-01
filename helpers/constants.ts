@@ -77,6 +77,8 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   USD: '5848466240000000',
   fxPHP: oneEther.multipliedBy('0.00023421').toFixed(),
   HLP_PHP_USDC: oneEther.multipliedBy('0.00023421').toFixed(),
+  HLP_XSGD_USDC: oneEther.multipliedBy('0.00023421').toFixed(),
+  CHF: oneEther.multipliedBy('0.00023421').toFixed(),
 };
 
 export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {

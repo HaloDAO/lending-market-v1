@@ -13,7 +13,9 @@ import {
   strategyWETH,
   strategyXSGD,
   strategyfxPHP,
+  strategyCHF,
   strategyHLP_PHP_USDC,
+  strategyHLP_XSGD_USDC,
 } from './reservesConfigs';
 
 // ----------------
@@ -32,7 +34,9 @@ export const HaloConfig: IHaloConfiguration = {
     WETH: strategyWETH,
     XSGD: strategyXSGD,
     fxPHP: strategyfxPHP,
+    CHF: strategyCHF,
     HLP_PHP_USDC: strategyHLP_PHP_USDC,
+    HLP_XSGD_USDC: strategyHLP_XSGD_USDC
   },
   ReserveAssets: {
     [eEthereumNetwork.buidlerevm]: {},
@@ -47,6 +51,7 @@ export const HaloConfig: IHaloConfiguration = {
       XSGD: kovan.tokens.XSGD!,
       fxPHP: kovan.tokens.fxPHP!,
       HLP_PHP_USDC: '0xEb06cF1cD90d75eC6d10bbdc43B555483674F6ff',
+      CHF: kovan.tokens.CHF!
     },
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {
@@ -59,6 +64,7 @@ export const HaloConfig: IHaloConfiguration = {
       XSGD: mainnet.tokens.XSGD!,
       fxPHP: mainnet.tokens.fxPHP!,
       HLP_PHP_USDC: '0x0000000000000000000000000000000000000000',
+      HLP_XSGD_USDC: '0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A',
       // BUSD: '0x4fabb145d64652a948d72533023f6e7a623c7c53', // To Check
       // SUSD: '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // To Check
     },

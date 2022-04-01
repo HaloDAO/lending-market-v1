@@ -32,6 +32,7 @@ const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
 
 task(`external:deploy-and-init-new-asset-halo`, `Deploy and Initialize Asset`)
   .addParam('symbol', `Asset symbol, needs to have configuration ready`)
+  .addParam('decimal', `Asset decimal`)
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify, symbol, decimal }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -46,7 +47,7 @@ task(`external:deploy-and-init-new-asset-halo`, `Deploy and Initialize Asset`)
     if (!isSymbolValid(symbol, network as eEthereumNetwork)) {
       throw new Error(
         `
-WRONG RESERVE ASSET SETUP:
+        WRONG RESERVE ASSET SETUP:
         The symbol ${symbol} has no reserve Config and/or reserve Asset setup.
         update /markets/halo/index.ts and add the asset address for ${network} network
         update /markets/halo/reservesConfigs.ts and add parameters for ${symbol}
@@ -60,7 +61,7 @@ WRONG RESERVE ASSET SETUP:
     if (!isUnderlyingAssetAddressValid) {
       throw new Error(
         `
-UNDERLYING ASSET ADDRESS NOT FOUND:
+        UNDERLYING ASSET ADDRESS NOT FOUND:
         The symbol ${symbol} has no matching token address in halodao-contract-addresses package.
         `
       );
@@ -69,7 +70,7 @@ UNDERLYING ASSET ADDRESS NOT FOUND:
     if (!isPriceOracleAddressValid) {
       throw new Error(
         `
-PRICE ORACLE ADDRESS NOT FOUND:
+        PRICE ORACLE ADDRESS NOT FOUND:
         The symbol ${symbol} has no matching priceOracle address in halodao-contract-addresses package.
         `
       );
@@ -200,5 +201,6 @@ PRICE ORACLE ADDRESS NOT FOUND:
 
     console.log(await aTokensAndRatesHelperContract.configureReserves(reserveConfig));
     await addressProviderContract.setPoolAdmin(await signer.getAddress());
+
     console.log('Pool Admin is set back to deployer: ', await addressProviderContract.getPoolAdmin());
   });
