@@ -1,6 +1,10 @@
 import { task } from 'hardhat/config';
 import { eEthereumNetwork } from '../../helpers/types';
-import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
+import {
+  haloContractAddresses,
+  underlyingAssetAddress,
+  priceOracleAddress,
+} from '../../helpers/halo-contract-address-network';
 import {
   getHaloUiPoolDataProvider,
   getLendingPoolAddressesProvider,
@@ -26,15 +30,18 @@ const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
   marketConfigs.HaloConfig.ReserveAssets[network][symbol] &&
   marketConfigs.HaloConfig.ReservesConfig[symbol] === reserveConfigs['strategy' + symbol];
 
-task(`external:deploy-and-init-new-asset-halo`, `Initialize Asset`)
+task(`external:deploy-and-init-new-asset-halo`, `Deploy and Initialize Asset`)
   .addParam('symbol', `Asset symbol, needs to have configuration ready`)
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify, symbol }, localBRE) => {
+  .setAction(async ({ verify, symbol, decimal }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = localBRE.network.name;
 
     if (!localBRE.network.config.chainId) {
       throw new Error('INVALID_CHAIN_ID');
+    }
+    if (!decimal) {
+      throw new Error('INVALID_DECIMAL');
     }
     if (!isSymbolValid(symbol, network as eEthereumNetwork)) {
       throw new Error(
@@ -47,20 +54,41 @@ WRONG RESERVE ASSET SETUP:
       );
     }
 
+    const isUnderlyingAssetAddressValid = underlyingAssetAddress(network, symbol) !== '' ? true : false;
+    const isPriceOracleAddressValid = priceOracleAddress(network, symbol) !== '' ? true : false;
+
+    if (!isUnderlyingAssetAddressValid) {
+      throw new Error(
+        `
+UNDERLYING ASSET ADDRESS NOT FOUND:
+        The symbol ${symbol} has no matching token address in halodao-contract-addresses package.
+        `
+      );
+    }
+
+    if (!isPriceOracleAddressValid) {
+      throw new Error(
+        `
+PRICE ORACLE ADDRESS NOT FOUND:
+        The symbol ${symbol} has no matching priceOracle address in halodao-contract-addresses package.
+        `
+      );
+    }
+
     // deploy new asset
 
     const strategyParams = reserveConfigs['strategy' + symbol];
     const reserveAssetAddress = marketConfigs.HaloConfig.ReserveAssets[localBRE.network.name][symbol];
     const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
-    const addressProvider = await getLendingPoolAddressesProvider(
+    const addressProviderContract = await getLendingPoolAddressesProvider(
       haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
     );
-    const poolAddress = await addressProvider.getLendingPool();
+    const poolAddress = await addressProviderContract.getLendingPool();
     const treasuryAddress = await getTreasuryAddress(marketConfigs.HaloConfig);
     const signer = await getFirstSigner();
     console.log(`Deploying ${symbol} reserve asset`);
     console.log(`deployCustomAToken: ${deployCustomAToken}`);
-    console.log(`addressProvider: ${addressProvider}`);
+    console.log(`addressProvider: ${addressProviderContract}`);
     console.log(`Pool address: ${poolAddress}`);
     console.log(`reserveAssetAddress: ${reserveAssetAddress}`);
     console.log(`Deployer: ${await signer.getAddress()}`);
@@ -88,7 +116,7 @@ WRONG RESERVE ASSET SETUP:
     );
     const rates = await deployDefaultReserveInterestRateStrategy(
       [
-        addressProvider.address,
+        addressProviderContract.address,
         strategyParams.strategy.optimalUtilizationRate,
         strategyParams.strategy.baseVariableBorrowRate,
         strategyParams.strategy.variableRateSlope1,
@@ -108,36 +136,33 @@ WRONG RESERVE ASSET SETUP:
 
     // init new asset
 
-    const uiPoolDataProvider = await getHaloUiPoolDataProvider(
-      haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
-    );
-    const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
-    const priceOracle = await getPriceOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
-    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy(
+    const aaveOracleContract = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
+    const priceOracleContract = await getPriceOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
+    const lendingPoolConfiguratorContract = await getLendingPoolConfiguratorProxy(
       haloContractAddresses(network).lendingMarket!.protocol.lendingPoolConfigurator
     );
-    const lendingPoolAddressesProvider = await getLendingPoolAddressesProvider(
-      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
+    const uiPoolDataProviderContractContract = await getHaloUiPoolDataProvider(
+      haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
     );
-    const aTokensAndRatesHelper = await getATokensAndRatesHelper(
+    const aTokensAndRatesHelperContract = await getATokensAndRatesHelper(
       haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper
     );
 
-    await aaveOracle.setAssetSources(
-      [haloContractAddresses(network).tokens.XSGD!],
-      [haloContractAddresses(network).lendingMarket!.priceOracles.fxPHP!]
+    await aaveOracleContract.setAssetSources(
+      [underlyingAssetAddress(network, symbol)],
+      [priceOracleAddress(network, symbol)]
     );
 
-    console.log('assetPrice', await priceOracle.getAssetPrice(haloContractAddresses(network).tokens.XSGD!));
+    console.log('assetPrice', await priceOracleContract.getAssetPrice(underlyingAssetAddress(network, symbol)));
 
-    await lendingPoolConfigurator.batchInitReserve([
+    await lendingPoolConfiguratorContract.batchInitReserve([
       {
         aTokenImpl: aToken.address,
         stableDebtTokenImpl: stableDebt.address,
         variableDebtTokenImpl: variableDebt.address,
-        underlyingAssetDecimals: '6',
+        underlyingAssetDecimals: decimal,
         interestRateStrategyAddress: rates.address,
-        underlyingAsset: haloContractAddresses(network).tokens.XSGD!,
+        underlyingAsset: underlyingAssetAddress(network, symbol),
         treasury: await signer.getAddress(),
         incentivesController: haloContractAddresses(network).lendingMarket!.protocol.rnbwIncentivesController!,
         underlyingAssetName: symbol,
@@ -150,19 +175,20 @@ WRONG RESERVE ASSET SETUP:
         params: '0x10',
       },
     ]);
+
     console.log(
-      await uiPoolDataProvider.getReservesData(
+      await uiPoolDataProviderContractContract.getReservesData(
         haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
       )
     );
 
-    await lendingPoolAddressesProvider.setPoolAdmin(
+    await addressProviderContract.setPoolAdmin(
       haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper
     );
 
     const reserveConfig = [
       {
-        asset: haloContractAddresses(network).tokens.XSGD!,
+        asset: underlyingAssetAddress(network, symbol),
         baseLTV: '8000',
         liquidationThreshold: '8500',
         liquidationBonus: '10500',
@@ -172,7 +198,7 @@ WRONG RESERVE ASSET SETUP:
       },
     ];
 
-    console.log(await aTokensAndRatesHelper.configureReserves(reserveConfig));
-    await addressProvider.setPoolAdmin(await signer.getAddress());
-    console.log('Pool Admin', await addressProvider.getPoolAdmin());
+    console.log(await aTokensAndRatesHelperContract.configureReserves(reserveConfig));
+    await addressProviderContract.setPoolAdmin(await signer.getAddress());
+    console.log('Pool Admin is set back to deployer: ', await addressProviderContract.getPoolAdmin());
   });
