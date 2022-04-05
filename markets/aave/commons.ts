@@ -97,6 +97,9 @@ export const CommonsConfig: ICommonConfiguration = {
     XSGD: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
+    HLP_GBP_USDC: {
+      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
+    }
   },
   // ----------------
   // COMMON PROTOCOL ADDRESSES ACROSS POOLS
@@ -239,6 +242,7 @@ export const CommonsConfig: ICommonConfiguration = {
       YFI: '0xC5d1B1DEb2992738C0273408ac43e1e906086B6C',
       ZRX: '0xBc3f28Ccc21E9b5856E81E6372aFf57307E2E883',
       USD: '0x9326BFA02ADD2366b30bacB125260Af641031331',
+      PHP: '0x84fdC8dD500F29902C99c928AF2A91970E7432b6',
     },
     [eEthereumNetwork.ropsten]: {
       AAVE: ZERO_ADDRESS,
@@ -261,6 +265,7 @@ export const CommonsConfig: ICommonConfiguration = {
       YFI: ZERO_ADDRESS,
       ZRX: '0x1d0052e4ae5b4ae4563cbac50edc3627ca0460d7',
       USD: '0x8468b2bDCE073A157E560AA4D9CcF6dB1DB98507',
+      PHP: ZERO_ADDRESS,
     },
     [eEthereumNetwork.main]: {
       AAVE: '0x6Df09E975c830ECae5bd4eD9d90f3A95a4f88012',
@@ -284,6 +289,7 @@ export const CommonsConfig: ICommonConfiguration = {
       ZRX: '0x2Da4983a622a8498bb1a21FaE9D8F6C664939962',
       USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
       xSUSHI: '0x9b26214bEC078E68a394AaEbfbffF406Ce14893F',
+      PHP: '0x9481e7ad8BE6BbB22A8B9F7B9fB7588d1df65DF6',
     },
     [eEthereumNetwork.tenderly]: {
       AAVE: '0x6Df09E975c830ECae5bd4eD9d90f3A95a4f88012',
@@ -307,6 +313,7 @@ export const CommonsConfig: ICommonConfiguration = {
       ZRX: '0x2Da4983a622a8498bb1a21FaE9D8F6C664939962',
       USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
       xSUSHI: '0x9b26214bEC078E68a394AaEbfbffF406Ce14893F',
+      PHP: '0x9481e7ad8BE6BbB22A8B9F7B9fB7588d1df65DF6',
     },
   },
   ReserveAssets: {

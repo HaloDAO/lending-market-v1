@@ -224,6 +224,7 @@ export interface iAssetCommon<T> {
 // Main Type Reference
 export interface iAssetBase<T> {
   WETH: T;
+  CHF: T;
   DAI: T;
   TUSD: T;
   USDC: T;
@@ -269,7 +270,10 @@ export interface iAssetBase<T> {
   fxPHP: T;
   HLP_PHP_USDC: T;
   HLP_XSGD_USDC: T;
-  CHF: T;
+  AMPL: T;
+  HLP_GBP_USDC: T;
+  RNBW: T;
+  xRNBW: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -305,7 +309,20 @@ export type iAavePoolAssets<T> = Pick<
 
 export type iHaloPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'XSGD' | 'fxPHP' | 'HLP_PHP_USDC' | 'HLP_XSGD_USDC' | 'CHF'
+  | 'DAI'
+  | 'USDC'
+  | 'USDT'
+  | 'WBTC'
+  | 'WETH'
+  | 'XSGD'
+  | 'fxPHP'
+  | 'HLP_PHP_USDC'
+  | 'HLP_XSGD_USDC'
+  | 'CHF'
+  | 'AMPL'
+  | 'HLP_GBP_USDC'
+  | 'RNBW'
+  | 'xRNBW'
 >;
 
 export type iLpPoolAssets<T> = Pick<

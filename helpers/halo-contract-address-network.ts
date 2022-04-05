@@ -16,11 +16,16 @@ export const haloContractAddresses = (network: string) => {
 export const underlyingAssetAddress = (network: string, symbol: string) => {
   //@todo: add curve support
   const tokens = haloContractAddresses(network).tokens;
-  return symbol.toLowerCase() === 'fxphp' ? tokens.fxPHP : tokens[symbol.toUpperCase()] ?? '';
+  const lpAssets = haloContractAddresses(network).lendingMarket?.lpAssets!;
+  return symbol.toLowerCase() === 'fxphp'
+    ? tokens.fxPHP
+    : tokens[symbol.toUpperCase()]
+    ? tokens[symbol.toUpperCase()]
+    : lpAssets[symbol.toUpperCase()] ?? '';
 };
 
 export const priceOracleAddress = (network: string, symbol: string) => {
   const priceOracles = haloContractAddresses(network).lendingMarket!.priceOracles;
   console.log(priceOracles);
-  return symbol.toLowerCase() === 'fxphp' ? priceOracles.fxPHP : priceOracles[symbol.toUpperCase()] ?? '';
+  return symbol.toLowerCase() === 'xrnbw' ? priceOracles.xRNBW : priceOracles[symbol.toUpperCase()] ?? '';
 };

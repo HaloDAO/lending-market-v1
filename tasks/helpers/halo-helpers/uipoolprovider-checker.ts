@@ -1,8 +1,19 @@
 import { task } from 'hardhat/config';
 import { eAvalancheNetwork, eContractid, eEthereumNetwork, eNetwork, ePolygonNetwork } from '../../../helpers/types';
+import { DRE, getDb, notFalsyOrZeroAddress, omit } from '../../../helpers/misc-utils';
+import {
+  haloContractAddresses,
+  underlyingAssetAddress,
+  priceOracleAddress,
+} from '../../../helpers/halo-contract-address-network';
 
 import {
   getHaloUiPoolDataProvider,
+  getLendingPoolAddressesProvider,
+  getPriceOracle,
+  getLendingPool,
+  getAToken,
+  getStableDebtToken,
   getIncentivePoolDataProvider,
   getUiPoolDataProvider,
   getWETHMocked,
@@ -15,9 +26,28 @@ task(`external:uipoolprovider-checker`, `Check UI Pool Provider`).setAction(asyn
     throw new Error('INVALID_CHAIN_ID');
   }
   const network = localBRE.network.name;
+  const haloAddresses = haloContractAddresses(network);
 
-  const uiPoolDataProvider = await getHaloUiPoolDataProvider('0x6Af1ffC2F20e54CDED0549CEde1ba6269A615717');
-  const uiIncentivesDataProvider = await getIncentivePoolDataProvider('0x22fA9599D8007B279BB935718DeE408fCad9Ea0B');
+  const lendingPool = await getLendingPool(haloAddresses.lendingMarket!.protocol.lendingPool);
+  // const uiPoolDataProvider = await getHaloUiPoolDataProvider('0x6c00EC488A2D2EB06b2Ed28e1F9f12C38fBCF426');
+  const uiPoolDataProvider = await getHaloUiPoolDataProvider(
+    haloAddresses.lendingMarket!.protocol.uiHaloPoolDataProvider
+  );
+  // const addressProvider = await getLendingPoolAddressesProvider('0xD8708572AfaDccE523a8B8883a9b882a79cbC6f2');
+  // const uiIncentivesDataProvider = await getIncentivePoolDataProvider('0x22fA9599D8007B279BB935718DeE408fCad9Ea0B');
 
-  console.log(await uiPoolDataProvider.getReservesData('0x737a452ec095D0fd6740E0190670847841cE7F93'));
+  // console.log('addressProvider', addressProvider.address);
+  console.log('Aave Oracle', haloAddresses.lendingMarket!.protocol.aaveOracle);
+  const priceOracleContract = await getPriceOracle(haloAddresses.lendingMarket!.protocol.aaveOracle);
+  // console.log('underlying asset address', underlyingAssetAddress(network, 'CHF'));
+  // console.log('assetPrice', await priceOracleContract.getAssetPrice(underlyingAssetAddress(network, 'CHF')));
+  console.log(
+    await uiPoolDataProvider.getReservesList(haloAddresses.lendingMarket!.protocol.lendingPoolAddressesProvider)
+  );
+  console.log(
+    await uiPoolDataProvider.getReservesData(haloAddresses.lendingMarket!.protocol.lendingPoolAddressesProvider)
+  );
+  // console.log(await lendingPool.getReserveData(underlyingAssetAddress(network, 'CHF')));
+
+  // console.log(await uiPoolDataProvider.getReservesData(underlyingAssetAddress(network, 'CHF')));
 });
