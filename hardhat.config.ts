@@ -3,7 +3,7 @@ import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
+import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork, eArbitrumNetwork} from './helpers/types';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
 import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
 
@@ -39,6 +39,7 @@ if (!SKIP_LOAD) {
     'helpers',
     'halo-dev',
     'halo-main',
+    'halo-arb',
     'helpers/halo-helpers',
     'halo-new-asset',
   ].forEach((folder) => {
@@ -107,6 +108,8 @@ const buidlerConfig: HardhatUserConfig = {
     xdai: getCommonNetworkConfig(eXDaiNetwork.xdai, 100),
     avalanche: getCommonNetworkConfig(eAvalancheNetwork.avalanche, 43114),
     fuji: getCommonNetworkConfig(eAvalancheNetwork.fuji, 43113),
+    arbitrum: getCommonNetworkConfig(eArbitrumNetwork.arbitrum, 42161),
+    arbitrumRinkeby: getCommonNetworkConfig(eArbitrumNetwork.arbitrumRinkeby, 421611),
     /*
     hardhat: {
       hardfork: 'berlin',

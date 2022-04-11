@@ -1,5 +1,12 @@
 import { task } from 'hardhat/config';
-import { eAvalancheNetwork, eContractid, eEthereumNetwork, eNetwork, ePolygonNetwork } from '../../helpers/types';
+import {
+  eAvalancheNetwork,
+  eContractid,
+  eEthereumNetwork,
+  eNetwork,
+  ePolygonNetwork,
+  eArbitrumNetwork,
+} from '../../helpers/types';
 import { deployHaloUiPoolDataProvider, deployUiPoolDataProvider } from '../../helpers/contracts-deployments';
 import { exit } from 'process';
 import { ethers } from 'ethers';
@@ -24,6 +31,10 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
       },
       [eEthereumNetwork.main]: {
         ethUsdOracle: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
+      },
+      //@todo: replace with actual ETH/USD oracle for Arbitrum network
+      [eArbitrumNetwork.arbitrumRinkeby]: {
+        ethUsdOracle: '	0x6eFd3CCf5c673bd5A7Ea91b414d0307a5bAb9cC1',
       },
     };
     const supportedNetworks = Object.keys(addressesByNetwork);

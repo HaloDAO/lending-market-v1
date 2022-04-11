@@ -4,7 +4,7 @@ export interface SymbolMap<T> {
   [symbol: string]: T;
 }
 
-export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAvalancheNetwork;
+export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAvalancheNetwork | eArbitrumNetwork;
 
 export enum eEthereumNetwork {
   buidlerevm = 'buidlerevm',
@@ -23,6 +23,11 @@ export enum ePolygonNetwork {
 
 export enum eXDaiNetwork {
   xdai = 'xdai',
+}
+
+export enum eArbitrumNetwork {
+  arbitrum = 'arbitrum',
+  arbitrumRinkeby = 'arbitrumRinkeby',
 }
 
 export enum eAvalancheNetwork {
@@ -47,6 +52,7 @@ export enum AavePools {
   amm = 'amm',
   avalanche = 'avalanche',
   halo = 'halo',
+  haloArb = 'haloArb',
 }
 
 export enum eContractid {
@@ -462,7 +468,8 @@ export type iParamsPerNetwork<T> =
   | iEthereumParamsPerNetwork<T>
   | iPolygonParamsPerNetwork<T>
   | iXDaiParamsPerNetwork<T>
-  | iAvalancheParamsPerNetwork<T>;
+  | iAvalancheParamsPerNetwork<T>
+  | iArbitrumParamsPerNetwork<T>;
 
 export interface iParamsPerNetworkAll<T>
   extends iEthereumParamsPerNetwork<T>,
@@ -493,10 +500,16 @@ export interface iAvalancheParamsPerNetwork<T> {
   [eAvalancheNetwork.fuji]: T;
 }
 
+export interface iArbitrumParamsPerNetwork<T> {
+  [eArbitrumNetwork.arbitrum]: T;
+  [eArbitrumNetwork.arbitrumRinkeby]: T;
+}
+
 export interface iParamsPerPool<T> {
   [AavePools.proto]: T;
   [AavePools.matic]: T;
   [AavePools.halo]: T;
+  [AavePools.haloArb]: T;
   [AavePools.amm]: T;
   [AavePools.avalanche]: T;
 }
