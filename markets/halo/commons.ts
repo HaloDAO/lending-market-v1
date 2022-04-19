@@ -57,9 +57,9 @@ export const CommonsConfig: ICommonConfiguration = {
     USDT: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
-    //RNBW: {
-    //  borrowRate: oneRay.multipliedBy(0.03).toFixed(),
-    //},
+    RNBW: {
+      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    },
     WBTC: {
       borrowRate: oneRay.multipliedBy(0.03).toFixed(),
     },

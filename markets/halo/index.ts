@@ -26,6 +26,7 @@ export const HaloConfig: IHaloConfiguration = {
     USDT: strategyUSDT,
     WBTC: strategyWBTC,
     WETH: strategyWETH,
+    RNBW: strategyWETH,
   },
   ReserveAssets: {
     [eEthereumNetwork.buidlerevm]: {},

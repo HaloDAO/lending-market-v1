@@ -70,7 +70,7 @@ export const setInitialAssetPricesInOracle = async (
       const [, assetAddress] = (Object.entries(assetsAddresses) as [string, string][])[assetAddressIndex];
       await waitForTx(await priceOracleInstance.setAssetPrice(assetAddress, price));
     } catch (e: any) {
-      console.log(`Its ${assetSymbol}!`);
+      // console.log(`Its ${assetSymbol}!`);
     }
   }
 };

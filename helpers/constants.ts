@@ -75,6 +75,7 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   THKD: oneEther.multipliedBy('0.00014912').toFixed(),
   WAVAX: oneEther.multipliedBy('0.006051936629').toFixed(),
   USD: '5848466240000000',
+  RNBW: oneEther.multipliedBy('0.003620948469').toFixed(), //mock
 };
 
 export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
