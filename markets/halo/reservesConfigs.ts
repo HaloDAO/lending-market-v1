@@ -325,7 +325,7 @@ export const strategyUST: IReserveParams = {
   reserveFactor: '1000',
 };
 
-export const strategyHLP_XSGD_USD: IReserveParams = {
+export const strategyHLP_XSGD_USDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8500',
@@ -337,7 +337,7 @@ export const strategyHLP_XSGD_USD: IReserveParams = {
   reserveFactor: '1000',
 };
 
-export const strategyHLP_UST_USD: IReserveParams = {
+export const strategyHLP_UST_USDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8500',

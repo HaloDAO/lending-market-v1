@@ -102,7 +102,6 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     `);
 
     // init new asset
-
     const uiPoolDataProvider = await getHaloUiPoolDataProvider(
       haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
     );
@@ -112,11 +111,20 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
       haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
     );
 
+    console.log('settting asset');
+
     await aaveOracle.setAssetSources(
       [haloContractAddresses(network).tokens[symbol]],
-      // [haloContractAddresses(network).lendingMarket!.priceOracles[symbol]]
-      ['0xa20623070413d42a5C01Db2c8111640DD7A5A03a'] // USTETH
+      [haloContractAddresses(network).lendingMarket!.priceOracles[symbol]]
+      // ['0xa20623070413d42a5C01Db2c8111640DD7A5A03a'] // USTETH
     );
+
+    // await aaveOracle.setAssetSources(
+    //   //[haloContractAddresses(network).tokens[symbol]],
+    //   ['0x868084406449bda10a5bd556fb33cef5086b0797'],
+    //   [haloContractAddresses(network).lendingMarket!.priceOracles[symbol]]
+    //   // ['0xa20623070413d42a5C01Db2c8111640DD7A5A03a'] // USTETH
+    // );
 
     console.log(
       'assetPrice: ',
