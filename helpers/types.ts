@@ -267,6 +267,11 @@ export interface iAssetBase<T> {
   XSGD: T;
   THKD: T;
   RNBW?: T;
+  FXPHP?: T;
+  HLPPHP?: T;
+  UST?: T;
+  HLP_XSGD_USDC?: T;
+  HLP_UST_USDC?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -300,7 +305,10 @@ export type iAavePoolAssets<T> = Pick<
   | 'THKD'
 >;
 
-export type iHaloPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'RNBW'>;
+export type iHaloPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'RNBW' | 'XSGD' | 'FXPHP' | 'UST' | 'HLP_XSGD_USDC' | 'HLP_UST_USDC'
+>;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -352,7 +360,7 @@ export enum HaloTokenContractId {
   WBTC = 'WBTC',
   //BUSD = 'BUSD',
   USD = 'USD',
-  // XSGD = 'XSGD',
+  XSGD = 'XSGD',
   // THKD = 'THKD',
   RNBW = 'RNBW',
 }

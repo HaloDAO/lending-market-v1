@@ -20,10 +20,10 @@ task('halo:dev', 'Deploy development enviroment')
 
     console.log('Migration started\n');
 
-    //if (withmocktokens == true) {
-    console.log('0. Deploy mock tokens');
-    await localBRE.run('halo:dev:deploy-mock-tokens', { verify });
-    // }
+    if (withmocktokens === 'true') {
+      console.log('0. Deploy mock tokens');
+      await localBRE.run('halo:dev:deploy-mock-tokens', { verify });
+    }
 
     console.log('1. Deploy address provider');
     await localBRE.run('halo:dev:deploy-address-provider', { verify });

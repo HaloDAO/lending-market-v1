@@ -40,6 +40,7 @@ if (!SKIP_LOAD) {
     'halo-dev',
     'halo-main',
     'helpers/halo-helpers',
+    'halo-new-asset',
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)
@@ -106,6 +107,7 @@ const buidlerConfig: HardhatUserConfig = {
     xdai: getCommonNetworkConfig(eXDaiNetwork.xdai, 100),
     avalanche: getCommonNetworkConfig(eAvalancheNetwork.avalanche, 43114),
     fuji: getCommonNetworkConfig(eAvalancheNetwork.fuji, 43113),
+    /*
     hardhat: {
       hardfork: 'berlin',
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
@@ -120,6 +122,20 @@ const buidlerConfig: HardhatUserConfig = {
         balance,
       })),
       forking: buildForkConfig(),
+    },
+    */
+
+    hardhat: {
+      chainId: 1,
+      forking: {
+        enabled: true,
+        url: 'https://eth-mainnet.alchemyapi.io/v2/DiPOcqLZRi6pPRizpQTbb5AGppuRI0dI',
+        blockNumber: 14632357,
+      },
+      accounts: {
+        //  accountsBalance: '100000000000000000000000', // 100000 ETH
+        mnemonic: MNEMONIC,
+      },
     },
     buidlerevm_docker: {
       hardfork: 'berlin',

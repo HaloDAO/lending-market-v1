@@ -101,7 +101,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xC0453222F519e6D561652367662C2D305C23Be3e',
     [eEthereumNetwork.coverage]: '',
-    [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.hardhat]: '0xC0453222F519e6D561652367662C2D305C23Be3e', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.tenderly]: '',
   },
@@ -110,13 +110,14 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
     [eEthereumNetwork.coverage]: '',
+    [eEthereumNetwork.main]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.tenderly]: '',
   },
   LendingRateOracle: {
     [eEthereumNetwork.coverage]: '',
-    [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.hardhat]: '0xB626E339a0EF63a15585FAAb4483a1732aaD0A94', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.kovan]: '0xFf4b5a92240CBaa0384f3d7f5e2D50772A80c42E',
     [eEthereumNetwork.ropsten]: '',
@@ -134,7 +135,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   LendingPoolConfigurator: {
     [eEthereumNetwork.coverage]: '',
-    [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.hardhat]: '0xCeE5D0fb8fF915D8C089f2B05edF138801E1dB0B', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.kovan]: '0xBc61245fD99A65470A952e6661A9D630E7b47842',
     [eEthereumNetwork.ropsten]: '',
@@ -143,7 +144,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   LendingPool: {
     [eEthereumNetwork.coverage]: '',
-    [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.hardhat]: '0xC73b2c6ab14F25e1EAd3DE75b4F6879DEde3968E', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.kovan]: '0xcE1E8c1b7664ae8E71180D40e9c160D243f211e1',
     [eEthereumNetwork.ropsten]: '',
@@ -152,7 +153,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   WethGateway: {
     [eEthereumNetwork.coverage]: '',
-    [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.hardhat]: '0xa0576E91069098271951559369a31D89A123C796', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.kovan]: '0x2921B1CCf02F109f137dEC988A29562D6fBbc3D1',
     [eEthereumNetwork.ropsten]: '',
@@ -170,7 +171,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   AaveOracle: {
     [eEthereumNetwork.coverage]: '',
-    [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.hardhat]: '0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.kovan]: '0x0beBf7C0504cf3eCE4c7f1a4AB70F4Ccc34Cbdb1',
     [eEthereumNetwork.ropsten]: '',
@@ -188,7 +189,20 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ChainlinkAggregator: {
     [eEthereumNetwork.coverage]: {},
-    [eEthereumNetwork.hardhat]: {},
+    [eEthereumNetwork.hardhat]: {
+      //BUSD: '0x614715d2Af89E6EC99A233818275142cE88d1Cfd',
+      DAI: '0x773616E4d11A78F511299002da57A0a94577F1f4',
+      //SUSD: '0x8e0b7e6062272B5eF4524250bFFF8e5Bd3497757',
+      //TUSD: '0x3886BA987236181D98F2401c507Fb8BeA7871dF2',
+      USDC: '0x986b5E1e1755e3C2440e960477f25201B0a8bbD4',
+      USDT: '0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46',
+      WBTC: '0xdeb288F737066589598e9214E782fa5A8eD689e8',
+      USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
+      XSGD: '0xE1bA4190e8a907154A4b7EFe4c5bbF0f584847a7',
+      UST: '0xa20623070413d42a5C01Db2c8111640DD7A5A03a',
+      HLP_XSGD_USDC: '0xE911bA4d01b64830160284E42BfC9b9933fA19BA',
+      HLP_UST_USDC: '0x6859a10034b260b80dfb4755D9AF4811045bb10f',
+    }, // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: {},
     [eEthereumNetwork.kovan]: {
       // BUSD: '0xbF7A18ea5DE0501f7559144e702b29c55b055CcB',
@@ -209,6 +223,9 @@ export const CommonsConfig: ICommonConfiguration = {
       USDT: '0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46',
       WBTC: '0xdeb288F737066589598e9214E782fa5A8eD689e8',
       USD: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
+      XSGD: '0xE1bA4190e8a907154A4b7EFe4c5bbF0f584847a7',
+      HLP_XSGD_USDC: '0xE911bA4d01b64830160284E42BfC9b9933fA19BA',
+      HLP_UST_USDC: '0x6859a10034b260b80dfb4755D9AF4811045bb10f',
       // WETH: '',
     },
     [eEthereumNetwork.tenderly]: {},

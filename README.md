@@ -34,44 +34,8 @@ Please check the latest documentation [here](https://docs.halodao.com/).
 
 You can join at the [Discord](https://discord.com/invite/halodao) channel or at the [Governance Forum](https://snapshot.org/#/halodao.eth) for asking questions about the protocol or talk about HaloDAO Lending Market with other peers.
 
-## Getting Started
-
-You can install `@aave/protocol-v2` as an NPM package in your Hardhat, Buidler or Truffle project to import the contracts and interfaces:
-
-`npm install @aave/protocol-v2`
-
-Import at Solidity files:
-
-```
-import {ILendingPool} from "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
-
-contract Misc {
-
-  function deposit(address pool, address token, address user, uint256 amount) public {
-    ILendingPool(pool).deposit(token, amount, user, 0);
-    {...}
-  }
-}
-```
-
-The JSON artifacts with the ABI and Bytecode are also included into the bundled NPM package at `artifacts/` directory.
-
-Import JSON file via Node JS `require`:
-
-```
-const LendingPoolV2Artifact = require('@aave/protocol-v2/artifacts/contracts/protocol/lendingpool/LendingPool.sol/LendingPool.json');
-
-// Log the ABI into console
-console.log(LendingPoolV2Artifact.abi)
-```
-
 ## Setup
 
-The repository uses Docker Compose to manage sensitive keys and load the configuration. Prior any action like test or deploy, you must run `docker-compose up` to start the `contracts-env` container, and then connect to the container console via `docker-compose exec contracts-env bash`.
-
-Follow the next steps to setup the repository:
-
-- Install `docker` and `docker-compose`
 - Create an enviroment file named `.env` and fill the next enviroment variables
 
 ```
@@ -92,6 +56,11 @@ TENDERLY_USERNAME=""
 
 ```
 
+## Local Setup
+
+- This repo eliminates docker implementation from Aave and uses hardhat instead for faster setup.
+- You can either run a node for localhost config by running `yarn hardhat node` on one terminal then add `--network localhost` on all hardhat tasks that youy will execute. You can also run tasks using the temporary hardhat node by not adding a flag for network and just running the task.
+
 ## Markets configuration
 
 The configurations related with the HaloDAO Lending Market Markets are located at `markets` directory. You can follow the `IAaveConfiguration` interface to create new Markets configuration or extend the current HaloDAO Lending Market configuration.
@@ -103,34 +72,23 @@ Each market should have his own Market configuration file, and their own set of 
 You can run the full test suite with the following commands:
 
 ```
-# In one terminal
-docker-compose up
-
-# Open another tab or terminal
-docker-compose exec contracts-env bash
-
-# A new Bash terminal is prompted, connected to the container
-npm run test
+yarn test
 ```
 
-## Deployments
+### Local Deployment
 
-For deploying HaloDAO Lending Market, you can use the available scripts located at `package.json`. For a complete list, run `npm run` to see all the tasks.
+1. In one terminal: `yarn hardhat node`
+2. In another terminal, generate typechain types first by running `yarn hardhat compile`
+3. You can now deploy the whole environment in your local node. Run `yarn hardhat halo:dev --withmocktokens true` (this installs mock tokens for local dev environment, if you want to read from your previously generated `deployed-contracts.json` file then set this to false)
 
 ### Kovan deployment
 
-```
-# In one terminal
-docker-compose up
+1. If you made any changes from the smart contracts, make sure to recompile them first since some deplyment scripts skips compiling. Run `yarn recompile`
+2. Make sure you have the updated Kovan assets in the `markets` directory on kovan
+3. Deploy the whole environment to Kovan by running `yarn hardhat halo:dev --withmocktokens false --network kovan`
+4. Test using the tasks in `Lending Pool Tasks`
 
-# Open another tab or terminal
-docker-compose exec contracts-env bash
-
-# A new Bash terminal is prompted, connected to the container
-npm run aave:kovan:full:migration
-```
-
-### Mainnet fork deployment
+### Mainnet fork deployment via Docker
 
 You can deploy HaloDAO Lending Market in a forked Mainnet chain using Hardhat built-in fork feature:
 
@@ -138,7 +96,7 @@ You can deploy HaloDAO Lending Market in a forked Mainnet chain using Hardhat bu
 docker-compose run contracts-env npm run aave:fork:main
 ```
 
-### Deploy HaloDAO Lending Market into a Mainnet Fork via console
+### Deploy HaloDAO Lending Market into a Mainnet Fork via console with Docker
 
 You can deploy HaloDAO Lending Market into the Hardhat console in fork mode, to interact with the protocol inside the fork or for testing purposes.
 
@@ -182,7 +140,7 @@ await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('
 
 ```
 
-## Interact with HaloDAO Lending Market in Mainnet via console
+## Interact with HaloDAO Lending Market in Mainnet via console with Docker
 
 You can interact with HaloDAO Lending Market at Mainnet network using the Hardhat console, in the scenario where the frontend is down or you want to interact directly. You can check the deployed addresses at https://docs.aave.com/developers/deployed-contracts.
 
@@ -217,7 +175,7 @@ await DAI.connect(signer).approve(lendingPool.address, ethers.utils.parseUnits('
 await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
 ```
 
-## Using lending pool tasks
+## Using lending pool tasks (if using hardhat environment)
 
 Run the following command to test lending pool related tasks
 `yarn/npm run hardhat external:lendingpool-action --action {desired action} --amount {amount to use, 0 if getter functions}
@@ -235,6 +193,7 @@ list of actions
 - `setUserUseReserveAsCollateral` - set current hardcoded asset as a collateral for borrow
 
 note: you can modify the `TEST_ASSET` if you want to use other tokens, default now is USDC
+note 2: check the addresses especially when running localhost node
 
 ## Adding a new asset in the market
 
