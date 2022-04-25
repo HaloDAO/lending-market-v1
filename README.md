@@ -75,6 +75,11 @@ You can run the full test suite with the following commands:
 yarn test
 ```
 
+NOTES:
+
+- You can use a non forked version of the hardhat node to run this in an isolated environment (which is preferred). Refer to the comments on `./hardhat.config.ts` in the `buidlerConfig.networks.hardhat`
+- Test may fail when the test engine runs incentives controller tests. Sometimes its off by 1. Just run the test again.
+
 ### Local Deployment
 
 1. In one terminal: `yarn hardhat node`

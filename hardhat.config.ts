@@ -122,9 +122,9 @@ const buidlerConfig: HardhatUserConfig = {
         balance,
       })),
       forking: buildForkConfig(),
-    },
-    */
+    }, //  NOTE: use this for running yarn test
 
+   */
     hardhat: {
       chainId: 1,
       forking: {
@@ -136,7 +136,8 @@ const buidlerConfig: HardhatUserConfig = {
         //  accountsBalance: '100000000000000000000000', // 100000 ETH
         mnemonic: MNEMONIC,
       },
-    },
+    }, // NOTE: use this for simulating transcations
+
     buidlerevm_docker: {
       hardfork: 'berlin',
       blockGasLimit: 9500000,
