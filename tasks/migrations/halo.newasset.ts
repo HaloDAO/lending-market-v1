@@ -7,7 +7,8 @@ import { getEthersSigners } from '../../helpers/contracts-helpers';
 task('halo:new-asset', 'Deploy development enviroment')
   .addParam('symbol', `Asset symbol, needs to have configuration ready`)
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ symbol, verify }, localBRE) => {
+  .addFlag('lp', 'If asset is an LP')
+  .setAction(async ({ symbol, verify, lp }, localBRE) => {
     // To be used in full kovan deployment also
     await localBRE.run('set-DRE');
 
@@ -18,7 +19,7 @@ task('halo:new-asset', 'Deploy development enviroment')
     console.log('Adding new asset process started\n');
 
     console.log('1. Deploy lending market implementation tokens and initialize reserve');
-    await localBRE.run('halo:newasset:initialize-reserve', { verify, symbol: symbol });
+    await localBRE.run('halo:newasset:initialize-reserve', { verify, symbol: symbol, lp });
 
     console.log('2. Configure reserve');
     await localBRE.run('halo:newasset:configure-reserve', { verify, symbol: symbol });

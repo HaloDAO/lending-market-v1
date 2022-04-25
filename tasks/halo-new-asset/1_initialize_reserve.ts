@@ -9,6 +9,7 @@ import {
   getATokensAndRatesHelper,
   getFirstSigner,
   getHaloUiPoolDataProvider,
+  getIErc20Detailed,
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getPriceOracle,
@@ -29,10 +30,21 @@ const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
   marketConfigs.HaloConfig.ReserveAssets[network][symbol] &&
   marketConfigs.HaloConfig.ReservesConfig[symbol] === reserveConfigs['strategy' + symbol];
 
+const getAssetAddress = (lp: boolean, network: string, symbol: string): string => {
+  if (lp) {
+    if (haloContractAddresses(network).lendingMarket!.lpAssets[symbol] === undefined)
+      console.log('Asset is not an LP!');
+    return haloContractAddresses(network).lendingMarket!.lpAssets[symbol];
+  } else {
+    return haloContractAddresses(network).tokens![symbol];
+  }
+};
+
 task('halo:newasset:initialize-reserve', 'Initialize reserve')
   .addParam('symbol', `Asset symbol, needs to have configuration ready`)
+  .addFlag('lp', 'If asset is an LP')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify, symbol }, localBRE) => {
+  .setAction(async ({ verify, symbol, lp }, localBRE) => {
     const network = localBRE.network.name;
 
     if (!localBRE.network.config.chainId) {
@@ -57,6 +69,15 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     const addressProvider = await getLendingPoolAddressesProvider(
       haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
     );
+
+    const assetAddress = getAssetAddress(lp, network, symbol);
+
+    console.log(`assetAddress is: ${assetAddress} and it is a ${lp ? 'LP token' : 'not a LP token'}`);
+
+    const assetERC20Instance = await getIErc20Detailed(assetAddress);
+
+    const assetDecimals = await assetERC20Instance.decimals();
+    console.log('Decimals: ', assetDecimals);
 
     const poolAddress = await addressProvider.getLendingPool();
 
@@ -114,31 +135,20 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     console.log('settting asset');
 
     await aaveOracle.setAssetSources(
-      [haloContractAddresses(network).tokens[symbol]],
+      [assetAddress],
       [haloContractAddresses(network).lendingMarket!.priceOracles[symbol]]
-      // ['0xa20623070413d42a5C01Db2c8111640DD7A5A03a'] // USTETH
     );
 
-    // await aaveOracle.setAssetSources(
-    //   //[haloContractAddresses(network).tokens[symbol]],
-    //   ['0x868084406449bda10a5bd556fb33cef5086b0797'],
-    //   [haloContractAddresses(network).lendingMarket!.priceOracles[symbol]]
-    //   // ['0xa20623070413d42a5C01Db2c8111640DD7A5A03a'] // USTETH
-    // );
-
-    console.log(
-      'assetPrice: ',
-      formatEther(await aaveOracle.getAssetPrice(haloContractAddresses(network).tokens[symbol]))
-    );
+    console.log('assetPrice: ', formatEther(await aaveOracle.getAssetPrice(assetAddress)));
 
     await lendingPoolConfigurator.batchInitReserve([
       {
         aTokenImpl: aToken.address,
         stableDebtTokenImpl: stableDebt.address,
         variableDebtTokenImpl: variableDebt.address,
-        underlyingAssetDecimals: '6',
+        underlyingAssetDecimals: assetDecimals, // change
         interestRateStrategyAddress: rates.address,
-        underlyingAsset: haloContractAddresses(network).tokens[symbol],
+        underlyingAsset: assetAddress, // change
         treasury: await signer.getAddress(),
         incentivesController: haloContractAddresses(network).lendingMarket!.protocol.rnbwIncentivesController!,
         underlyingAssetName: symbol,

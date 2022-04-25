@@ -12,6 +12,7 @@ task('halo:newasset:configure-reserve', 'Initialize reserve')
   .setAction(async ({ verify, symbol }, localBRE) => {
     const network = localBRE.network.name;
 
+    const HLP_ADDRESS = '0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A';
     const aTokensAndRatesHelper = await getATokensAndRatesHelper(
       haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper
     );
@@ -26,7 +27,7 @@ task('halo:newasset:configure-reserve', 'Initialize reserve')
     // WARNING: This part is hardcoded since we are using the same strategy for all stable coins. Change if necessary
     const reserveConfig = [
       {
-        asset: haloContractAddresses(network).tokens[symbol],
+        asset: HLP_ADDRESS, // change
         baseLTV: '8000',
         liquidationThreshold: '8500',
         liquidationBonus: '10500',
