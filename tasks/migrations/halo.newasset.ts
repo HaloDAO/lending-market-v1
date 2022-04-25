@@ -22,7 +22,7 @@ task('halo:new-asset', 'Deploy development enviroment')
     await localBRE.run('halo:newasset:initialize-reserve', { verify, symbol: symbol, lp });
 
     console.log('2. Configure reserve');
-    await localBRE.run('halo:newasset:configure-reserve', { verify, symbol: symbol });
+    await localBRE.run('halo:newasset:configure-reserve', { verify, symbol: symbol, lp });
 
     console.log('\nFinished adding asset!');
   });

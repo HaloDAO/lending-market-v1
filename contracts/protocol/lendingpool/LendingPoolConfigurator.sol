@@ -17,8 +17,6 @@ import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {ILendingPoolConfigurator} from '../../interfaces/ILendingPoolConfigurator.sol';
 
-import 'hardhat/console.sol';
-
 /**
  * @title LendingPoolConfigurator contract
  * @author Aave
@@ -58,7 +56,6 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
    * @dev Initializes reserves in batch
    **/
   function batchInitReserve(InitReserveInput[] calldata input) external onlyPoolAdmin {
-    console.log('batch init reserve in');
     ILendingPool cachedPool = pool;
     for (uint256 i = 0; i < input.length; i++) {
       _initReserve(cachedPool, input[i]);
@@ -66,7 +63,6 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
   }
 
   function _initReserve(ILendingPool pool, InitReserveInput calldata input) internal {
-    console.log('init proxy start');
     address aTokenProxyAddress = _initTokenWithProxy(
       input.aTokenImpl,
       abi.encodeWithSelector(
@@ -82,8 +78,6 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       )
     );
 
-    console.log('finished a token proxy');
-
     address stableDebtTokenProxyAddress = _initTokenWithProxy(
       input.stableDebtTokenImpl,
       abi.encodeWithSelector(
@@ -97,8 +91,6 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         input.params
       )
     );
-
-    console.log('finished stable token proxy');
 
     address variableDebtTokenProxyAddress = _initTokenWithProxy(
       input.variableDebtTokenImpl,
@@ -114,8 +106,6 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       )
     );
 
-    console.log('finished debt token proxy');
-
     pool.initReserve(
       input.underlyingAsset,
       aTokenProxyAddress,
@@ -124,11 +114,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       input.interestRateStrategyAddress
     );
 
-    console.log('reserve initialized');
-
     DataTypes.ReserveConfigurationMap memory currentConfig = pool.getConfiguration(input.underlyingAsset);
-
-    console.log('got config');
 
     currentConfig.setDecimals(input.underlyingAssetDecimals);
 

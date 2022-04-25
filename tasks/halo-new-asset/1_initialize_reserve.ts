@@ -24,21 +24,12 @@ import { setDRE } from '../../helpers/misc-utils';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
 import { formatEther } from '@ethersproject/units';
+import { getAssetAddress } from '../helpers/halo-helpers/util-getters';
 
 const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
   Object.keys(reserveConfigs).includes('strategy' + symbol) &&
   marketConfigs.HaloConfig.ReserveAssets[network][symbol] &&
   marketConfigs.HaloConfig.ReservesConfig[symbol] === reserveConfigs['strategy' + symbol];
-
-const getAssetAddress = (lp: boolean, network: string, symbol: string): string => {
-  if (lp) {
-    if (haloContractAddresses(network).lendingMarket!.lpAssets[symbol] === undefined)
-      console.log('Asset is not an LP!');
-    return haloContractAddresses(network).lendingMarket!.lpAssets[symbol];
-  } else {
-    return haloContractAddresses(network).tokens![symbol];
-  }
-};
 
 task('halo:newasset:initialize-reserve', 'Initialize reserve')
   .addParam('symbol', `Asset symbol, needs to have configuration ready`)
@@ -128,9 +119,6 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     );
     const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
     const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy('0xCeE5D0fb8fF915D8C089f2B05edF138801E1dB0B');
-    const lendingPoolAddressesProvider = await getLendingPoolAddressesProvider(
-      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
-    );
 
     console.log('settting asset');
 

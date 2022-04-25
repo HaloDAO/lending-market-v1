@@ -203,3 +203,7 @@ note 2: check the addresses especially when running localhost node
 ## Adding a new asset in the market
 
 [Refer to this document](https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/169017345/Adding+New+Asset+using+script)
+
+## Disable borrowing asset
+
+Run `yarn hardhat external:disable-borrow-reserve --symbol {symbol of the asset} --lp {if it's an lp token}`
