@@ -118,7 +118,9 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
       haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
     );
     const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
-    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy('0xCeE5D0fb8fF915D8C089f2B05edF138801E1dB0B');
+    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy(
+      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolConfigurator
+    );
 
     console.log('settting asset');
 

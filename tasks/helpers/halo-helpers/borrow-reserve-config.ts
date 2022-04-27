@@ -5,6 +5,7 @@ import {
   getHaloUiPoolDataProvider,
   getIncentivePoolDataProvider,
   getLendingPoolConfiguratorProxy,
+  getPriceOracle,
   getUiPoolDataProvider,
   getWETHMocked,
 } from '../../../helpers/contracts-getters';
@@ -23,8 +24,12 @@ task(`external:disable-borrow-reserve`, `Enable or disable borrowing in reserve`
 
     const network = localBRE.network.name;
 
-    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy('0xCeE5D0fb8fF915D8C089f2B05edF138801E1dB0B');
+    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy(
+      haloContractAddresses(network).lendingMarket?.protocol.lendingPoolConfigurator
+    );
 
     await lendingPoolConfigurator.disableBorrowingOnReserve(getAssetAddress(lp, network, symbol));
     await lendingPoolConfigurator.disableReserveStableRate(getAssetAddress(lp, network, symbol));
+
+    const oracle = await getPriceOracle('0xE911bA4d01b64830160284E42BfC9b9933fA19BA');
   });
