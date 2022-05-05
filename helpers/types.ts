@@ -266,6 +266,12 @@ export interface iAssetBase<T> {
   WAVAX: T;
   XSGD: T;
   THKD: T;
+  RNBW?: T;
+  FXPHP?: T;
+  HLPPHP?: T;
+  UST?: T;
+  HLP_XSGD_USDC?: T;
+  HLP_UST_USDC?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -299,7 +305,10 @@ export type iAavePoolAssets<T> = Pick<
   | 'THKD'
 >;
 
-export type iHaloPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH'>;
+export type iHaloPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'RNBW' | 'XSGD' | 'FXPHP' | 'UST' | 'HLP_XSGD_USDC' | 'HLP_UST_USDC'
+>;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -343,16 +352,16 @@ export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
 export enum HaloTokenContractId {
   DAI = 'DAI',
-  TUSD = 'TUSD',
+  // TUSD = 'TUSD',
   WETH = 'WETH',
   USDC = 'USDC',
   USDT = 'USDT',
-  SUSD = 'SUSD',
+  // SUSD = 'SUSD',
   WBTC = 'WBTC',
-  BUSD = 'BUSD',
+  //BUSD = 'BUSD',
   USD = 'USD',
   XSGD = 'XSGD',
-  THKD = 'THKD',
+  // THKD = 'THKD',
   RNBW = 'RNBW',
 }
 
@@ -409,6 +418,7 @@ export enum TokenContractId {
   WAVAX = 'WAVAX',
   XSGD = 'XSGD',
   THKD = 'THKD',
+  RNBW = 'RNBW',
 }
 
 export interface IReserveParams extends IReserveBorrowParams, IReserveCollateralParams {

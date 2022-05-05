@@ -75,6 +75,12 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   THKD: oneEther.multipliedBy('0.00014912').toFixed(),
   WAVAX: oneEther.multipliedBy('0.006051936629').toFixed(),
   USD: '5848466240000000',
+  RNBW: oneEther.multipliedBy('0.003620948469').toFixed(), //mock
+  FXPHP: oneEther.multipliedBy('0.00023421').toFixed(),
+  HLPPHP: oneEther.multipliedBy('0.00023421').toFixed(),
+  UST: oneEther.multipliedBy('0.00367714136416').toFixed(),
+  HLP_XSGD_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
+  HLP_UST_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
 };
 
 export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {
