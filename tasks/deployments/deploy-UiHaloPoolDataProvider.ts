@@ -34,7 +34,7 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
       },
       //@todo: replace with actual ETH/USD oracle for Arbitrum network
       [eArbitrumNetwork.arbitrumRinkeby]: {
-        ethUsdOracle: '	0x6eFd3CCf5c673bd5A7Ea91b414d0307a5bAb9cC1',
+        ethUsdOracle: '0x5f0423B1a6935dc5596e7A24d98532b67A0AeFd8',
       },
     };
     const supportedNetworks = Object.keys(addressesByNetwork);

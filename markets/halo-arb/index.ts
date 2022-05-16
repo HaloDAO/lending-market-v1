@@ -10,6 +10,7 @@ import {
   strategyUSDT,
   strategyWBTC,
   strategyWETH,
+  strategyXSGD,
 } from './reservesConfigs';
 
 // ----------------
@@ -26,6 +27,7 @@ export const HaloArbConfig: IHaloConfiguration = {
     USDT: strategyUSDT,
     WBTC: strategyWBTC,
     WETH: strategyWETH,
+    XSGD: strategyXSGD,
   },
   ReserveAssets: {
     [eEthereumNetwork.buidlerevm]: {},
