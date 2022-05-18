@@ -40,6 +40,7 @@ if (!SKIP_LOAD) {
     'halo-dev',
     'halo-main',
     'halo-arb',
+    'halo-arb-dev',
     'helpers/halo-helpers',
     'halo-new-asset',
   ].forEach((folder) => {

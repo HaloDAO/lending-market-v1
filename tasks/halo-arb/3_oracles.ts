@@ -8,7 +8,7 @@ import { getLendingPoolAddressesProvider, getPairsTokenAggregator } from '../../
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo-arb/constants';
 
-task('halo:arb-oracles-3', 'Deploy oracles for prod enviroment')
+task('halo:arb-oracles-3', 'Deploy oracles for arbitrum enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');

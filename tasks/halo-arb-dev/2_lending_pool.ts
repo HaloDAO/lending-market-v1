@@ -16,7 +16,7 @@ import {
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
-task('halo:arb-lendingpool-2', 'Deploy lending pool for arbitrum enviroment')
+task('halo:arb-dev-lendingpool-2', 'Deploy lending pool for Arbitrum Rinkeby enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
