@@ -61,7 +61,7 @@ task('halo:arb-dev-lendingpool-2', 'Deploy lending pool for Arbitrum Rinkeby env
 
     console.log('deploying a tokens and rates helper');
 
-    await deployATokenImplementations(ConfigNames.Halo, poolConfig.ReservesConfig, verify);
+    await deployATokenImplementations(ConfigNames.HaloArb, poolConfig.ReservesConfig, verify);
 
     console.log('deploy aToken implementations');
 
