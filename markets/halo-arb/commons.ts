@@ -162,7 +162,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eArbitrumNetwork.arbitrumRinkeby]: '',
   },
   WrappedNativeToken: {
-    [eArbitrumNetwork.arbitrum]: '',
+    [eArbitrumNetwork.arbitrum]: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     [eArbitrumNetwork.arbitrumRinkeby]: '',
   },
   ReserveFactorTreasuryAddress: {
