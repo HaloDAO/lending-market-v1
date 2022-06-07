@@ -65,6 +65,7 @@ export const HaloConfig: IHaloConfiguration = {
       XSGD: kovan.tokens.XSGD!,
       FXPHP: kovan.tokens.fxPHP!,
       HLPPHP: '0xEb06cF1cD90d75eC6d10bbdc43B555483674F6ff',
+      HLP_XSGD_USDC: kovan.lendingMarket!.lpAssets.HLP_XSGD_USDC!,
     },
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {

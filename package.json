@@ -110,6 +110,7 @@
     "external:halo:deploy-assets-main": "npm run compile && hardhat --network main external:deploy-new-asset-halo --symbol ${SYMBOL} --verify"
   },
   "devDependencies": {
+    "@halodao/halodao-contract-addresses": "^0.0.29",
     "@nomiclabs/buidler": "^1.4.7",
     "@nomiclabs/buidler-ethers": "2.0.0",
     "@nomiclabs/buidler-etherscan": "^2.1.0",
@@ -173,7 +174,6 @@
   ],
   "license": "AGPLv3",
   "dependencies": {
-    "@halodao/halodao-contract-addresses": "^0.0.27",
     "axios-curlirize": "^1.3.7",
     "tmp-promise": "^3.0.2"
   },
