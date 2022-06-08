@@ -41,8 +41,8 @@ export const HaloArbConfig: IHaloConfiguration = {
       DAI: '',
       //TUSD: '0x0000000000085d4780B73119b644AE5ecd22b376',
       WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-      USDC: '',
-      USDT: '',
+      USDC: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+      USDT: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
       WBTC: '',
       // BUSD: '0x4fabb145d64652a948d72533023f6e7a623c7c53', // To Check
       // SUSD: '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // To Check
