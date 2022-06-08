@@ -36,6 +36,9 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
       [eArbitrumNetwork.arbitrumRinkeby]: {
         ethUsdOracle: '0x5f0423B1a6935dc5596e7A24d98532b67A0AeFd8',
       },
+      [eArbitrumNetwork.arbitrum]: {
+        ethUsdOracle: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612',
+      },
     };
     const supportedNetworks = Object.keys(addressesByNetwork);
 

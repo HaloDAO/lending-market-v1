@@ -17,7 +17,7 @@ export const HALO_CONTRACT_ADDRESSES = {
     xrnbw: '0x323C11843DEaEa9f13126FE33B86f6C5086DE138',
     curveFactory: '0x972127aFf8e6464e50eFc0a2aD344063355AE424',
     usdc: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
-    usdcRnbwPair: '', // sushi
+    usdcRnbwPair: '0x0000000000000000000000000000000000000000', // sushi
     fallbackPriceOracle: '0x0000000000000000000000000000000000000000', // Aave's fallbackOracle in Arbitrum is 0x0 (zero address)
   },
   [eArbitrumNetwork.arbitrumRinkeby]: {
@@ -30,6 +30,6 @@ export const HALO_CONTRACT_ADDRESSES = {
     usdc: '0x64EaC61A2DFda2c3Fa04eED49AA33D021AeC8838',
     usdcRnbwPair: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd', // sushi
     fallbackPriceOracle: '0x6eFd3CCf5c673bd5A7Ea91b414d0307a5bAb9cC1',
-  }
+  },
 };
 

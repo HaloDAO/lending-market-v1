@@ -64,7 +64,7 @@ export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
   [eXDaiNetwork.xdai]: 1 * GWEI,
   [eAvalancheNetwork.avalanche]: 225 * GWEI,
   [eAvalancheNetwork.fuji]: 85 * GWEI,
-  [eArbitrumNetwork.arbitrum]: 65 * GWEI,
+  [eArbitrumNetwork.arbitrum]: 10 * GWEI,
   [eArbitrumNetwork.arbitrumRinkeby]: 65 * GWEI,
 };
 
