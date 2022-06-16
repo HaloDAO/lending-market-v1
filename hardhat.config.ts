@@ -61,6 +61,7 @@ const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
   gasMultiplier: DEFAULT_GAS_MUL,
   gasPrice: NETWORKS_DEFAULT_GAS[networkName],
   maxPriorityFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
+  maxFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
   chainId: networkId,
   accounts: {
     mnemonic: MNEMONIC,

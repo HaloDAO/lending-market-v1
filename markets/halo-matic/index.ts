@@ -20,7 +20,7 @@ import {
 
 export const HaloMaticConfig: IHaloMaticConfiguration = {
   ...CommonsConfig,
-  MarketId: 'Matic Market',
+  MarketId: 'Halo Matic Market',
   ProviderId: 3,
   ReservesConfig: {
     DAI: strategyDAI,
