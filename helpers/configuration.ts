@@ -19,6 +19,7 @@ export enum ConfigNames {
   Amm = 'Amm',
   Avalanche = 'Avalanche',
   Halo = 'Halo',
+  HaloMatic = 'HaloMatic',
 }
 
 export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
@@ -26,6 +27,8 @@ export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
     case ConfigNames.Aave:
       return AaveConfig;
     case ConfigNames.Halo:
+      return HaloConfig;
+    case ConfigNames.HaloMatic:
       return HaloConfig;
     case ConfigNames.Matic:
       return MaticConfig;

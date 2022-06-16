@@ -41,6 +41,7 @@ if (!SKIP_LOAD) {
     'halo-main',
     'helpers/halo-helpers',
     'halo-new-asset',
+    'halo-matic'
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)

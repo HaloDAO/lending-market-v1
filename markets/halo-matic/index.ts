@@ -18,7 +18,7 @@ import {
 // POOL--SPECIFIC PARAMS
 // ----------------
 
-export const MaticConfig: IHaloMaticConfiguration = {
+export const HaloMaticConfig: IHaloMaticConfiguration = {
   ...CommonsConfig,
   MarketId: 'Matic Market',
   ProviderId: 3,
@@ -58,4 +58,4 @@ export const MaticConfig: IHaloMaticConfiguration = {
   },
 };
 
-export default MaticConfig;
+export default HaloMaticConfig;
