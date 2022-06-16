@@ -153,10 +153,10 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ReserveFactorTreasuryAddress: {
     [ePolygonNetwork.mumbai]: ZERO_ADDRESS,
-    [ePolygonNetwork.matic]: '0x7734280A4337F37Fbf4651073Db7c28C80B339e9',
+    [ePolygonNetwork.matic]: ZERO_ADDRESS,
   },
   IncentivesController: {
     [ePolygonNetwork.mumbai]: '0xd41aE58e803Edf4304334acCE4DC4Ec34a63C644',
-    [ePolygonNetwork.matic]: '0x357D51124f59836DeD84c8a1730D72B749d8BC23',
+    [ePolygonNetwork.matic]: '',
   },
 };

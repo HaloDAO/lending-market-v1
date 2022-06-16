@@ -65,6 +65,21 @@ export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
   [eAvalancheNetwork.fuji]: 85 * GWEI,
 };
 
+export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
+  [eEthereumNetwork.kovan]: 1 * GWEI,
+  [eEthereumNetwork.ropsten]: 1 * GWEI,
+  [eEthereumNetwork.main]: 1 * GWEI,
+  [eEthereumNetwork.coverage]: 1 * GWEI,
+  [eEthereumNetwork.hardhat]: 1 * GWEI,
+  [eEthereumNetwork.buidlerevm]: 1 * GWEI,
+  [eEthereumNetwork.tenderly]: 1 * GWEI,
+  [ePolygonNetwork.mumbai]: 1 * GWEI,
+  [ePolygonNetwork.matic]: 1 * GWEI,
+  [eXDaiNetwork.xdai]: 1 * GWEI,
+  [eAvalancheNetwork.avalanche]: 1 * GWEI,
+  [eAvalancheNetwork.fuji]: 1 * GWEI,
+};
+
 export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
   [eEthereumNetwork.main]: 12406069,
   [eEthereumNetwork.kovan]: undefined,

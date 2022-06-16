@@ -5,7 +5,7 @@ import { HardhatUserConfig } from 'hardhat/types';
 import { accounts } from './test-wallets.js';
 import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
-import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
+import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, NETWORK_DEFAULT_PRIORITYFEE, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
 
@@ -60,6 +60,7 @@ const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
   blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
   gasMultiplier: DEFAULT_GAS_MUL,
   gasPrice: NETWORKS_DEFAULT_GAS[networkName],
+  maxPriorityFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
   chainId: networkId,
   accounts: {
     mnemonic: MNEMONIC,
