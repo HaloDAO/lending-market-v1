@@ -81,6 +81,7 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   UST: oneEther.multipliedBy('0.00367714136416').toFixed(),
   HLP_XSGD_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
   HLP_UST_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
+  MockUSDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
 };
 
 export const MOCK_CHAINLINK_AGGREGATORS_PRICES_HALO = {

@@ -531,10 +531,10 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.0"
 
-"@halodao/halodao-contract-addresses@^0.0.29":
-  version "0.0.29"
-  resolved "https://registry.yarnpkg.com/@halodao/halodao-contract-addresses/-/halodao-contract-addresses-0.0.29.tgz#0542b3af7880d57c3af947cea164482c20b64e6d"
-  integrity sha512-OQjNlItj8hoGERDpE2WzHakxp6yp5JOZ0wPZRAlYNTQ6ZXQysWEDqTLqnH7hAAT+ovnVEQDj02qOw0e4xRiY9w==
+"@halodao/halodao-contract-addresses@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@halodao/halodao-contract-addresses/-/halodao-contract-addresses-0.0.37.tgz#0c34b6f60f19dd5945df0bfcce0e5fc08ae6f4bc"
+  integrity sha512-wTN0JkbZqqwzcN5O5VqtTtHropFgZuP3XSLoQLVak/IVBBmST7FNv7557yLzLZnKCwTYYUms+K0ZXw8++v//cw==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
