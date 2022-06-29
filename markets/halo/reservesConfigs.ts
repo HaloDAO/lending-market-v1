@@ -348,3 +348,15 @@ export const strategyHLP_UST_USDC: IReserveParams = {
   aTokenImpl: eContractid.AToken,
   reserveFactor: '1000',
 };
+
+export const strategyMockUSDC: IReserveParams = {
+  strategy: rateStrategyStableThree,
+  baseLTVAsCollateral: '8000',
+  liquidationThreshold: '8500',
+  liquidationBonus: '10500',
+  borrowingEnabled: true,
+  stableBorrowRateEnabled: true,
+  reserveDecimals: '6',
+  aTokenImpl: eContractid.AToken,
+  reserveFactor: '1000',
+};

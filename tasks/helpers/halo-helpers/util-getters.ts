@@ -6,6 +6,7 @@ export const getAssetAddress = (lp: boolean, network: string, symbol: string): s
       console.log('Asset is not an LP!');
     return haloContractAddresses(network).lendingMarket!.lpAssets[symbol];
   } else {
-    return haloContractAddresses(network).tokens![symbol];
+    const properSymbol = symbol === 'MockUSDC' ? 'USDC' : symbol;
+    return haloContractAddresses(network).tokens![properSymbol];
   }
 };

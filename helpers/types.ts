@@ -272,6 +272,7 @@ export interface iAssetBase<T> {
   UST?: T;
   HLP_XSGD_USDC?: T;
   HLP_UST_USDC?: T;
+  MockUSDC?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -307,7 +308,18 @@ export type iAavePoolAssets<T> = Pick<
 
 export type iHaloPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'RNBW' | 'XSGD' | 'FXPHP' | 'UST' | 'HLP_XSGD_USDC' | 'HLP_UST_USDC'
+  | 'DAI'
+  | 'USDC'
+  | 'USDT'
+  | 'WBTC'
+  | 'WETH'
+  | 'RNBW'
+  | 'XSGD'
+  | 'FXPHP'
+  | 'UST'
+  | 'HLP_XSGD_USDC'
+  | 'HLP_UST_USDC'
+  | 'MockUSDC'
 >;
 
 export type iLpPoolAssets<T> = Pick<
