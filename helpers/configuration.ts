@@ -3,6 +3,7 @@ import { getEthersSignersAddresses, getParamPerPool } from './contracts-helpers'
 import AaveConfig from '../markets/aave';
 import MaticConfig from '../markets/matic';
 import HaloConfig from '../markets/halo';
+import HaloArbConfig from '../markets/halo-arb';
 import AvalancheConfig from '../markets/avalanche';
 import AmmConfig from '../markets/amm';
 
@@ -19,6 +20,7 @@ export enum ConfigNames {
   Amm = 'Amm',
   Avalanche = 'Avalanche',
   Halo = 'Halo',
+  HaloArb = 'HaloArb',
 }
 
 export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
@@ -27,6 +29,8 @@ export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
       return AaveConfig;
     case ConfigNames.Halo:
       return HaloConfig;
+    case ConfigNames.HaloArb:
+      return HaloArbConfig;
     case ConfigNames.Matic:
       return MaticConfig;
     case ConfigNames.Amm:
@@ -56,6 +60,9 @@ export const getReservesConfigByPool = (pool: AavePools): iMultiPoolsAssets<IRes
       },
       [AavePools.halo]: {
         ...HaloConfig.ReservesConfig,
+      },
+      [AavePools.haloArb]: {
+        ...HaloArbConfig.ReservesConfig,
       },
       [AavePools.amm]: {
         ...AmmConfig.ReservesConfig,
