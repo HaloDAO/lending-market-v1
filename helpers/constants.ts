@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { eEthereumNetwork } from './types';
 
 // ----------------
 // MATH
@@ -81,6 +82,7 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
   HLP_XSGD_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
   HLP_UST_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
   MockUSDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
+  LP_XSGD_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
   LP_FXPHP_USDC: oneEther.multipliedBy('0.00367714136416').toFixed(),
 };
 

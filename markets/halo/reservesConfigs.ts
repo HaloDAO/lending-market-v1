@@ -361,6 +361,18 @@ export const strategyMockUSDC: IReserveParams = {
   reserveFactor: '1000',
 };
 
+export const strategyLP_XSGD_USDC: IReserveParams = {
+  strategy: rateStrategyStableThree,
+  baseLTVAsCollateral: '8000',
+  liquidationThreshold: '8500',
+  liquidationBonus: '10500',
+  borrowingEnabled: true,
+  stableBorrowRateEnabled: true,
+  reserveDecimals: '18',
+  aTokenImpl: eContractid.AToken,
+  reserveFactor: '1000',
+};
+
 export const strategyLP_FXPHP_USDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
