@@ -19,6 +19,7 @@ import {
   strategyXSGD,
   strategyMockUSDC,
   strategyLP_XSGD_USDC,
+  strategyLP_FXPHP_USDC,
 } from './reservesConfigs';
 
 // ----------------
@@ -43,6 +44,7 @@ export const HaloConfig: IHaloConfiguration = {
     HLP_UST_USDC: strategyHLP_UST_USDC,
     MockUSDC: strategyMockUSDC,
     LP_XSGD_USDC: strategyLP_XSGD_USDC,
+    LP_FXPHP_USDC: strategyLP_FXPHP_USDC,
   },
   ReserveAssets: {
     [eEthereumNetwork.buidlerevm]: {},
@@ -72,6 +74,7 @@ export const HaloConfig: IHaloConfiguration = {
       HLP_XSGD_USDC: kovan.lendingMarket!.lpAssets.HLP_XSGD_USDC!,
       MockUSDC: kovan.tokens.USDC!,
       LP_XSGD_USDC: kovan.lendingMarket!.lpAssets.LP_XSGD_USDC!,
+      LP_FXPHP_USDC: kovan.lendingMarket!.lpAssets.LP_FXPHP_USDC!,
     },
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {
