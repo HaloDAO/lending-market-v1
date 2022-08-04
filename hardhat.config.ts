@@ -5,7 +5,7 @@ import { HardhatUserConfig } from 'hardhat/types';
 import { accounts } from './test-wallets.js';
 import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork, eArbitrumNetwork} from './helpers/types';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
-import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
+import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, NETWORK_DEFAULT_PRIORITYFEE, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
 
@@ -43,6 +43,7 @@ if (!SKIP_LOAD) {
     'halo-arb-dev',
     'helpers/halo-helpers',
     'halo-new-asset',
+    'halo-matic'
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)
@@ -61,18 +62,21 @@ const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
   blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
   gasMultiplier: DEFAULT_GAS_MUL,
   gasPrice: NETWORKS_DEFAULT_GAS[networkName],
+  maxPriorityFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
+  maxFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
   chainId: networkId,
-  accounts: {
-    mnemonic: MNEMONIC,
-    path: MNEMONIC_PATH,
-    initialIndex: 0,
-    count: 20,
-  },
+  accounts: [process.env.PRIVATE_KEY!],
+  // accounts: {
+  //   mnemonic: MNEMONIC,
+  //   path: MNEMONIC_PATH,
+  //   initialIndex: 0,
+  //   count: 20,
+  // },
 });
 
 let forkMode;
 
-const buidlerConfig: HardhatUserConfig = {
+const buidlerConfig: any = {
   solidity: {
     version: '0.6.12',
     settings: {
@@ -133,10 +137,12 @@ const buidlerConfig: HardhatUserConfig = {
       chainId: 1,
       forking: {
         enabled: true,
-        url: 'https://eth-mainnet.alchemyapi.io/v2/DiPOcqLZRi6pPRizpQTbb5AGppuRI0dI',
+        url: 'https://polygon-mainnet.g.alchemy.com/v2/uAxh7xPTIteQvKVEs5kQzpAWJjdmX8o8',
         blockNumber: 14632357, // before deploying new assets
         // blockNumber: 14651807,
       },
+      // url: 'https://polygon-mainnet.g.alchemy.com/v2/uAxh7xPTIteQvKVEs5kQzpAWJjdmX8o8',
+      // accounts: [process.env.PRIVATE_KEY!]
       accounts: {
         //  accountsBalance: '100000000000000000000000', // 100000 ETH
         mnemonic: MNEMONIC,

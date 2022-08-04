@@ -279,6 +279,7 @@ export interface iAssetBase<T> {
   HLP_XSGD_USDC?: T;
   HLP_UST_USDC?: T;
   MockUSDC?: T;
+  TAGPHP?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -326,6 +327,11 @@ export type iHaloPoolAssets<T> = Pick<
   | 'HLP_XSGD_USDC'
   | 'HLP_UST_USDC'
   | 'MockUSDC'
+>;
+
+export type iHaloMaticPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP'
 >;
 
 export type iLpPoolAssets<T> = Pick<
@@ -381,6 +387,7 @@ export enum HaloTokenContractId {
   XSGD = 'XSGD',
   // THKD = 'THKD',
   RNBW = 'RNBW',
+  XIDR = 'XIDR',
 }
 
 export enum HaloTokenMainetContractId {
@@ -437,6 +444,7 @@ export enum TokenContractId {
   XSGD = 'XSGD',
   THKD = 'THKD',
   RNBW = 'RNBW',
+  XIDR = 'XIDR',
 }
 
 export interface IReserveParams extends IReserveBorrowParams, IReserveCollateralParams {
@@ -609,6 +617,10 @@ export interface IAaveConfiguration extends ICommonConfiguration {
 
 export interface IHaloConfiguration extends ICommonConfiguration {
   ReservesConfig: iHaloPoolAssets<IReserveParams>;
+}
+
+export interface IHaloMaticConfiguration extends ICommonConfiguration {
+  ReservesConfig: iHaloMaticPoolAssets<IReserveParams>;
 }
 
 export interface IAmmConfiguration extends ICommonConfiguration {
