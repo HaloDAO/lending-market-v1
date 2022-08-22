@@ -11,6 +11,7 @@ import { DRE, filterMapBy } from './misc-utils';
 import { tEthereumAddress } from './types';
 import { getParamPerNetwork } from './contracts-helpers';
 import { deployWETHMocked } from './contracts-deployments';
+import HaloMaticConfig from '../markets/halo-matic';
 
 export enum ConfigNames {
   Commons = 'Commons',
@@ -29,7 +30,7 @@ export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
     case ConfigNames.Halo:
       return HaloConfig;
     case ConfigNames.HaloMatic:
-      return HaloConfig;
+      return HaloMaticConfig;
     case ConfigNames.Matic:
       return MaticConfig;
     case ConfigNames.Amm:
