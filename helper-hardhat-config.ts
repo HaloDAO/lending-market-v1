@@ -1,6 +1,6 @@
 // @ts-ignore
 import { HardhatNetworkForkingUserConfig, HardhatUserConfig } from 'hardhat/types';
-import { eAvalancheNetwork, eEthereumNetwork, ePolygonNetwork, eXDaiNetwork, iParamsPerNetwork } from './helpers/types';
+import { eAvalancheNetwork, eEthereumNetwork, ePolygonNetwork, eXDaiNetwork, iParamsPerNetwork, eArbitrumNetwork } from './helpers/types';
 
 require('dotenv').config();
 
@@ -48,6 +48,8 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
   [eXDaiNetwork.xdai]: 'https://rpc.xdaichain.com/',
   [eAvalancheNetwork.avalanche]: 'https://api.avax.network/ext/bc/C/rpc',
   [eAvalancheNetwork.fuji]: 'https://api.avax-test.network/ext/bc/C/rpc',
+  [eArbitrumNetwork.arbitrum]: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`,
+  [eArbitrumNetwork.arbitrumRinkeby]: `https://arbitrum-rinkeby.infura.io/v3/${INFURA_KEY}`,
 };
 
 export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
@@ -63,6 +65,8 @@ export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
   [eXDaiNetwork.xdai]: 1 * GWEI,
   [eAvalancheNetwork.avalanche]: 225 * GWEI,
   [eAvalancheNetwork.fuji]: 85 * GWEI,
+  [eArbitrumNetwork.arbitrum]: 10 * GWEI,
+  [eArbitrumNetwork.arbitrumRinkeby]: 65 * GWEI,
 };
 
 export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
@@ -93,4 +97,6 @@ export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
   [eXDaiNetwork.xdai]: undefined,
   [eAvalancheNetwork.avalanche]: undefined,
   [eAvalancheNetwork.fuji]: undefined,
+  [eArbitrumNetwork.arbitrum]: undefined,
+  [eArbitrumNetwork.arbitrumRinkeby]: undefined,
 };

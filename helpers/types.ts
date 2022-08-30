@@ -4,7 +4,7 @@ export interface SymbolMap<T> {
   [symbol: string]: T;
 }
 
-export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAvalancheNetwork;
+export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAvalancheNetwork | eArbitrumNetwork;
 
 export enum eEthereumNetwork {
   buidlerevm = 'buidlerevm',
@@ -23,6 +23,11 @@ export enum ePolygonNetwork {
 
 export enum eXDaiNetwork {
   xdai = 'xdai',
+}
+
+export enum eArbitrumNetwork {
+  arbitrum = 'arbitrum',
+  arbitrumRinkeby = 'arbitrumRinkeby',
 }
 
 export enum eAvalancheNetwork {
@@ -47,6 +52,7 @@ export enum AavePools {
   amm = 'amm',
   avalanche = 'avalanche',
   halo = 'halo',
+  haloArb = 'haloArb',
 }
 
 export enum eContractid {
@@ -272,6 +278,9 @@ export interface iAssetBase<T> {
   UST?: T;
   HLP_XSGD_USDC?: T;
   HLP_UST_USDC?: T;
+  MockUSDC?: T;
+  LP_XSGD_USDC?: T;
+  LP_FXPHP_USDC?: T;
   TAGPHP?: T;
 }
 
@@ -308,7 +317,20 @@ export type iAavePoolAssets<T> = Pick<
 
 export type iHaloPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'RNBW' | 'XSGD' | 'FXPHP' | 'UST' | 'HLP_XSGD_USDC' | 'HLP_UST_USDC'
+  | 'DAI'
+  | 'USDC'
+  | 'USDT'
+  | 'WBTC'
+  | 'WETH'
+  | 'RNBW'
+  | 'XSGD'
+  | 'FXPHP'
+  | 'UST'
+  | 'HLP_XSGD_USDC'
+  | 'HLP_UST_USDC'
+  | 'MockUSDC'
+  | 'LP_XSGD_USDC'
+  | 'LP_FXPHP_USDC'
 >;
 
 export type iHaloMaticPoolAssets<T> = Pick<
@@ -468,7 +490,8 @@ export type iParamsPerNetwork<T> =
   | iEthereumParamsPerNetwork<T>
   | iPolygonParamsPerNetwork<T>
   | iXDaiParamsPerNetwork<T>
-  | iAvalancheParamsPerNetwork<T>;
+  | iAvalancheParamsPerNetwork<T>
+  | iArbitrumParamsPerNetwork<T>;
 
 export interface iParamsPerNetworkAll<T>
   extends iEthereumParamsPerNetwork<T>,
@@ -499,10 +522,16 @@ export interface iAvalancheParamsPerNetwork<T> {
   [eAvalancheNetwork.fuji]: T;
 }
 
+export interface iArbitrumParamsPerNetwork<T> {
+  [eArbitrumNetwork.arbitrum]: T;
+  [eArbitrumNetwork.arbitrumRinkeby]: T;
+}
+
 export interface iParamsPerPool<T> {
   [AavePools.proto]: T;
   [AavePools.matic]: T;
   [AavePools.halo]: T;
+  [AavePools.haloArb]: T;
   [AavePools.amm]: T;
   [AavePools.avalanche]: T;
 }

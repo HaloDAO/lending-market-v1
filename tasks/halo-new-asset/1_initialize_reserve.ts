@@ -124,9 +124,10 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
 
     console.log('settting asset');
 
+    const properSymbol = symbol === 'MockUSDC' ? 'USDC' : symbol;
     await aaveOracle.setAssetSources(
       [assetAddress],
-      [haloContractAddresses(network).lendingMarket!.priceOracles[symbol]]
+      [haloContractAddresses(network).lendingMarket!.priceOracles[properSymbol]]
     );
 
     console.log('assetPrice: ', formatEther(await aaveOracle.getAssetPrice(assetAddress)));
