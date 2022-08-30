@@ -5,7 +5,13 @@ import { HardhatUserConfig } from 'hardhat/types';
 import { accounts } from './test-wallets.js';
 import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
-import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, NETWORK_DEFAULT_PRIORITYFEE, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
+import {
+  NETWORKS_RPC_URL,
+  NETWORKS_DEFAULT_GAS,
+  NETWORK_DEFAULT_PRIORITYFEE,
+  BLOCK_TO_FORK,
+  buildForkConfig,
+} from './helper-hardhat-config';
 
 require('dotenv').config();
 
@@ -41,7 +47,7 @@ if (!SKIP_LOAD) {
     'halo-main',
     'helpers/halo-helpers',
     'halo-new-asset',
-    'halo-matic'
+    'halo-matic',
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)
@@ -137,7 +143,7 @@ const buidlerConfig: HardhatUserConfig = {
         // blockNumber: 14651807,
       },
       accounts: {
-        //  accountsBalance: '100000000000000000000000', // 100000 ETH
+        accountsBalance: '100000000000000000000000', // 100000 ETH
         mnemonic: MNEMONIC,
       },
     }, // NOTE: use this for simulating transcations

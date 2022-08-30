@@ -25,6 +25,9 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
       [eEthereumNetwork.main]: {
         ethUsdOracle: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
       },
+      [ePolygonNetwork.matic]: {
+        ethUsdOracle: '0xf9680d99d6c9589e2a93a78a04a279e509205945',
+      },
     };
     const supportedNetworks = Object.keys(addressesByNetwork);
 

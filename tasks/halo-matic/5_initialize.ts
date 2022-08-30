@@ -5,7 +5,7 @@ import {
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
   authorizeWETHGateway,
-  deployTreasury,
+  // deployTreasury,
   deployRnbwIncentivesContoller,
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
@@ -41,20 +41,20 @@ task('halo:matic-initialize-5', 'Initialize lending pool configuration.')
     const admin = await addressesProvider.getPoolAdmin();
     const lendingPoolAddress = await addressesProvider.getLendingPool();
     const reserveAssets = await getParamPerNetwork(ReserveAssets, network);
-
+    const treasury = HALO_CONTRACT_ADDRESSES.matic.treasury;
     // Deploy Halo Contracts
     // HALO Treasury contract
-    const treasury = await deployTreasury(
-      [
-        lendingPoolAddress,
-        HALO_CONTRACT_ADDRESSES[network].rnbw,
-        HALO_CONTRACT_ADDRESSES[network].xrnbw,
-        HALO_CONTRACT_ADDRESSES[network].curveFactory,
-        HALO_CONTRACT_ADDRESSES[network].usdc,
-        HALO_CONTRACT_ADDRESSES[network].usdcRnbwPair,
-      ],
-      false
-    );
+    // const treasury = await deployTreasury(
+    //   [
+    //     lendingPoolAddress,
+    //     HALO_CONTRACT_ADDRESSES[network].rnbw,
+    //     HALO_CONTRACT_ADDRESSES[network].xrnbw,
+    //     HALO_CONTRACT_ADDRESSES[network].curveFactory,
+    //     HALO_CONTRACT_ADDRESSES[network].usdc,
+    //     HALO_CONTRACT_ADDRESSES[network].usdcRnbwPair,
+    //   ],
+    //   false
+    // );
 
     // HALO Incentives Controller contract
     // Distribution end set to 100 years
@@ -72,7 +72,7 @@ task('halo:matic-initialize-5', 'Initialize lending pool configuration.')
       VariableDebtTokenNamePrefix,
       SymbolPrefix,
       admin,
-      treasury.address,
+      treasury,
       incentiveController.address,
       ConfigNames.HaloMatic,
       verify
@@ -97,7 +97,6 @@ task('halo:matic-initialize-5', 'Initialize lending pool configuration.')
 
     console.log(`
     AaveProtocolDataProvider: ${testHelpers.address}
-    Halo Treasury: ${treasury.address}
     Halo IncentivesController: ${incentiveController.address}
     WalletBalanceProvider: ${walletBalanceProvider.address}
     `);

@@ -12,6 +12,7 @@ export const HALO_CONTRACT_ADDRESSES = {
     usdc: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
     usdcRnbwPair: '0x2bcfd3c474484a7b07ca616d70a36c184bbd7ef0', // sushi
     fallbackPriceOracle: '0x0000000000000000000000000000000000000000',
+    treasury: '0x5560659d9a4aB330dE2112fc8Ee0989857197728', // multisig
   },
   [ePolygonNetwork.mumbai]: {},
 };
