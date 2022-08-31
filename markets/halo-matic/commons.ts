@@ -74,7 +74,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   LendingPool: {
     [ePolygonNetwork.mumbai]: '',
-    [ePolygonNetwork.matic]: '',
+    [ePolygonNetwork.matic]: '0x51485c7278fa37f0f504F541f2755abda7715abf',
   },
   LendingPoolConfigurator: {
     [ePolygonNetwork.mumbai]: '',
