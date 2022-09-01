@@ -1,3 +1,4 @@
+import { matic } from '@halodao/halodao-contract-addresses';
 import { IMaticConfiguration, ePolygonNetwork, IHaloMaticConfiguration } from '../../helpers/types';
 
 import { CommonsConfig } from './commons';
@@ -42,9 +43,10 @@ export const HaloMaticConfig: IHaloMaticConfiguration = {
       WBTC: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
       WETH: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
       WMATIC: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-      XSGD: '0x769434dca303597c8fc4997bf3dab233e961eda2',
+      XSGD:  matic.tokens.XSGD!,
       FXPHP: '0x3d147cd9ac957b2a5f968de9d1c6b9d0872286a0',
-      TAGPHP: '0x69a8aaa4318f4803b3517f78a2ca6c859f5349f3'
+      TAGPHP: '0x69a8aaa4318f4803b3517f78a2ca6c859f5349f3',
+      LP_XSGD_USDC: matic.lendingMarket!.lpAssets.LP_XSGD_USDC!
     },
     [ePolygonNetwork.mumbai]: {
       // Mock tokens with a simple "mint" external function, except wmatic

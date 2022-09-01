@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { oneEther, oneRay, RAY, ZERO_ADDRESS, MOCK_CHAINLINK_AGGREGATORS_PRICES } from '../../helpers/constants';
 import { ICommonConfiguration, ePolygonNetwork } from '../../helpers/types';
+import { matic } from '@halodao/halodao-contract-addresses';
 
 // ----------------
 // PROTOCOL GLOBAL PARAMS
@@ -124,6 +125,7 @@ export const CommonsConfig: ICommonConfiguration = {
       FXPHP: '0x24eA470A0836B5D24d82fEf1f55ad4C79DFd0b04',
       TAGPHP: '0x24eA470A0836B5D24d82fEf1f55ad4C79DFd0b04',
       XSGD: '0x22070511b8985C8694413847ed81E6A856d27D33',
+      LP_FXPHP_USDC:  matic.lendingMarket!.priceOracles.LP_XSGD_USDC!
     },
     [ePolygonNetwork.mumbai]: {
       DAI: ZERO_ADDRESS,
