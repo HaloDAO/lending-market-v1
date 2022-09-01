@@ -125,7 +125,7 @@ export const CommonsConfig: ICommonConfiguration = {
       FXPHP: '0x24eA470A0836B5D24d82fEf1f55ad4C79DFd0b04',
       TAGPHP: '0x24eA470A0836B5D24d82fEf1f55ad4C79DFd0b04',
       XSGD: '0x22070511b8985C8694413847ed81E6A856d27D33',
-      BPT_FXPHP_USDC: matic.lendingMarket!.priceOracles.LP_XSGD_USDC!,
+      BPT_XSGD_USDC: matic.lendingMarket!.priceOracles.LP_XSGD_USDC!,
     },
     [ePolygonNetwork.mumbai]: {
       DAI: ZERO_ADDRESS,
