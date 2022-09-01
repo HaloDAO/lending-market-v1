@@ -9,10 +9,10 @@ import { matic } from '@halodao/halodao-contract-addresses';
 
 export const CommonsConfig: ICommonConfiguration = {
   MarketId: 'Commons',
-  ATokenNamePrefix: 'Aave Matic Market',
-  StableDebtTokenNamePrefix: 'Aave Matic Market stable debt',
-  VariableDebtTokenNamePrefix: 'Aave Matic Market variable debt',
-  SymbolPrefix: 'm',
+  ATokenNamePrefix: 'Xave Matic Market',
+  StableDebtTokenNamePrefix: 'Xave Matic Market stable debt',
+  VariableDebtTokenNamePrefix: 'Xave Matic Market variable debt',
+  SymbolPrefix: 'x',
   ProviderId: 0, // Overriden in index.ts
   OracleQuoteCurrency: 'ETH',
   OracleQuoteUnit: oneEther.toString(),

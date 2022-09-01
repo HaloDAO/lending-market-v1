@@ -12,7 +12,7 @@ import {
   strategyAAVE,
   strategyXSGD,
   strategyFXPHP,
-  strategyTAGPHP
+  strategyTAGPHP,
 } from './reservesConfigs';
 
 // ----------------
@@ -21,7 +21,7 @@ import {
 
 export const HaloMaticConfig: IHaloMaticConfiguration = {
   ...CommonsConfig,
-  MarketId: 'Halo Matic Market',
+  MarketId: 'Xave Matic Market',
   ProviderId: 3,
   ReservesConfig: {
     DAI: strategyDAI,
@@ -33,7 +33,7 @@ export const HaloMaticConfig: IHaloMaticConfiguration = {
     AAVE: strategyAAVE,
     XSGD: strategyXSGD,
     FXPHP: strategyFXPHP,
-    TAGPHP: strategyTAGPHP
+    TAGPHP: strategyTAGPHP,
   },
   ReserveAssets: {
     [ePolygonNetwork.matic]: {
