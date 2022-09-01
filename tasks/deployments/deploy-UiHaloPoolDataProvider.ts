@@ -32,6 +32,9 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
       [eEthereumNetwork.main]: {
         ethUsdOracle: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
       },
+      [ePolygonNetwork.matic]: {
+        ethUsdOracle: '0xf9680d99d6c9589e2a93a78a04a279e509205945',
+      },
       //@todo: replace with actual ETH/USD oracle for Arbitrum network
       [eArbitrumNetwork.arbitrumRinkeby]: {
         ethUsdOracle: '0x5f0423B1a6935dc5596e7A24d98532b67A0AeFd8',

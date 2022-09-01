@@ -281,6 +281,7 @@ export interface iAssetBase<T> {
   MockUSDC?: T;
   LP_XSGD_USDC?: T;
   LP_FXPHP_USDC?: T;
+  TAGPHP?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -330,6 +331,11 @@ export type iHaloPoolAssets<T> = Pick<
   | 'MockUSDC'
   | 'LP_XSGD_USDC'
   | 'LP_FXPHP_USDC'
+>;
+
+export type iHaloMaticPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP'
 >;
 
 export type iLpPoolAssets<T> = Pick<
@@ -613,6 +619,10 @@ export interface IAaveConfiguration extends ICommonConfiguration {
 
 export interface IHaloConfiguration extends ICommonConfiguration {
   ReservesConfig: iHaloPoolAssets<IReserveParams>;
+}
+
+export interface IHaloMaticConfiguration extends ICommonConfiguration {
+  ReservesConfig: iHaloMaticPoolAssets<IReserveParams>;
 }
 
 export interface IAmmConfiguration extends ICommonConfiguration {

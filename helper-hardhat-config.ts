@@ -42,7 +42,8 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
   [ePolygonNetwork.mumbai]: 'https://rpc-mumbai.maticvigil.com',
   [ePolygonNetwork.matic]:
     // 'https://rpc-mainnet.maticvigil.com/v1/e616b9ddc7598ffae92629f8145614d55094c722',
-    'https://polygon-mainnet.g.alchemy.com/v2/6NUmfWDZw6lC3RPAphj0p_2vm7ElOn2U',
+    // 'https://polygon-mainnet.g.alchemy.com/v2/6NUmfWDZw6lC3RPAphj0p_2vm7ElOn2U',
+    `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
   // [ePolygonNetwork.matic]: 'https://rpc-mainnet.matic.network',
   [eXDaiNetwork.xdai]: 'https://rpc.xdaichain.com/',
   [eAvalancheNetwork.avalanche]: 'https://api.avax.network/ext/bc/C/rpc',
@@ -60,12 +61,27 @@ export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
   [eEthereumNetwork.buidlerevm]: 65 * GWEI,
   [eEthereumNetwork.tenderly]: 1 * GWEI,
   [ePolygonNetwork.mumbai]: 1 * GWEI,
-  [ePolygonNetwork.matic]: 1 * GWEI,
+  [ePolygonNetwork.matic]: 65 * GWEI,
   [eXDaiNetwork.xdai]: 1 * GWEI,
   [eAvalancheNetwork.avalanche]: 225 * GWEI,
   [eAvalancheNetwork.fuji]: 85 * GWEI,
   [eArbitrumNetwork.arbitrum]: 10 * GWEI,
   [eArbitrumNetwork.arbitrumRinkeby]: 65 * GWEI,
+};
+
+export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
+  [eEthereumNetwork.kovan]: 1 * GWEI,
+  [eEthereumNetwork.ropsten]: 1 * GWEI,
+  [eEthereumNetwork.main]: 1 * GWEI,
+  [eEthereumNetwork.coverage]: 1 * GWEI,
+  [eEthereumNetwork.hardhat]: 1 * GWEI,
+  [eEthereumNetwork.buidlerevm]: 1 * GWEI,
+  [eEthereumNetwork.tenderly]: 1 * GWEI,
+  [ePolygonNetwork.mumbai]: 1 * GWEI,
+  [ePolygonNetwork.matic]: 2 * GWEI,
+  [eXDaiNetwork.xdai]: 1 * GWEI,
+  [eAvalancheNetwork.avalanche]: 1 * GWEI,
+  [eAvalancheNetwork.fuji]: 1 * GWEI,
 };
 
 export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {

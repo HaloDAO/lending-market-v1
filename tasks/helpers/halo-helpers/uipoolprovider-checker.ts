@@ -16,8 +16,8 @@ task(`external:uipoolprovider-checker`, `Check UI Pool Provider`).setAction(asyn
   }
   const network = localBRE.network.name;
 
-  const uiPoolDataProvider = await getHaloUiPoolDataProvider('0xbca5c841eC9cC6Bd54ee18450eAe3B4D7b68146b');
-  const uiIncentivesDataProvider = await getIncentivePoolDataProvider('0x22fA9599D8007B279BB935718DeE408fCad9Ea0B');
+  const uiPoolDataProvider = await getHaloUiPoolDataProvider('0x7B007AC2B082E81542CfC74dA327E4bbFd5B9904');
+  // const uiIncentivesDataProvider = await getIncentivePoolDataProvider('0x22fA9599D8007B279BB935718DeE408fCad9Ea0B');
 
-  console.log(await uiPoolDataProvider.getReservesData('0x8eBFB2FC668a0ccCC8ADa5133c721a34060D1cDe'));
+  console.log(await uiPoolDataProvider.getReservesData('0x1D5da10918CAC00a62a22532881B9c83C1C9551a'));
 });
