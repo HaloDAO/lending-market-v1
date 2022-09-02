@@ -335,7 +335,7 @@ export type iHaloPoolAssets<T> = Pick<
 
 export type iHaloMaticPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP'
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP' | 'BPT_XSGD_USDC'
 >;
 
 export type iLpPoolAssets<T> = Pick<

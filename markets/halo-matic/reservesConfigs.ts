@@ -130,7 +130,7 @@ export const strategyTAGPHP: IReserveParams = {
   reserveFactor: '1000',
 };
 
-export const strategyLP_XSGD_USDC: IReserveParams = {
+export const strategyBPT_XSGD_USDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8500',
