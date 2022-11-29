@@ -14,34 +14,26 @@ import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 import { eContractid } from '../../helpers/types';
 import { waitForTx, notFalsyOrZeroAddress } from '../../helpers/misc-utils';
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
-import { getLendingPoolAddressesProvider, getWETHGateway } from '../../helpers/contracts-getters';
+import {
+  getAaveProtocolDataProvider,
+  getLendingPoolAddressesProvider,
+  getWETHGateway,
+} from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo-matic/constants';
 
-task('halo:matic-initialize-5', 'Initialize lending pool configuration.')
+task('halo:matic-initialize-5-a', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>localBRE.network.name;
 
-    const poolConfig = loadPoolConfig(ConfigNames.HaloMatic);
-    const {
-      ATokenNamePrefix,
-      StableDebtTokenNamePrefix,
-      VariableDebtTokenNamePrefix,
-      SymbolPrefix,
-      WethGateway,
-      ReserveAssets,
-      ReservesConfig,
-    } = poolConfig;
-
     const addressesProvider = await getLendingPoolAddressesProvider();
 
+    console.log('deploying aave protocol data provider');
     const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, verify);
-    const admin = await addressesProvider.getPoolAdmin();
-    const lendingPoolAddress = await addressesProvider.getLendingPool();
-    const reserveAssets = await getParamPerNetwork(ReserveAssets, network);
-    const treasury = HALO_CONTRACT_ADDRESSES.matic.treasury;
+    await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
+
     // Deploy Halo Contracts
     // HALO Treasury contract
     // const treasury = await deployTreasury(
@@ -58,46 +50,15 @@ task('halo:matic-initialize-5', 'Initialize lending pool configuration.')
 
     // HALO Incentives Controller contract
     // Distribution end set to 100 years
+    console.log('deploying incentive controller');
     const incentiveController = await deployRnbwIncentivesContoller(
       [HALO_CONTRACT_ADDRESSES[network].rewardToken, HALO_CONTRACT_ADDRESSES[network].emissionManager, '3153600000'],
       false
     );
 
-    // Initialize and Configure Reserves, Atokens, Debt Tokens
-    await initReservesByHelper(
-      ReservesConfig,
-      reserveAssets,
-      ATokenNamePrefix,
-      StableDebtTokenNamePrefix,
-      VariableDebtTokenNamePrefix,
-      SymbolPrefix,
-      admin,
-      treasury,
-      incentiveController.address,
-      ConfigNames.HaloMatic,
-      verify
-    );
-
-    await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
-
-    const collateralManager = await deployLendingPoolCollateralManager(verify);
-    await waitForTx(await addressesProvider.setLendingPoolCollateralManager(collateralManager.address));
-
-    // TODO: Check but skip first
-    // const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(addressesProvider.address, verify);
-    // await insertContractAddressInDb(eContractid.MockFlashLoanReceiver, mockFlashLoanReceiver.address);
-
-    const walletBalanceProvider = await deployWalletBalancerProvider(verify);
-    await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
-
-    let gateway = getParamPerNetwork(WethGateway, network);
-
-    await authorizeWETHGateway(gateway, lendingPoolAddress);
-    console.log('WETH Gateway Authorized');
-
     console.log(`
     AaveProtocolDataProvider: ${testHelpers.address}
     Halo IncentivesController: ${incentiveController.address}
-    WalletBalanceProvider: ${walletBalanceProvider.address}
+  
     `);
   });

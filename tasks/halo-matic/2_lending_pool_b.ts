@@ -16,38 +16,20 @@ import {
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
-task('halo:matic-lendingpool-2', 'Deploy lending pool for prod enviroment')
+task('halo:matic-lendingpool-2-b', 'Deploy lending pool for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
 
     const addressesProvider = await getLendingPoolAddressesProvider();
-    const lendingPoolImpl = await deployLendingPool(verify);
-    console.log('deploying lending pool implementation');
     const poolConfig = loadPoolConfig(ConfigNames.HaloMatic);
-
-    // Set lending pool impl to Address Provider
-    await waitForTx(await addressesProvider.setLendingPoolImpl(lendingPoolImpl.address));
-    console.log('setting lending pool implementation');
-
-    const address = await addressesProvider.getLendingPool();
-    const lendingPoolProxy = await getLendingPool(address);
-
-    await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
-
-    const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(verify);
-    console.log('deploying lending pool configurator');
-
-    // Set lending pool conf impl to Address Provider
-    await waitForTx(await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address));
-    console.log('setting lending pool configurator implementation');
-
+    const lendingPoolProxy = await getLendingPool(addressesProvider.address);
     const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
       await addressesProvider.getLendingPoolConfigurator()
     );
-    await insertContractAddressInDb(eContractid.LendingPoolConfigurator, lendingPoolConfiguratorProxy.address);
 
     // Deploy deployment helper contracts
+    console.log('deploying helper contracts ');
     const stableAndVariableTokensHelper = await deployStableAndVariableTokensHelper(
       [lendingPoolProxy.address, addressesProvider.address],
       verify
@@ -59,16 +41,12 @@ task('halo:matic-lendingpool-2', 'Deploy lending pool for prod enviroment')
       verify
     );
 
-    console.log('deploying a tokens and rates helper');
-
+    console.log('deploying aTokens and rates helper');
     await deployATokenImplementations(ConfigNames.HaloMatic, poolConfig.ReservesConfig, verify);
 
     console.log('deploy aToken implementations');
 
     console.log(`
-    LendingPoolProxy: ${lendingPoolProxy.address}
-    LendingPoolConfiguratorImpl: ${lendingPoolConfiguratorImpl.address}
-    LendingPoolConfiguratorProxy: ${lendingPoolConfiguratorProxy.address}
     StableAndVariableTokensHelper: ${stableAndVariableTokensHelper.address}
     aTokensAndRatesHelper: ${aTokensAndRatesHelper.address}
     `);

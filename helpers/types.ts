@@ -279,7 +279,7 @@ export interface iAssetBase<T> {
   HLP_XSGD_USDC?: T;
   HLP_UST_USDC?: T;
   MockUSDC?: T;
-  LP_XSGD_USDC?: T;
+  BPT_XSGD_USDC?: T;
   LP_FXPHP_USDC?: T;
   TAGPHP?: T;
 }
@@ -329,13 +329,13 @@ export type iHaloPoolAssets<T> = Pick<
   | 'HLP_XSGD_USDC'
   | 'HLP_UST_USDC'
   | 'MockUSDC'
-  | 'LP_XSGD_USDC'
+  | 'BPT_XSGD_USDC'
   | 'LP_FXPHP_USDC'
 >;
 
 export type iHaloMaticPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP'
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP' | 'BPT_XSGD_USDC'
 >;
 
 export type iLpPoolAssets<T> = Pick<
