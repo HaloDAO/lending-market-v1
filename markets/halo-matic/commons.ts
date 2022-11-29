@@ -87,7 +87,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ProviderRegistryOwner: {
     [ePolygonNetwork.mumbai]: '0x943E44157dC0302a5CEb172374d1749018a00994',
-    [ePolygonNetwork.matic]: '0xC76Ec28801ad09020fB89da48306176e56960CC5',
+    [ePolygonNetwork.matic]: '0x01e198818a895f01562e0a087595e5b1c7bb8d5c',
   },
   LendingRateOracle: {
     [ePolygonNetwork.mumbai]: '0xC661e1445F9a8E5FD3C3dbCa0A0A2e8CBc79725D',
