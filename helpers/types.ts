@@ -281,6 +281,7 @@ export interface iAssetBase<T> {
   MockUSDC?: T;
   BPT_XSGD_USDC?: T;
   LP_FXPHP_USDC?: T;
+  LP_EURS_USDC?: T;
   TAGPHP?: T;
 }
 
@@ -331,6 +332,7 @@ export type iHaloPoolAssets<T> = Pick<
   | 'MockUSDC'
   | 'BPT_XSGD_USDC'
   | 'LP_FXPHP_USDC'
+  | 'LP_EURS_USDC'
 >;
 
 export type iHaloMaticPoolAssets<T> = Pick<

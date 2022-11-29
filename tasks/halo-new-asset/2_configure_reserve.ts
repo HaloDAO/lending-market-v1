@@ -38,8 +38,8 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
         liquidationThreshold: '8500',
         liquidationBonus: '10500',
         reserveFactor: '1000',
-        stableBorrowingEnabled: true,
-        borrowingEnabled: true,
+        stableBorrowingEnabled: false,
+        borrowingEnabled: false,
       },
     ];
 
