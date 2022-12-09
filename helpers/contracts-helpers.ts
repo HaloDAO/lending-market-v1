@@ -32,6 +32,7 @@ import { usingPolygon, verifyAtPolygon } from './polygon-utils';
 import { ConfigNames, loadPoolConfig } from './configuration';
 import { ZERO_ADDRESS } from './constants';
 import { getDefenderRelaySigner, usingDefender } from './defender-utils';
+import { LedgerSigner } from '@anders-t/ethers-ledger';
 
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
 
@@ -80,6 +81,16 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
     return [await getDefenderRelaySigner(), ...users];
   }
   return ethersSigners;
+};
+
+export const getLedgerSigner = async (): Promise<Signer> => {
+  const LEDGER_ACCOUNT_PATH = "44'/60'/0'/0/0";
+  const defaultProvider = await DRE.ethers.getDefaultProvider();
+
+  const signer = new LedgerSigner(); // @todo test: use all defaults? what if null provider?
+  // const signer = new LedgerSigner(defaultProvider, LEDGER_ACCOUNT_PATH);
+
+  return signer;
 };
 
 export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =>

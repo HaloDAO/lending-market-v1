@@ -13,7 +13,8 @@ import {
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getPriceOracle,
-} from '../../helpers/contracts-getters';
+} from '../../helpers/contracts-getters-ledger';
+
 import {
   deployDefaultReserveInterestRateStrategy,
   deployStableDebtToken,
