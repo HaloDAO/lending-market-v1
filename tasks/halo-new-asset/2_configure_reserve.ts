@@ -3,7 +3,7 @@ import {
   getATokensAndRatesHelper,
   getFirstSigner,
   getLendingPoolAddressesProvider,
-} from '../../helpers/contracts-getters';
+} from '../../helpers/contracts-getters-ledger';
 import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
 import { getAssetAddress } from '../helpers/halo-helpers/util-getters';
 
