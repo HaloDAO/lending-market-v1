@@ -384,3 +384,15 @@ export const strategyLP_FXPHP_USDC: IReserveParams = {
   aTokenImpl: eContractid.AToken,
   reserveFactor: '1000',
 };
+
+export const strategyLP_EURS_USDC: IReserveParams = {
+  strategy: rateStrategyStableThree,
+  baseLTVAsCollateral: '8000',
+  liquidationThreshold: '8500',
+  liquidationBonus: '10500',
+  borrowingEnabled: false,
+  stableBorrowRateEnabled: false,
+  reserveDecimals: '18',
+  aTokenImpl: eContractid.AToken,
+  reserveFactor: '1000',
+};

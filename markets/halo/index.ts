@@ -20,6 +20,7 @@ import {
   strategyMockUSDC,
   strategyLP_XSGD_USDC,
   strategyLP_FXPHP_USDC,
+  strategyLP_EURS_USDC,
 } from './reservesConfigs';
 
 // ----------------
@@ -43,8 +44,8 @@ export const HaloConfig: IHaloConfiguration = {
     HLP_XSGD_USDC: strategyHLP_XSGD_USDC,
     HLP_UST_USDC: strategyHLP_UST_USDC,
     MockUSDC: strategyMockUSDC,
-    LP_XSGD_USDC: strategyLP_XSGD_USDC,
     LP_FXPHP_USDC: strategyLP_FXPHP_USDC,
+    LP_EURS_USDC: strategyLP_EURS_USDC,
   },
   ReserveAssets: {
     [eEthereumNetwork.buidlerevm]: {},
@@ -88,6 +89,7 @@ export const HaloConfig: IHaloConfiguration = {
       UST: mainnet.tokens.UST!,
       HLP_XSGD_USDC: '0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A',
       HLP_UST_USDC: '0x868084406449bda10a5bd556fb33cef5086b0797',
+      LP_EURS_USDC: mainnet.ammV2.pools.all.LP_EURS_USDC!,
     },
     [eEthereumNetwork.tenderly]: {},
   },
