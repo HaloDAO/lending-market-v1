@@ -1,9 +1,6 @@
 import { task } from 'hardhat/config';
-import {
-  getATokensAndRatesHelper,
-  getFirstSigner,
-  getLendingPoolAddressesProvider,
-} from '../../helpers/contracts-getters';
+import { getATokensAndRatesHelper, getLendingPoolAddressesProvider } from '../../helpers/contracts-getters-ledger';
+import { getLedgerSigner } from '../../helpers/contracts-helpers';
 import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
 import { getAssetAddress } from '../helpers/halo-helpers/util-getters';
 
@@ -12,6 +9,7 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
   .addFlag('lp', 'If asset is an LP')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify, symbol, lp }, localBRE) => {
+    await localBRE.run('set-DRE');
     const network = localBRE.network.name;
 
     const assetAddress = getAssetAddress(lp, network, symbol);
@@ -26,7 +24,7 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
       haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
     );
 
-    const signer = await localBRE.ethers.getSigners();
+    const signer = await getLedgerSigner();
 
     await addressProvider.setPoolAdmin(haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper);
 

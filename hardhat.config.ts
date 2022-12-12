@@ -3,7 +3,14 @@ import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork, eArbitrumNetwork} from './helpers/types';
+import {
+  eAvalancheNetwork,
+  eEthereumNetwork,
+  eNetwork,
+  ePolygonNetwork,
+  eXDaiNetwork,
+  eArbitrumNetwork,
+} from './helpers/types';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
 import {
   NETWORKS_RPC_URL,
@@ -143,7 +150,8 @@ const buidlerConfig: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: 'https://eth-mainnet.alchemyapi.io/v2/DiPOcqLZRi6pPRizpQTbb5AGppuRI0dI',
-        blockNumber: 14632357, // before deploying new assets
+        blockNumber: 16166868,
+        // blockNumber: 14632357, // before deploying new assets
         // blockNumber: 14651807,
       },
       accounts: {

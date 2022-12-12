@@ -61,6 +61,7 @@ export const HaloConfig: IHaloConfiguration = {
       UST: '0xa693b19d2931d498c5b318df961919bb4aee87a5',
       HLP_XSGD_USDC: '0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A',
       HLP_UST_USDC: '0x868084406449bda10a5bd556fb33cef5086b0797',
+      LP_EURS_USDC: mainnet.ammV2.pools.all.LP_EURS_USDC!,
     }, // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.coverage]: {},
     [eEthereumNetwork.kovan]: {

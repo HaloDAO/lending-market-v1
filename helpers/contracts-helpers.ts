@@ -23,7 +23,7 @@ import {
   iArbitrumParamsPerNetwork,
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
-import { Artifact } from 'hardhat/types';
+import { Artifact, HardhatRuntimeEnvironment } from 'hardhat/types';
 import { Artifact as BuidlerArtifact } from '@nomiclabs/buidler/types';
 import { verifyEtherscanContract } from './etherscan-verification';
 import { getFirstSigner, getIErc20Detailed } from './contracts-getters';
@@ -82,6 +82,15 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
   return ethersSigners;
 };
 
+export const getLedgerSigner = async (): Promise<Signer> => {
+  const framerRPC = 'http://127.0.0.1:1248';
+
+  const ledgerProvider = await new DRE.ethers.providers.JsonRpcProvider(framerRPC);
+  const signer = await ledgerProvider.getSigner(0);
+
+  return signer;
+};
+
 export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =>
   await Promise.all((await getEthersSigners()).map((signer) => signer.getAddress()));
 
@@ -98,6 +107,18 @@ export const deployContract = async <ContractType extends Contract>(
 ): Promise<ContractType> => {
   const contract = (await (await DRE.ethers.getContractFactory(contractName))
     .connect(await getFirstSigner())
+    .deploy(...args)) as ContractType;
+  await waitForTx(contract.deployTransaction);
+  await registerContractInJsonDb(<eContractid>contractName, contract);
+  return contract;
+};
+
+export const deployContractWithLedger = async <ContractType extends Contract>(
+  contractName: string,
+  args: any[]
+): Promise<ContractType> => {
+  const contract = (await (await DRE.ethers.getContractFactory(contractName))
+    .connect(await getLedgerSigner())
     .deploy(...args)) as ContractType;
   await waitForTx(contract.deployTransaction);
   await registerContractInJsonDb(<eContractid>contractName, contract);
