@@ -20,7 +20,7 @@ import {
   deployVariableDebtToken,
   chooseATokenDeployment,
 } from '../../helpers/contracts-deployments-ledger';
-import { setDRE } from '../../helpers/misc-utils';
+
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
 import { formatEther } from '@ethersproject/units';
@@ -56,110 +56,110 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
 
     // deploy new asset
     const signer = await getLedgerSigner();
-    console.log(await signer.getAddress());
-    // const strategyParams = reserveConfigs['strategy' + symbol];
-    // const reserveAssetAddress = marketConfigs.HaloConfig.ReserveAssets[localBRE.network.name][symbol];
-    // const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
-    // const addressProvider = await getLendingPoolAddressesProvider(
-    //   haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
-    // );
 
-    // const assetAddress = getAssetAddress(lp, network, symbol);
+    const strategyParams = reserveConfigs['strategy' + symbol];
+    const reserveAssetAddress = marketConfigs.HaloConfig.ReserveAssets[localBRE.network.name][symbol];
+    const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
+    const addressProvider = await getLendingPoolAddressesProvider(
+      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
+    );
 
-    // console.log(`assetAddress is: ${assetAddress} and it is a ${lp ? 'LP token' : 'not a LP token'}`);
+    const assetAddress = getAssetAddress(lp, network, symbol);
 
-    // const assetERC20Instance = await getIErc20Detailed(assetAddress);
+    console.log(`assetAddress is: ${assetAddress} and it is a ${lp ? 'LP token' : 'not a LP token'}`);
 
-    // const assetDecimals = await assetERC20Instance.decimals();
-    // console.log('Decimals: ', assetDecimals);
+    const assetERC20Instance = await getIErc20Detailed(assetAddress);
 
-    // const poolAddress = await addressProvider.getLendingPool();
+    const assetDecimals = await assetERC20Instance.decimals();
+    console.log('Decimals: ', assetDecimals);
 
-    // const aToken = await deployCustomAToken(verify);
-    // const stableDebt = await deployStableDebtToken(
-    //   [
-    //     poolAddress,
-    //     reserveAssetAddress,
-    //     ZERO_ADDRESS, // Incentives Controller
-    //     `Halo stable debt bearing ${symbol}`,
-    //     `hStableDebt${symbol}`,
-    //   ],
-    //   verify
-    // );
-    // const variableDebt = await deployVariableDebtToken(
-    //   [
-    //     poolAddress,
-    //     reserveAssetAddress,
-    //     ZERO_ADDRESS, // Incentives Controller
-    //     `Halo variable debt bearing ${symbol}`,
-    //     `hVariableDebt${symbol}`,
-    //   ],
-    //   verify
-    // );
-    // const rates = await deployDefaultReserveInterestRateStrategy(
-    //   [
-    //     addressProvider.address,
-    //     strategyParams.strategy.optimalUtilizationRate,
-    //     strategyParams.strategy.baseVariableBorrowRate,
-    //     strategyParams.strategy.variableRateSlope1,
-    //     strategyParams.strategy.variableRateSlope2,
-    //     strategyParams.strategy.stableRateSlope1,
-    //     strategyParams.strategy.stableRateSlope2,
-    //   ],
-    //   verify
-    // );
-    // console.log(`
-    // New interest bearing asset deployed on ${network}:
-    // Interest bearing a${symbol} address: ${aToken.address}
-    // Variable Debt variableDebt${symbol} address: ${variableDebt.address}
-    // Stable Debt stableDebt${symbol} address: ${stableDebt.address}
-    // Strategy Implementation for ${symbol} address: ${rates.address}
-    // `);
+    const poolAddress = await addressProvider.getLendingPool();
 
-    // // init new asset
-    // const uiPoolDataProvider = await getHaloUiPoolDataProvider(
-    //   haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
-    // );
-    // const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
-    // const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy(
-    //   haloContractAddresses(network).lendingMarket!.protocol.lendingPoolConfigurator
-    // );
+    const aToken = await deployCustomAToken(verify);
+    const stableDebt = await deployStableDebtToken(
+      [
+        poolAddress,
+        reserveAssetAddress,
+        ZERO_ADDRESS, // Incentives Controller
+        `Halo stable debt bearing ${symbol}`,
+        `hStableDebt${symbol}`,
+      ],
+      verify
+    );
+    const variableDebt = await deployVariableDebtToken(
+      [
+        poolAddress,
+        reserveAssetAddress,
+        ZERO_ADDRESS, // Incentives Controller
+        `Halo variable debt bearing ${symbol}`,
+        `hVariableDebt${symbol}`,
+      ],
+      verify
+    );
+    const rates = await deployDefaultReserveInterestRateStrategy(
+      [
+        addressProvider.address,
+        strategyParams.strategy.optimalUtilizationRate,
+        strategyParams.strategy.baseVariableBorrowRate,
+        strategyParams.strategy.variableRateSlope1,
+        strategyParams.strategy.variableRateSlope2,
+        strategyParams.strategy.stableRateSlope1,
+        strategyParams.strategy.stableRateSlope2,
+      ],
+      verify
+    );
+    console.log(`
+    New interest bearing asset deployed on ${network}:
+    Interest bearing a${symbol} address: ${aToken.address}
+    Variable Debt variableDebt${symbol} address: ${variableDebt.address}
+    Stable Debt stableDebt${symbol} address: ${stableDebt.address}
+    Strategy Implementation for ${symbol} address: ${rates.address}
+    `);
 
-    // console.log('settting asset');
+    // init new asset
+    const uiPoolDataProvider = await getHaloUiPoolDataProvider(
+      haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
+    );
+    const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
+    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy(
+      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolConfigurator
+    );
 
-    // const properSymbol = symbol === 'MockUSDC' ? 'USDC' : symbol;
-    // await aaveOracle.setAssetSources(
-    //   [assetAddress],
-    //   [haloContractAddresses(network).lendingMarket!.priceOracles[properSymbol]]
-    // );
+    console.log('settting asset');
 
-    // console.log('assetPrice: ', formatEther(await aaveOracle.getAssetPrice(assetAddress)));
+    const properSymbol = symbol === 'MockUSDC' ? 'USDC' : symbol;
+    await aaveOracle.setAssetSources(
+      [assetAddress],
+      [haloContractAddresses(network).lendingMarket!.priceOracles[properSymbol]]
+    );
 
-    // await lendingPoolConfigurator.batchInitReserve([
-    //   {
-    //     aTokenImpl: aToken.address,
-    //     stableDebtTokenImpl: stableDebt.address,
-    //     variableDebtTokenImpl: variableDebt.address,
-    //     underlyingAssetDecimals: assetDecimals, // change
-    //     interestRateStrategyAddress: rates.address,
-    //     underlyingAsset: assetAddress, // change
-    //     treasury: await signer.getAddress(),
-    //     incentivesController: haloContractAddresses(network).lendingMarket!.protocol.rnbwIncentivesController!,
-    //     underlyingAssetName: symbol,
-    //     aTokenName: `h${symbol}`,
-    //     aTokenSymbol: `h${symbol}`,
-    //     variableDebtTokenName: `variable${symbol}`,
-    //     variableDebtTokenSymbol: `variable${symbol}`,
-    //     stableDebtTokenName: `stb${symbol}`,
-    //     stableDebtTokenSymbol: `stb${symbol}`,
-    //     params: '0x10',
-    //   },
-    // ]);
-    // console.log(
-    //   await uiPoolDataProvider.getReservesData(
-    //     haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
-    //   )
-    // );
+    console.log('assetPrice: ', formatEther(await aaveOracle.getAssetPrice(assetAddress)));
 
-    // console.log('Reserve initialization complete. Configuring reserve..');
+    await lendingPoolConfigurator.batchInitReserve([
+      {
+        aTokenImpl: aToken.address,
+        stableDebtTokenImpl: stableDebt.address,
+        variableDebtTokenImpl: variableDebt.address,
+        underlyingAssetDecimals: assetDecimals, // change
+        interestRateStrategyAddress: rates.address,
+        underlyingAsset: assetAddress, // change
+        treasury: await signer.getAddress(),
+        incentivesController: haloContractAddresses(network).lendingMarket!.protocol.rnbwIncentivesController!,
+        underlyingAssetName: symbol,
+        aTokenName: `h${symbol}`,
+        aTokenSymbol: `h${symbol}`,
+        variableDebtTokenName: `variable${symbol}`,
+        variableDebtTokenSymbol: `variable${symbol}`,
+        stableDebtTokenName: `stb${symbol}`,
+        stableDebtTokenSymbol: `stb${symbol}`,
+        params: '0x10',
+      },
+    ]);
+    console.log(
+      await uiPoolDataProvider.getReservesData(
+        haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
+      )
+    );
+
+    console.log('Reserve initialization complete. Configuring reserve..');
   });
