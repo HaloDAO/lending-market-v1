@@ -465,10 +465,12 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@halodao/halodao-contract-addresses@^1.0.15":
-  version "1.0.15"
-  resolved "https://registry.yarnpkg.com/@halodao/halodao-contract-addresses/-/halodao-contract-addresses-1.0.15.tgz#d3008ad67a2860dd737d8ba1cb84bccfdb2fa1b2"
-  integrity sha512-xUyxtFbmOkxKULuP9eq3LOdiZ79FrcwXfw5A8usqMQjYqMMo3bzdbbaIpxGKkm8fcvY0j1OlO27CY8DJTNvyEw==
+"@halodao/halodao-contract-addresses@^1.0.16":
+  version "1.0.16"
+  resolved "https://registry.yarnpkg.com/@halodao/halodao-contract-addresses/-/halodao-contract-addresses-1.0.16.tgz#63a5086eca40571d51559c5cdca767080303fc43"
+  integrity sha512-JLNdisffKdqbYGzrmp9C4//V50ODDboZAPwwSLoqRm8YQ1HY0IG85ggTQSnNoMT8JVgkRTIOM8P6qoO+nS0nog==
+  dependencies:
+    tsc "^2.0.4"
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
@@ -9486,6 +9488,11 @@ ts-node@^8.10.2:
     make-error "^1.1.1"
     source-map-support "^0.5.17"
     yn "3.1.1"
+
+tsc@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/tsc/-/tsc-2.0.4.tgz#5f6499146abea5dca4420b451fa4f2f9345238f5"
+  integrity sha512-fzoSieZI5KKJVBYGvwbVZs/J5za84f2lSTLPYf6AGiIf43tZ3GNrI1QzTLcjtyDDP4aLxd46RTZq1nQxe7+k5Q==
 
 tslib@^1.13.0, tslib@^1.7.1, tslib@^1.8.1, tslib@^1.9.3:
   version "1.14.1"
