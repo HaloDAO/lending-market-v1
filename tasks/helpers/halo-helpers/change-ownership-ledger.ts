@@ -19,8 +19,9 @@ task(`external:batch-change-ownership-ledger`, `Change ownership of all lending 
     }
 
     const network = localBRE.network.name;
-    // Change back to ops multisig
-    const NEW_OWNER = '0x009c4ba01488A15816093F96BA91210494E2C644'; // ledger ops
+
+    // From ledger to contract ops
+    const NEW_OWNER = '0xA4d521ae4302ffcf3cD5b257B45B16DAC726A057'; // contract ops
 
     // LendingPoolAddressesProvider
     const lendingPoolAddressesProvider = await getLendingPoolAddressesProvider(
