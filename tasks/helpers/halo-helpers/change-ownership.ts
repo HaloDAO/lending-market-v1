@@ -28,7 +28,9 @@ task(`external:batch-change-ownership`, `Change ownership of all lending market 
     );
     const txn1 = await lendingPoolAddressesProvider.transferOwnership(NEW_OWNER);
     await txn1.wait();
+
     console.log('txn 1 done - LendingPoolAddressesProvider');
+    console.log(`${lendingPoolAddressesProvider.owner()} is ${NEW_OWNER}`);
 
     // lendingPoolAddressesProviderRegistry
     const lendingPoolAddressesProviderRegistry = await getLendingPoolAddressesProviderRegistry(
@@ -38,6 +40,7 @@ task(`external:batch-change-ownership`, `Change ownership of all lending market 
     const txn2 = await lendingPoolAddressesProviderRegistry.transferOwnership(NEW_OWNER);
     await txn2.wait();
     console.log('txn 2 done - lendingPoolAddressesProviderRegistry');
+    console.log(`${lendingPoolAddressesProviderRegistry.owner()} is ${NEW_OWNER}`);
 
     // stableAndVariableTokensHelper
     const stableAndVariableTokensHelper = await getStableAndVariableTokensHelper(
@@ -47,6 +50,7 @@ task(`external:batch-change-ownership`, `Change ownership of all lending market 
     const txn3 = await stableAndVariableTokensHelper.transferOwnership(NEW_OWNER);
     await txn3.wait();
     console.log('txn 3 done - stableAndVariableTokensHelper');
+    console.log(`${stableAndVariableTokensHelper.owner()} is ${NEW_OWNER}`);
 
     // aTokensAndRatesHelper
     const aTokensAndRatesHelper = await getATokensAndRatesHelper(
@@ -55,12 +59,14 @@ task(`external:batch-change-ownership`, `Change ownership of all lending market 
     const txn4 = await aTokensAndRatesHelper.transferOwnership(NEW_OWNER);
     await txn4.wait();
     console.log('txn 4 done - aTokensAndRatesHelper');
+    console.log(`${aTokensAndRatesHelper.owner()} is ${NEW_OWNER}`);
 
     // aaveOracle
     const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
     const txn5 = await aaveOracle.transferOwnership(NEW_OWNER);
     await txn5.wait();
     console.log('txn 5 done -  aaveOracle');
+    console.log(`${aaveOracle.owner()} is ${NEW_OWNER}`);
 
     // lendingRateOracle
     const lendingRateOracle = await getLendingRateOracle(
@@ -68,12 +74,14 @@ task(`external:batch-change-ownership`, `Change ownership of all lending market 
     );
     const txn6 = await lendingRateOracle.transferOwnership(NEW_OWNER);
     await txn6.wait();
+    console.log(`${lendingRateOracle.owner()} is ${NEW_OWNER}`);
     console.log('txn 6 done - lendingRateOracle');
 
     // wethGateway
     const wethGateWay = await getWETHGateway(haloContractAddresses(network).lendingMarket!.protocol.wethGateway);
     const txn7 = await wethGateWay.transferOwnership(NEW_OWNER);
     await txn7.wait();
+    console.log(`${wethGateWay.owner()} is ${NEW_OWNER}`);
     console.log('txn 7 done - wethGateWay');
   }
 );
