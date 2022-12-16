@@ -27,6 +27,7 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
     const signer = await getLedgerSigner();
 
     await addressProvider.setPoolAdmin(haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper);
+    console.log('set pool admin done');
 
     // WARNING: This part is hardcoded since we are using the same strategy for all stable coins. Change if necessary
     const reserveConfig = [
@@ -42,8 +43,10 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
     ];
 
     await aTokensAndRatesHelper.configureReserves(reserveConfig);
-    await addressProvider.setPoolAdmin(await signer[0].getAddress());
+    console.log('configureReserves done');
+
+    await addressProvider.setPoolAdmin(await signer.getAddress());
     console.log(
-      `Pool Admin should be ${await signer[0].getAddress()}, your current pool adming is ${await addressProvider.getPoolAdmin()}`
+      `Pool Admin should be ${await signer.getAddress()}, your current pool adming is ${await addressProvider.getPoolAdmin()}`
     );
   });
