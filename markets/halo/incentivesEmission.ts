@@ -5,6 +5,7 @@ const AtokenAddresses = {
   [eEthereumNetwork.buidlerevm]: {},
   [eEthereumNetwork.hardhat]: {},
   [eEthereumNetwork.coverage]: {},
+  [eEthereumNetwork.goerli]: {}, // Update after deployment and adding RET to lending market
   [eEthereumNetwork.kovan]: {
     // AAVE: '0x8C98CD6686F28b49D28e561d37F017bB456CD8C5',
     BUSD: '0x15e778863C9357022Edb885C2A4e42c8B7974f9F',
@@ -28,6 +29,7 @@ export const HaloIncentives = {
     [eEthereumNetwork.buidlerevm]: {},
     [eEthereumNetwork.hardhat]: {},
     [eEthereumNetwork.coverage]: {},
+    [eEthereumNetwork.goerli]: {},
     [eEthereumNetwork.kovan]: [
       {
         emissionPerSecond: parseEther('2.2'),
@@ -44,7 +46,6 @@ export const HaloIncentives = {
         totalStaked: 0,
         underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].XSGD,
       },
-
       {
         emissionPerSecond: parseEther('1'),
         totalStaked: 0,
@@ -65,7 +66,6 @@ export const HaloIncentives = {
         totalStaked: 0,
         underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].USDC,
       },
-
       {
         emissionPerSecond: parseEther('1'),
         totalStaked: 0,

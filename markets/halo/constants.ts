@@ -5,6 +5,7 @@ export const HALO_CONTRACT_ADDRESSES = {
   [eEthereumNetwork.buidlerevm]: {},
   [eEthereumNetwork.hardhat]: {},
   [eEthereumNetwork.coverage]: {},
+  [eEthereumNetwork.goerli]: {}, // Update after deployment and adding RET to lending market
   [eEthereumNetwork.kovan]: {
     rewardToken: '0xCffb28605165012cc1e334336c72143eA1a8f47d',
     emissionManager: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',

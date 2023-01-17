@@ -14,32 +14,29 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
   .setAction(async ({ verify, symbol, lp }, localBRE) => {
     const network = localBRE.network.name;
 
-    const assetAddress = getAssetAddress(lp, network, symbol);
+    // const assetAddress = getAssetAddress(lp, network, symbol);
+    const assetAddress = '0x9649201B51de91E059076329531347a9e615ABC8';
 
     console.log(`assetAddress is: ${assetAddress} and it is a ${lp ? 'LP token' : 'not a LP token'}`);
 
-    const aTokensAndRatesHelper = await getATokensAndRatesHelper(
-      haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper
-    );
+    const aTokensAndRatesHelper = await getATokensAndRatesHelper('0xde29585a4134752632a07f09BCA0f02F72a33B8d');
 
-    const addressProvider = await getLendingPoolAddressesProvider(
-      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
-    );
+    const addressProvider = await getLendingPoolAddressesProvider('0x59847B1314E1A1cad9E0a207F6E53c04F4FAbFBD');
 
     const signer = await localBRE.ethers.getSigners();
 
-    await addressProvider.setPoolAdmin(haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper);
+    await addressProvider.setPoolAdmin('0xde29585a4134752632a07f09BCA0f02F72a33B8d');
 
     // WARNING: This part is hardcoded since we are using the same strategy for all stable coins. Change if necessary
     const reserveConfig = [
       {
         asset: assetAddress,
-        baseLTV: '8000',
-        liquidationThreshold: '8500',
-        liquidationBonus: '10500',
-        reserveFactor: '1000',
-        stableBorrowingEnabled: false,
-        borrowingEnabled: false,
+        baseLTV: '7000',
+        liquidationThreshold: '7500',
+        liquidationBonus: '11000',
+        reserveFactor: '2000',
+        stableBorrowingEnabled: true,
+        borrowingEnabled: true,
       },
     ];
 

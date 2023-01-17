@@ -60,6 +60,7 @@ export const AmmConfig: IAmmConfiguration = {
     [eEthereumNetwork.buidlerevm]: {},
     [eEthereumNetwork.hardhat]: {},
     [eEthereumNetwork.coverage]: {},
+    [eEthereumNetwork.goerli]: {}, // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: {
       DAI: '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD',
       USDC: '0xe22da380ee6B445bb8273C81944ADEB6E8450422',

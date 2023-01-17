@@ -80,6 +80,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.buidlerevm]: undefined,
     [eEthereumNetwork.coverage]: undefined,
     [eEthereumNetwork.hardhat]: undefined,
+    [eEthereumNetwork.goerli]: undefined, // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
     [eEthereumNetwork.ropsten]: undefined,
     [eEthereumNetwork.main]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
@@ -90,6 +91,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.hardhat]: undefined,
     [eEthereumNetwork.coverage]: undefined,
     [eEthereumNetwork.buidlerevm]: undefined,
+    [eEthereumNetwork.goerli]: undefined, // Update after deployment
     [eEthereumNetwork.kovan]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
     [eEthereumNetwork.ropsten]: undefined,
     [eEthereumNetwork.main]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
@@ -97,6 +99,7 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   EmergencyAdminIndex: 1,
   ProviderRegistry: {
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0xD692fb541265a8FB4dF4528c775735e4F535907F',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xC0453222F519e6D561652367662C2D305C23Be3e',
@@ -106,6 +109,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.tenderly]: '',
   },
   ProviderRegistryOwner: {
+    [eEthereumNetwork.goerli]: undefined, // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0x235A2ac113014F9dcb8aBA6577F20290832dDEFd',
@@ -119,6 +123,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '0xB626E339a0EF63a15585FAAb4483a1732aaD0A94', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0xFf4b5a92240CBaa0384f3d7f5e2D50772A80c42E',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xB626E339a0EF63a15585FAAb4483a1732aaD0A94',
@@ -128,6 +133,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x879ed8d0d2Fb84764D9aE9EF0fcE60B178593CE0',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '',
@@ -137,6 +143,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '0xCeE5D0fb8fF915D8C089f2B05edF138801E1dB0B', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0xBc61245fD99A65470A952e6661A9D630E7b47842',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xCeE5D0fb8fF915D8C089f2B05edF138801E1dB0B',
@@ -146,6 +153,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '0xC73b2c6ab14F25e1EAd3DE75b4F6879DEde3968E', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0xcE1E8c1b7664ae8E71180D40e9c160D243f211e1',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xC73b2c6ab14F25e1EAd3DE75b4F6879DEde3968E',
@@ -155,6 +163,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '0xa0576E91069098271951559369a31D89A123C796', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x2921B1CCf02F109f137dEC988A29562D6fBbc3D1',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xa0576E91069098271951559369a31D89A123C796',
@@ -164,6 +173,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.hardhat]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '',
@@ -173,6 +183,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC', // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x0beBf7C0504cf3eCE4c7f1a4AB70F4Ccc34Cbdb1',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC',
@@ -182,6 +193,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x50913E8E1c650E790F8a1E741FF9B1B1bB251dfe',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: ZERO_ADDRESS,
@@ -204,6 +216,7 @@ export const CommonsConfig: ICommonConfiguration = {
       HLP_UST_USDC: '0x6859a10034b260b80dfb4755D9AF4811045bb10f',
     }, // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.buidlerevm]: {},
+    [eEthereumNetwork.goerli]: {}, // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: {
       // BUSD: '0xbF7A18ea5DE0501f7559144e702b29c55b055CcB',
       DAI: '0x22B58f1EbEDfCA50feF632bD73368b2FdA96D541',
@@ -235,6 +248,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.hardhat]: {},
     [eEthereumNetwork.buidlerevm]: {},
     [eEthereumNetwork.main]: {},
+    [eEthereumNetwork.goerli]: {}, // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: {},
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.tenderly]: {},
@@ -244,6 +258,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '0x95b73a72c6ecf4ccbbba5178800023260bad8e75cdccdb8e4827a2977a37c820',
     [eEthereumNetwork.hardhat]: '0xbae024d959c6a022dc5ed37294cd39c141034b2ae5f02a955cce75c930a81bf5',
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '',
@@ -253,6 +268,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x1363b62C9A82007e409876A71B524bD63dDc67Dd',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -262,6 +278,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x1363b62C9A82007e409876A71B524bD63dDc67Dd',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -271,6 +288,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: ZERO_ADDRESS,
     [eEthereumNetwork.hardhat]: ZERO_ADDRESS,
     [eEthereumNetwork.buidlerevm]: '',
+    [eEthereumNetwork.goerli]: '', // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0xc6302b5062190513B79b10DE1DC3b232b1964131',
     [eEthereumNetwork.ropsten]: '',
     [eEthereumNetwork.main]: '0xcFd794e2fEA74446B598964826f324FF9Fd5e2d9',
@@ -280,6 +298,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.coverage]: ZERO_ADDRESS,
     [eEthereumNetwork.hardhat]: ZERO_ADDRESS,
     [eEthereumNetwork.buidlerevm]: ZERO_ADDRESS,
+    [eEthereumNetwork.goerli]: ZERO_ADDRESS, // Update after deployment and adding RET to lending market
     [eEthereumNetwork.kovan]: '0x11Fc815c42F3eAc9fC181e2e215a1A339493f5e8',
     [eEthereumNetwork.ropsten]: ZERO_ADDRESS,
     [eEthereumNetwork.main]: '0x79C2c904D042fE2F4FDDf6DCafFE3631fB7c6b9f',

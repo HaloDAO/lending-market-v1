@@ -26,6 +26,9 @@ task(`deploy-${eContractid.UiHaloPoolDataProvider}`, `Deploys the UiHaloPoolData
     const addressesByNetwork: {
       [key: string]: { ethUsdOracle: string };
     } = {
+      [eEthereumNetwork.goerli]: {
+        ethUsdOracle: '0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e',
+      },
       [eEthereumNetwork.kovan]: {
         ethUsdOracle: '0x9326BFA02ADD2366b30bacB125260Af641031331',
       },

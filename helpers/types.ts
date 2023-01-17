@@ -8,6 +8,7 @@ export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAval
 
 export enum eEthereumNetwork {
   buidlerevm = 'buidlerevm',
+  goerli = 'goerli',
   kovan = 'kovan',
   ropsten = 'ropsten',
   main = 'main',
@@ -36,6 +37,7 @@ export enum eAvalancheNetwork {
 }
 
 export enum EthereumNetworkNames {
+  goerli = 'goerli',
   kovan = 'kovan',
   ropsten = 'ropsten',
   main = 'main',
@@ -283,6 +285,7 @@ export interface iAssetBase<T> {
   LP_FXPHP_USDC?: T;
   LP_EURS_USDC?: T;
   TAGPHP?: T;
+  RET?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -333,6 +336,7 @@ export type iHaloPoolAssets<T> = Pick<
   | 'BPT_XSGD_USDC'
   | 'LP_FXPHP_USDC'
   | 'LP_EURS_USDC'
+  | 'RET'
 >;
 
 export type iHaloMaticPoolAssets<T> = Pick<
@@ -503,6 +507,7 @@ export interface iParamsPerNetworkAll<T>
 export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.coverage]: T;
   [eEthereumNetwork.buidlerevm]: T;
+  [eEthereumNetwork.goerli]: T;
   [eEthereumNetwork.kovan]: T;
   [eEthereumNetwork.ropsten]: T;
   [eEthereumNetwork.main]: T;

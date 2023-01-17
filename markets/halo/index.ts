@@ -21,6 +21,7 @@ import {
   strategyLP_XSGD_USDC,
   strategyLP_FXPHP_USDC,
   strategyLP_EURS_USDC,
+  strategyRET,
 } from './reservesConfigs';
 
 // ----------------
@@ -46,6 +47,7 @@ export const HaloConfig: IHaloConfiguration = {
     MockUSDC: strategyMockUSDC,
     LP_FXPHP_USDC: strategyLP_FXPHP_USDC,
     LP_EURS_USDC: strategyLP_EURS_USDC,
+    RET: strategyRET,
   },
   ReserveAssets: {
     [eEthereumNetwork.buidlerevm]: {},
@@ -63,6 +65,9 @@ export const HaloConfig: IHaloConfiguration = {
       HLP_UST_USDC: '0x868084406449bda10a5bd556fb33cef5086b0797',
     }, // WARNING: for mainnet fork, comment out if doing a fresh deploy in hardhat
     [eEthereumNetwork.coverage]: {},
+    [eEthereumNetwork.goerli]: {
+      RET: '0x9649201B51de91E059076329531347a9e615ABC8',
+    },
     [eEthereumNetwork.kovan]: {
       DAI: '0x33988C7f1333773DCCE4c5d28cc4e785a7a07711',
       WETH: '0x1363b62C9A82007e409876A71B524bD63dDc67Dd',

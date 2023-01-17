@@ -396,3 +396,15 @@ export const strategyLP_EURS_USDC: IReserveParams = {
   aTokenImpl: eContractid.AToken,
   reserveFactor: '1000',
 };
+
+export const strategyRET: IReserveParams = {
+  strategy: rateStrategyVolatileOne,
+  baseLTVAsCollateral: '7000',
+  liquidationThreshold: '7500',
+  liquidationBonus: '11000',
+  borrowingEnabled: true,
+  stableBorrowRateEnabled: true,
+  reserveDecimals: '8',
+  aTokenImpl: eContractid.AToken,
+  reserveFactor: '2000',
+};

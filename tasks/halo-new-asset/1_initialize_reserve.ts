@@ -57,11 +57,10 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     const strategyParams = reserveConfigs['strategy' + symbol];
     const reserveAssetAddress = marketConfigs.HaloConfig.ReserveAssets[localBRE.network.name][symbol];
     const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
-    const addressProvider = await getLendingPoolAddressesProvider(
-      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
-    );
+    const addressProvider = await getLendingPoolAddressesProvider('0x59847B1314E1A1cad9E0a207F6E53c04F4FAbFBD');
 
-    const assetAddress = getAssetAddress(lp, network, symbol);
+    // const assetAddress = getAssetAddress(lp, network, symbol);
+    const assetAddress = '0x9649201B51de91E059076329531347a9e615ABC8';
 
     console.log(`assetAddress is: ${assetAddress} and it is a ${lp ? 'LP token' : 'not a LP token'}`);
 
@@ -114,21 +113,14 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     `);
 
     // init new asset
-    const uiPoolDataProvider = await getHaloUiPoolDataProvider(
-      haloContractAddresses(network).lendingMarket!.protocol.uiHaloPoolDataProvider
-    );
-    const aaveOracle = await getAaveOracle(haloContractAddresses(network).lendingMarket!.protocol.aaveOracle);
-    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy(
-      haloContractAddresses(network).lendingMarket!.protocol.lendingPoolConfigurator
-    );
+    const uiPoolDataProvider = await getHaloUiPoolDataProvider('0x8D0b93D929115faA2499DCF6Cfc84123ff9DC5Cd');
+    const aaveOracle = await getAaveOracle('0x3fa5F6aD2Afc55Fc117F19B06A7F436dE9a047e9');
+    const lendingPoolConfigurator = await getLendingPoolConfiguratorProxy('0x648DE21130Cf2b8B885EA06C7e755598Cc1eEE21');
 
     console.log('settting asset');
 
     const properSymbol = symbol === 'MockUSDC' ? 'USDC' : symbol;
-    await aaveOracle.setAssetSources(
-      [assetAddress],
-      [haloContractAddresses(network).lendingMarket!.priceOracles[properSymbol]]
-    );
+    await aaveOracle.setAssetSources([assetAddress], ['0x84713bcc6aee40b908b0ad3e946cec80278e87f1']);
 
     console.log('assetPrice: ', formatEther(await aaveOracle.getAssetPrice(assetAddress)));
 
@@ -141,7 +133,7 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
         interestRateStrategyAddress: rates.address,
         underlyingAsset: assetAddress, // change
         treasury: await signer.getAddress(),
-        incentivesController: haloContractAddresses(network).lendingMarket!.protocol.rnbwIncentivesController!,
+        incentivesController: '0x9f180428AB4fa85df1D2Fb6DE6527059D60d8D60',
         underlyingAssetName: symbol,
         aTokenName: `h${symbol}`,
         aTokenSymbol: `h${symbol}`,
@@ -152,11 +144,7 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
         params: '0x10',
       },
     ]);
-    console.log(
-      await uiPoolDataProvider.getReservesData(
-        haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
-      )
-    );
+    console.log(await uiPoolDataProvider.getReservesData('0x59847B1314E1A1cad9E0a207F6E53c04F4FAbFBD'));
 
     console.log('Reserve initialization complete. Configuring reserve..');
   });
