@@ -92,6 +92,15 @@ export const HaloConfig: IHaloConfiguration = {
       LP_EURS_USDC: mainnet.ammV2.pools.all.LP_EURS_USDC!,
     },
     [eEthereumNetwork.tenderly]: {},
+    [eEthereumNetwork.goerli]: {
+      DAI: '0xEF8143f052d225162C2660a0C7954ea3c6CAbb65',
+      WETH: '0x87fb8C797709176f890A7FBDe6185B66cabC5B93',
+      USDC: '0x6edE2292C4e9d3151169525af68D300f0C4EDbe1',
+      USDT: '0xCEF6014D0834d922F99264aF64C5A51eFbE9735f',
+      WBTC: '0x175ef0f7accf7cb3DEC16185e320873fe3cc56Aa',
+      LP_XSGD_USDC: '0x5886F7BFCC5D61CD4Ad0DC34e72DEFa2c85dE104',
+      LP_FXPHP_USDC: '0x1fbA91Ce46d2453e2d461b1a0FcF76588a07fE41',
+    },
   },
 };
 

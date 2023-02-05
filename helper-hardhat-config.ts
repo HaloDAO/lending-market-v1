@@ -1,6 +1,13 @@
 // @ts-ignore
 import { HardhatNetworkForkingUserConfig, HardhatUserConfig } from 'hardhat/types';
-import { eAvalancheNetwork, eEthereumNetwork, ePolygonNetwork, eXDaiNetwork, iParamsPerNetwork, eArbitrumNetwork } from './helpers/types';
+import {
+  eAvalancheNetwork,
+  eEthereumNetwork,
+  ePolygonNetwork,
+  eXDaiNetwork,
+  iParamsPerNetwork,
+  eArbitrumNetwork,
+} from './helpers/types';
 
 require('dotenv').config();
 
@@ -26,6 +33,9 @@ export const buildForkConfig = (): HardhatNetworkForkingUserConfig | undefined =
 };
 
 export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
+  [eEthereumNetwork.goerli]: ALCHEMY_KEY
+    ? `https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}`
+    : `https://goerli.infura.io/v3/${INFURA_KEY}`,
   [eEthereumNetwork.kovan]: ALCHEMY_KEY
     ? `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_KEY}`
     : `https://kovan.infura.io/v3/${INFURA_KEY}`,
@@ -53,6 +63,7 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
 };
 
 export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
+  [eEthereumNetwork.goerli]: 3 * GWEI,
   [eEthereumNetwork.kovan]: 3 * GWEI,
   [eEthereumNetwork.ropsten]: 65 * GWEI,
   [eEthereumNetwork.main]: 100 * GWEI,
@@ -70,6 +81,7 @@ export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
 };
 
 export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
+  [eEthereumNetwork.goerli]: 1 * GWEI,
   [eEthereumNetwork.kovan]: 1 * GWEI,
   [eEthereumNetwork.ropsten]: 1 * GWEI,
   [eEthereumNetwork.main]: 1 * GWEI,
@@ -86,6 +98,7 @@ export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
 
 export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
   [eEthereumNetwork.main]: 12406069,
+  [eEthereumNetwork.goerli]: undefined,
   [eEthereumNetwork.kovan]: undefined,
   [eEthereumNetwork.ropsten]: undefined,
   [eEthereumNetwork.coverage]: undefined,

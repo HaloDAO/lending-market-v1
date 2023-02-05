@@ -21,6 +21,7 @@ const AtokenAddresses = {
   [eEthereumNetwork.ropsten]: {},
   [eEthereumNetwork.main]: {},
   [eEthereumNetwork.tenderly]: {},
+  [eEthereumNetwork.goerli]: {},
 };
 
 export const HaloIncentives = {
@@ -85,5 +86,38 @@ export const HaloIncentives = {
     [eEthereumNetwork.ropsten]: {},
     [eEthereumNetwork.main]: {},
     [eEthereumNetwork.tenderly]: {},
+    [eEthereumNetwork.goerli]: [
+      {
+        emissionPerSecond: parseEther('1'),
+        totalStaked: 0,
+        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].DAI,
+      },
+      {
+        emissionPerSecond: parseEther('2.2'),
+        totalStaked: 0,
+        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].XSGD,
+      },
+      {
+        emissionPerSecond: parseEther('2.2'),
+        totalStaked: 0,
+        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].USDC,
+      },
+
+      {
+        emissionPerSecond: parseEther('1'),
+        totalStaked: 0,
+        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].USDT,
+      },
+      {
+        emissionPerSecond: parseEther('2.2'),
+        totalStaked: 0,
+        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].WBTC,
+      },
+      {
+        emissionPerSecond: parseEther('1'),
+        totalStaked: 0,
+        underlyingAsset: AtokenAddresses[eEthereumNetwork.kovan].WETH,
+      },
+    ],
   },
 };

@@ -29,4 +29,5 @@ export const HALO_CONTRACT_ADDRESSES = {
     fallbackPriceOracle: '0x5B09E578cfEAa23F1b11127A658855434e4F3e09',
   },
   [eEthereumNetwork.tenderly]: {},
+  [eEthereumNetwork.goerli]: {},
 };

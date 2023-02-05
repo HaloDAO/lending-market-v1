@@ -130,6 +130,7 @@ export const AmmConfig: IAmmConfiguration = {
       BptWBTCWETH: '0x1efF8aF5D577060BA4ac8A29A13525bb0Ee2A3D5',
       BptBALWETH: '0x59A19D8c652FA0284f44113D0ff9aBa70bd46fB4',
     },
+    [eEthereumNetwork.goerli]: {},
   },
 };
 
