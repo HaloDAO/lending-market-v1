@@ -1,9 +1,6 @@
 import { task } from 'hardhat/config';
-import {
-  getATokensAndRatesHelper,
-  getFirstSigner,
-  getLendingPoolAddressesProvider,
-} from '../../helpers/contracts-getters';
+import { getATokensAndRatesHelper, getLendingPoolAddressesProvider } from '../../helpers/contracts-getters-ledger';
+import { getLedgerSigner } from '../../helpers/contracts-helpers';
 import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
 import { getAssetAddress } from '../helpers/halo-helpers/util-getters';
 
@@ -12,6 +9,7 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
   .addFlag('lp', 'If asset is an LP')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify, symbol, lp }, localBRE) => {
+    await localBRE.run('set-DRE');
     const network = localBRE.network.name;
 
     const assetAddress = getAssetAddress(lp, network, symbol);
@@ -26,9 +24,10 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
       haloContractAddresses(network).lendingMarket!.protocol.lendingPoolAddressesProvider
     );
 
-    const signer = await localBRE.ethers.getSigners();
+    const signer = await getLedgerSigner();
 
     await addressProvider.setPoolAdmin(haloContractAddresses(network).lendingMarket!.protocol.aTokensAndRatesHelper);
+    console.log('set pool admin done');
 
     // WARNING: This part is hardcoded since we are using the same strategy for all stable coins. Change if necessary
     const reserveConfig = [
@@ -44,8 +43,10 @@ task('halo:newasset:configure-reserve', 'Configure the reserve')
     ];
 
     await aTokensAndRatesHelper.configureReserves(reserveConfig);
-    await addressProvider.setPoolAdmin(await signer[0].getAddress());
+    console.log('configureReserves done');
+
+    await addressProvider.setPoolAdmin(await signer.getAddress());
     console.log(
-      `Pool Admin should be ${await signer[0].getAddress()}, your current pool adming is ${await addressProvider.getPoolAdmin()}`
+      `Pool Admin should be ${await signer.getAddress()}, your current pool adming is ${await addressProvider.getPoolAdmin()}`
     );
   });

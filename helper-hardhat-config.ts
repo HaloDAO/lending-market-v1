@@ -1,6 +1,13 @@
 // @ts-ignore
 import { HardhatNetworkForkingUserConfig, HardhatUserConfig } from 'hardhat/types';
-import { eAvalancheNetwork, eEthereumNetwork, ePolygonNetwork, eXDaiNetwork, iParamsPerNetwork, eArbitrumNetwork } from './helpers/types';
+import {
+  eAvalancheNetwork,
+  eEthereumNetwork,
+  ePolygonNetwork,
+  eXDaiNetwork,
+  iParamsPerNetwork,
+  eArbitrumNetwork,
+} from './helpers/types';
 
 require('dotenv').config();
 
@@ -55,7 +62,7 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
 export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
   [eEthereumNetwork.kovan]: 3 * GWEI,
   [eEthereumNetwork.ropsten]: 65 * GWEI,
-  [eEthereumNetwork.main]: 100 * GWEI,
+  [eEthereumNetwork.main]: 40 * GWEI,
   [eEthereumNetwork.coverage]: 65 * GWEI,
   [eEthereumNetwork.hardhat]: 65 * GWEI,
   [eEthereumNetwork.buidlerevm]: 65 * GWEI,

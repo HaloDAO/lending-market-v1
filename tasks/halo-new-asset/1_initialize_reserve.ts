@@ -13,18 +13,19 @@ import {
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getPriceOracle,
-} from '../../helpers/contracts-getters';
+} from '../../helpers/contracts-getters-ledger';
 import {
   deployDefaultReserveInterestRateStrategy,
   deployStableDebtToken,
   deployVariableDebtToken,
   chooseATokenDeployment,
-} from '../../helpers/contracts-deployments';
-import { setDRE } from '../../helpers/misc-utils';
+} from '../../helpers/contracts-deployments-ledger';
+
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { haloContractAddresses } from '../../helpers/halo-contract-address-network';
 import { formatEther } from '@ethersproject/units';
 import { getAssetAddress } from '../helpers/halo-helpers/util-getters';
+import { getLedgerSigner } from '../../helpers/contracts-helpers';
 
 const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
   Object.keys(reserveConfigs).includes('strategy' + symbol) &&
@@ -36,6 +37,7 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
   .addFlag('lp', 'If asset is an LP')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify, symbol, lp }, localBRE) => {
+    await localBRE.run('set-DRE');
     const network = localBRE.network.name;
 
     if (!localBRE.network.config.chainId) {
@@ -53,7 +55,8 @@ task('halo:newasset:initialize-reserve', 'Initialize reserve')
     }
 
     // deploy new asset
-    const signer = await getFirstSigner();
+    const signer = await getLedgerSigner();
+
     const strategyParams = reserveConfigs['strategy' + symbol];
     const reserveAssetAddress = marketConfigs.HaloConfig.ReserveAssets[localBRE.network.name][symbol];
     const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
