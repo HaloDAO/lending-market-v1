@@ -36,6 +36,14 @@ You can join at the [Discord](https://discord.com/invite/halodao) channel or at 
 
 ## Getting Started
 
+Ensure you are using the correct node version. In the root directory execute the following:
+
+```sh
+# nvm will install and use the version specified in .nvmrc file
+nvm install
+nvm use
+```
+
 You can install `@aave/protocol-v2` as an NPM package in your Hardhat, Buidler or Truffle project to import the contracts and interfaces:
 
 `npm install @aave/protocol-v2`

@@ -1,3 +1,4 @@
+require('@nomicfoundation/hardhat-foundry');
 import path from 'path';
 import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
