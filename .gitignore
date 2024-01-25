@@ -25,3 +25,6 @@ coverage
 # Forge
 forge-artifacts/
 forge-cache/
+
+cache_forge/
+out/
