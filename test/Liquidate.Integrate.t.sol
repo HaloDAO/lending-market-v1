@@ -15,6 +15,8 @@ import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {MockAggregator} from '../contracts/mocks/oracle/CLAggregators/MockAggregator.sol';
 import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolDataProvider.sol';
 
+import {hlpPriceFeedOracle} from './HLPPriceFeedOracle.sol';
+
 contract IOracle {
   function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {}
 }
@@ -27,7 +29,8 @@ contract LiquididateIntegrationTest is Test {
   address constant ORACLE_OWNER = 0x21f73D42Eb58Ba49dDB685dc29D3bF5c0f0373CA;
   address constant ETH_USD_CHAINLINK = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
   address constant USDC_USD_CHAINLINK = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
-  address constant HLP_XSGD = 0xA8A04EcBBCc5f1B05773A34cE8495507aD6CcA22;
+  address constant HLP_XSGD = 0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A;
+  address constant HLP_XSGD_ORACLE = 0xE911bA4d01b64830160284E42BfC9b9933fA19BA;
   address constant AAVE_ORACLE = 0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC;
   address constant UI_DATA_PROVIDER = 0x6c00EC488A2D2EB06b2Ed28e1F9f12C38fBCF426;
   address constant LENDINGPOOL_ADDRESS_PROVIDER = 0xD8708572AfaDccE523a8B8883a9b882a79cbC6f2;
@@ -79,7 +82,29 @@ contract LiquididateIntegrationTest is Test {
     // check that the liquidator received the collateral
   }
 
+  function _etchXsgdHLPOracle(address _original) private {
+    console.log('fxPool', address(hlpPriceFeedOracle(HLP_XSGD_ORACLE).baseContract()));
+    // hlpPriceFeedOracle p = new hlpPriceFeedOracle()
+    //         vm.etch(HLP_XSGD_ORACLE, at(address(etchedFx)));
+  }
+
+  function _setXsgdHLPOracle(address _oracle) private {
+    _etchXsgdHLPOracle(HLP_XSGD_ORACLE);
+    address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
+
+    address[] memory assets = new address[](1);
+    assets[0] = HLP_XSGD;
+    address[] memory sources = new address[](1);
+    sources[0] = HLP_XSGD_ORACLE;
+
+    address oracleOwner = AaveOracle(aaveOracle).owner();
+    vm.prank(oracleOwner);
+    AaveOracle(aaveOracle).setAssetSources(assets, sources);
+  }
+
   function _borrowToLimit(address _user) private {
+    _setXsgdHLPOracle(HLP_XSGD_ORACLE);
+
     (
       ,
       /*uint256 totalCollateralETH*/
