@@ -242,6 +242,8 @@ contract LiquididateIntegrationTest is Test {
     DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
     address aToken = rd.aTokenAddress;
 
+    _printLiqIndex(USDC_MAINNET);
+
     console.log('[_liquididatePosition]');
     _printHealthFactor(_lpUser);
 
@@ -258,6 +260,7 @@ contract LiquididateIntegrationTest is Test {
 
     LP.withdraw(USDC_MAINNET, type(uint).max, me);
     console.log('[_liquididatePosition] USDC received', IERC20(USDC_MAINNET).balanceOf(me) - beforeBal);
+    console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(me));
   }
 
   function _manipulateOraclePrice() private {
