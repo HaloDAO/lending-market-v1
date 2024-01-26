@@ -49,6 +49,18 @@ contract LiquididateIntegrationTest is Test {
     IUsdcToken(USDC_MAINNET).mint(me, 2_000_000_000_000 * 1e6);
   }
 
+  /**
+    ## Liquidation test
+
+    - `Liquidate.Integrate.t.sol`
+    - update to use Polygon (same like HLPPriceFeedOracle.t.sol)
+    - ensure add LP Token instead of HLP
+    - \_deployReserve
+    - \_deployAndSetLPOracle
+    - luquidate
+    - profit!!!
+
+   */
   function testLiquidate() public {
     _printUserAccountData(LP_USER);
 
