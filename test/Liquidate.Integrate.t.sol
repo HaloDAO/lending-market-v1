@@ -18,8 +18,8 @@ import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolD
 import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
 import {IAToken} from '../contracts/interfaces/IAToken.sol';
 
-contract IOracle {
-  function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {}
+interface IOracle {
+  function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80);
 }
 
 contract LiquididateIntegrationTest is Test {
@@ -242,7 +242,7 @@ contract LiquididateIntegrationTest is Test {
     DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
     address aToken = rd.aTokenAddress;
 
-    _printLiqIndex(USDC_MAINNET);
+    // _printLiqIndex();
 
     console.log('[_liquididatePosition]');
     _printHealthFactor(_lpUser);
