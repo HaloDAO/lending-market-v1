@@ -15,7 +15,8 @@ import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {MockAggregator} from '../contracts/mocks/oracle/CLAggregators/MockAggregator.sol';
 import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolDataProvider.sol';
 
-import {hlpPriceFeedOracle} from './HLPPriceFeedOracle.sol';
+import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
+import {IAToken} from '../contracts/interfaces/IAToken.sol';
 
 contract IOracle {
   function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {}
@@ -31,6 +32,7 @@ contract LiquididateIntegrationTest is Test {
   address constant USDC_USD_CHAINLINK = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
   address constant HLP_XSGD = 0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A;
   address constant HLP_XSGD_ORACLE = 0xE911bA4d01b64830160284E42BfC9b9933fA19BA;
+  address constant A_TOKEN = 0x07F540613ea0B7e723ffB5978515A342a134be07;
   address constant AAVE_ORACLE = 0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC;
   address constant UI_DATA_PROVIDER = 0x6c00EC488A2D2EB06b2Ed28e1F9f12C38fBCF426;
   address constant LENDINGPOOL_ADDRESS_PROVIDER = 0xD8708572AfaDccE523a8B8883a9b882a79cbC6f2;
@@ -42,13 +44,6 @@ contract LiquididateIntegrationTest is Test {
   }
 
   function testLiquidate() public {
-    // LP.deposit(
-    //   0x0,
-    //   10 * 1e18,
-    //   0 // referral code
-    // );
-
-    // impersonate a user that has collateral deposited in the lending pool
     _printUserAccountData(LP_USER);
 
     (, int256 ethUsdPrice, , , ) = IOracle(ETH_USD_CHAINLINK).latestRoundData();
@@ -57,6 +52,8 @@ contract LiquididateIntegrationTest is Test {
     console.log('usdcUsdPrice', uint256(usdcUsdPrice));
 
     _borrowToLimit(LP_USER);
+
+    _repayLoan(LP_USER);
 
     // get the price for the collateral
 
@@ -82,14 +79,23 @@ contract LiquididateIntegrationTest is Test {
     // check that the liquidator received the collateral
   }
 
-  function _etchXsgdHLPOracle(address _original) private {
-    console.log('fxPool', address(hlpPriceFeedOracle(HLP_XSGD_ORACLE).baseContract()));
-    // hlpPriceFeedOracle p = new hlpPriceFeedOracle()
-    //         vm.etch(HLP_XSGD_ORACLE, at(address(etchedFx)));
+  function _repayLoan(address _user) private {
+    (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd1, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
+      .getReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER));
+    console.log('li before', rd1[1].liquidityIndex);
+
+    vm.roll(block.number + 1000);
+
+    (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd2, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
+      .getReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER));
+
+    console.log('li after', rd2[1].liquidityIndex);
+
+    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.repay(USDC_MAINNET, type(uint).max, 2, _user);
   }
 
   function _setXsgdHLPOracle(address _oracle) private {
-    _etchXsgdHLPOracle(HLP_XSGD_ORACLE);
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
 
     address[] memory assets = new address[](1);
@@ -125,28 +131,6 @@ contract LiquididateIntegrationTest is Test {
       uint256(usdcUsdPrice)) / 1e12;
 
     console.log('totalUsdcBorrows', totalUsdcBorrows);
-
-    /**
- rvs 0 0x6B175474E89094C44Da98b954EedeAC495271d0F
-  rvs 1 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-  rvs 2 0xdAC17F958D2ee523a2206206994597C13D831ec7
-  rvs 3 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
-  rvs 4 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
-  rvs 5 0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96
-  rvs 6 0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A
-
-  */
-
-    // address[] memory rvs = LP.getReservesList();
-    // console.log('rvs 0', rvs[0]); // DAI
-    // console.log('rvs 1', rvs[1]); // USDC
-    // console.log('rvs 2', rvs[2]); //USDT
-    // console.log('rvs 3', rvs[3]); // WBTC
-    // console.log('rvs 4', rvs[4]); // WETH
-    // console.log('rvs 5', rvs[5]); // XSGD
-    // console.log('rvs 6', rvs[6]); // XSGD HLP
-
-    // console.log('ETH/USD price', uint256(price));
 
     uint256 balBefore = IERC20(USDC_MAINNET).balanceOf(_user);
     console.log('balBefore', balBefore);
@@ -206,8 +190,21 @@ contract LiquididateIntegrationTest is Test {
     // mint usdc tokens to us
     IUsdcToken(USDC_MAINNET).mint(me, 2_000_000_000_000 * 1e6);
 
+    DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
+    address aToken = rd.aTokenAddress;
+
+    console.log('aToken', IERC20(aToken).balanceOf(me));
+
     IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
-    LP.liquidationCall(USDC_MAINNET, USDC_MAINNET, _lpUser, type(uint).max, false);
+    LP.liquidationCall(USDC_MAINNET, USDC_MAINNET, _lpUser, type(uint).max, true);
+
+    // check that the liquidator received the collateral
+    console.log('aToken', IERC20(aToken).balanceOf(me));
+
+    uint256 beforeBal = IERC20(USDC_MAINNET).balanceOf(me);
+
+    LP.withdraw(USDC_MAINNET, type(uint).max, me);
+    console.log('USDC received', IERC20(USDC_MAINNET).balanceOf(me) - beforeBal);
   }
 
   function _manipulateOraclePrice() private {
