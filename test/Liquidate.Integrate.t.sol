@@ -32,7 +32,6 @@ contract LiquididateIntegrationTest is Test {
   address constant USDC_USD_CHAINLINK = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
   address constant HLP_XSGD = 0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A;
   address constant HLP_XSGD_ORACLE = 0xE911bA4d01b64830160284E42BfC9b9933fA19BA;
-  address constant A_TOKEN = 0x07F540613ea0B7e723ffB5978515A342a134be07;
   address constant AAVE_ORACLE = 0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC;
   address constant UI_DATA_PROVIDER = 0x6c00EC488A2D2EB06b2Ed28e1F9f12C38fBCF426;
   address constant LENDINGPOOL_ADDRESS_PROVIDER = 0xD8708572AfaDccE523a8B8883a9b882a79cbC6f2;
@@ -41,6 +40,13 @@ contract LiquididateIntegrationTest is Test {
 
   function setUp() public {
     vm.createSelectFork(RPC_URL, FORK_BLOCK);
+
+    address me = address(this);
+
+    vm.prank(0xE982615d461DD5cD06575BbeA87624fda4e3de17); // usdc masterMinter
+    IUsdcToken(USDC_MAINNET).configureMinter(me, 2_000_000_000_000 * 1e6);
+    // mint usdc tokens to us
+    IUsdcToken(USDC_MAINNET).mint(me, 2_000_000_000_000 * 1e6);
   }
 
   function testLiquidate() public {
@@ -53,7 +59,9 @@ contract LiquididateIntegrationTest is Test {
 
     _borrowToLimit(LP_USER);
 
-    _repayLoan(LP_USER);
+    // _repayLoan(LP_USER); // repay the loan
+
+    // _depositWithdraw(); // deposit and withdraw
 
     // get the price for the collateral
 
@@ -79,20 +87,53 @@ contract LiquididateIntegrationTest is Test {
     // check that the liquidator received the collateral
   }
 
+  function _printLiqIndex(address _asset) private {
+    DataTypes.ReserveData memory rd = LP.getReserveData(_asset);
+    console.log('liquidityIndex', rd.liquidityIndex);
+  }
+
   function _repayLoan(address _user) private {
     (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd1, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
       .getReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER));
-    console.log('li before', rd1[1].liquidityIndex);
+    console.log('liqIndex before\t', rd1[1].liquidityIndex);
 
-    vm.roll(block.number + 1000);
+    vm.warp(block.timestamp + 31536000);
+
+    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.repay(USDC_MAINNET, 50_000 * 1e6, 2, _user);
 
     (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd2, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
       .getReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER));
 
-    console.log('li after', rd2[1].liquidityIndex);
+    console.log('liqIndex after\t', rd2[1].liquidityIndex);
+  }
 
+  function _depositWithdraw() private {
+    // @TODO tbd deposit 50k USDC, receive 50K (+1 wei) aUSDC, withdraw 50K aUSDC, receive 50K USDC (+1 wei)
+    address me = address(this);
+    uint256 balBefore = IERC20(USDC_MAINNET).balanceOf(me);
+    console.log('block.timestamp', block.timestamp);
+    _printLiqIndex(USDC_MAINNET);
     IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
-    LP.repay(USDC_MAINNET, type(uint).max, 2, _user);
+    LP.deposit(
+      USDC_MAINNET,
+      50_000 * 1e6,
+      me,
+      0 // referral code
+    );
+
+    // print amount of aTokens received
+    DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
+    address aToken = rd.aTokenAddress;
+
+    console.log('aToken', IERC20(aToken).balanceOf(me));
+
+    LP.withdraw(USDC_MAINNET, IERC20(aToken).balanceOf(me), me);
+
+    console.log('block.timestamp', block.timestamp);
+    _printLiqIndex(USDC_MAINNET);
+
+    console.log('USDC Received After Deposit/Withdraw', IERC20(USDC_MAINNET).balanceOf(me) - balBefore);
   }
 
   function _setXsgdHLPOracle(address _oracle) private {
@@ -130,10 +171,10 @@ contract LiquididateIntegrationTest is Test {
     uint256 totalUsdcBorrows = (((availableBorrowsETH - totalDebtETH) * (uint256(ethUsdPrice))) /
       uint256(usdcUsdPrice)) / 1e12;
 
-    console.log('totalUsdcBorrows', totalUsdcBorrows);
+    console.log('[_borrowToLimit] totalUsdcBorrows', totalUsdcBorrows);
 
     uint256 balBefore = IERC20(USDC_MAINNET).balanceOf(_user);
-    console.log('balBefore', balBefore);
+    console.log('[_borrowToLimit] balBefore', balBefore);
 
     LP.borrow(
       USDC_MAINNET,
@@ -144,7 +185,7 @@ contract LiquididateIntegrationTest is Test {
     );
 
     uint256 balAfter = IERC20(USDC_MAINNET).balanceOf(_user);
-    console.log('balAfter', balAfter);
+    console.log('[_borrowToLimit] balAfter', balAfter);
 
     (
       ,
@@ -155,10 +196,23 @@ contract LiquididateIntegrationTest is Test {
       uint256 healthFactor2
     ) = LP.getUserAccountData(_user);
 
-    console.log('availableBorrowsETH2', availableBorrowsETH2);
-    console.log('healthFactor2: ', healthFactor2);
+    console.log('[_borrowToLimit] availableBorrowsETH2', availableBorrowsETH2);
+    console.log('[_borrowToLimit] healthFactor2: ', healthFactor2);
 
     vm.stopPrank();
+  }
+
+  function _printHealthFactor(address _user) private {
+    (
+      ,
+      ,
+      ,
+      ,
+      ,
+      /*uint256 totalCollateralETH*/
+      /*uint256 totalDebtETH*/ /*uint256 availableBorrowsETH*/ /*uint256 currentLiquidationThreshold*/ /*uint256 ltv*/ uint256 healthFactor
+    ) = LP.getUserAccountData(_user);
+    console.log('healthFactor\t', healthFactor);
   }
 
   function _printUserAccountData(address _user) private {
@@ -185,26 +239,25 @@ contract LiquididateIntegrationTest is Test {
   function _liquididatePosition(address _lpUser) private {
     address me = address(this);
 
-    vm.prank(0xE982615d461DD5cD06575BbeA87624fda4e3de17); // usdc masterMinter
-    IUsdcToken(USDC_MAINNET).configureMinter(me, 2_000_000_000_000 * 1e6);
-    // mint usdc tokens to us
-    IUsdcToken(USDC_MAINNET).mint(me, 2_000_000_000_000 * 1e6);
-
     DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
     address aToken = rd.aTokenAddress;
 
-    console.log('aToken', IERC20(aToken).balanceOf(me));
+    console.log('[_liquididatePosition]');
+    _printHealthFactor(_lpUser);
 
-    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
-    LP.liquidationCall(USDC_MAINNET, USDC_MAINNET, _lpUser, type(uint).max, true);
-
-    // check that the liquidator received the collateral
-    console.log('aToken', IERC20(aToken).balanceOf(me));
+    console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(me));
 
     uint256 beforeBal = IERC20(USDC_MAINNET).balanceOf(me);
 
+    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.liquidationCall(USDC_MAINNET, USDC_MAINNET, _lpUser, type(uint).max, true);
+    _printHealthFactor(_lpUser);
+
+    // check that the liquidator received the collateral
+    console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(me));
+
     LP.withdraw(USDC_MAINNET, type(uint).max, me);
-    console.log('USDC received', IERC20(USDC_MAINNET).balanceOf(me) - beforeBal);
+    console.log('[_liquididatePosition] USDC received', IERC20(USDC_MAINNET).balanceOf(me) - beforeBal);
   }
 
   function _manipulateOraclePrice() private {
