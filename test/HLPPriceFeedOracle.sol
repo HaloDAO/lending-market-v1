@@ -2,6 +2,7 @@
 pragma solidity ^0.6.12;
 
 import './SafeCast.sol';
+import 'forge-std/console2.sol';
 
 interface AggregatorV3Interface {
   function latestRoundData()
@@ -16,6 +17,10 @@ interface hlpContract {
   function liquidity() external view returns (uint256);
 
   function totalSupply() external view returns (uint256);
+
+  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
+
+  function protocolPercentFee() external view returns (uint256);
 }
 
 contract hlpPriceFeedOracle {
@@ -37,13 +42,20 @@ contract hlpPriceFeedOracle {
 
   function latestAnswer() external view returns (int256) {
     uint256 _decimals = uint256(10 ** uint256(decimals));
-    uint256 liquidity = baseContract.liquidity();
+    uint256 currentFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
+    uint256 protocolPercentFee = baseContract.protocolPercentFee();
+    uint256 liquidity = baseContract.liquidity() - ((currentFees * 1e2) / protocolPercentFee);
     uint256 totalSupply = baseContract.totalSupply();
     uint256 hlp_usd = (totalSupply * (_decimals)) / (liquidity);
+
+    // console2.log('[latestAnswer] hlp-usd: ', hlp_usd);
 
     (, int256 quotePrice, , , ) = quotePriceFeed.latestRoundData();
     uint8 quoteDecimals = quotePriceFeed.decimals();
     quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
+    // console2.log('[hlpPriceFeedOracle] price:', (hlp_usd * _decimals) / uint256(quotePrice));
+    // console2.logInt(((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice));
+
     return ((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice);
   }
 

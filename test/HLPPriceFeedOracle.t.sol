@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import 'forge-std/Test.sol';
 import {Vm} from 'forge-std/Vm.sol';
-import 'forge-std/console.sol';
+import 'forge-std/console2.sol';
 
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
@@ -41,7 +41,6 @@ contract HLPPriceFeedOracle is Test {
   string private RPC_URL = vm.envString('POLYGON_RPC_URL');
   uint256 constant FORK_BLOCK = 52764552;
   address constant LP_XSGD = 0xE6D8FcD23eD4e417d7e9D1195eDf2cA634684e0E;
-  address constant LP_XSGD_ORACLE = 0xbca5c841eC9cC6Bd54ee18450eAe3B4D7b68146b;
   address constant LENDINGPOOL_ADDRESS_PROVIDER = 0x68aeB9C8775Cfc9b99753A1323D532556675c555;
   address constant XSGD_HOLDER = 0x728C6f69B4EaB57A9f2dE0Cf8Fd170eE5f22Eb21;
   address constant ETH_USD_ORACLE = 0xF9680D99D6C9589e2a93a78A04A279e509205945;
@@ -92,27 +91,77 @@ contract HLPPriceFeedOracle is Test {
     // output: price of XSGD/USDC LP token according to HLPOracle @TODO
 
     // DataTypes.ReserveData memory rd = LP.getReserveData();
-    // console.log('rd.liquidityIndex', uint256(rd.liquidityIndex));
-
-    console.log('baseContract', IHLPOracle(LP_XSGD_ORACLE).baseContract());
-    console.log('quotePriceFeed', IHLPOracle(LP_XSGD_ORACLE).quotePriceFeed());
+    // console2.log('rd.liquidityIndex', uint256(rd.liquidityIndex));
 
     _deployReserve();
 
-    _deployAndSetLPOracle();
+    address lpOracle = _deployAndSetLPOracle();
+    console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
+    console2.log('quotePriceFeed', IHLPOracle(lpOracle).quotePriceFeed());
 
     // address[] memory rvs = LP.getReservesList();
-    // console.log('rvs', rvs.length);
-    // console.log('rvs 7', rvs[7]); // XSGD HLP
+    // console2.log('rvs', rvs.length);
+    // console2.log('rvs 7', rvs[7]); // XSGD HLP
 
     // IFXPool(LP_XSGD).viewParameters();
-    int256 lpEthPrice = IOracle(LP_XSGD_ORACLE).latestAnswer();
-    console.log('lpEthPrice', uint256(lpEthPrice));
-
-    // _doSwap(me, 1000 * 1e6, XSGD, USDC);
+    // lp price in eth 452141146999509
+    _swapAndCheck(lpOracle, 10_000 * 1e6, XSGD, USDC, 'SWAP 1');
+    //lp price in eth  452141146997922
+    _swapAndCheck(lpOracle, 10_000 * 1e6, USDC, XSGD, 'SWAP 2');
+    // lp price in eth 455721063474353
+    _swapAndCheck(lpOracle, 10_000 * 1e6, XSGD, USDC, 'SWAP 3');
+    // lp price in eth 455721063472831
+    _swapAndCheck(lpOracle, 10_000 * 1e6, USDC, XSGD, 'SWAP 4');
+    // lp price in eth 456793395455523
+    // Note: the protocol does not get fees if the user swaps towards beta after getting out of beta. the reward for that swap goes to the user
   }
 
-  function _deployAndSetLPOracle() private {
+  function _swapAndCheck(
+    address lpOracle,
+    uint256 amountToSwap,
+    address swapIn,
+    address swapOut,
+    string memory swapLabel
+  ) internal {
+    int256 lpEthPrice0 = IOracle(lpOracle).latestAnswer();
+    console2.log('[%s] lpEthPrice0', swapLabel, uint256(lpEthPrice0));
+    uint256 fees0 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
+    console2.log('[%s] fees0', swapLabel, fees0);
+
+    (uint256 totalLiquidityInNumeraire0, uint256[] memory individualLiquidity0) = IFXPool(LP_XSGD).liquidity();
+    console2.log('[%s] totalLiquidityInNumeraire0', swapLabel, totalLiquidityInNumeraire0);
+    console2.log('[%s] totalLiquidityInNumeraire0', swapLabel, totalLiquidityInNumeraire0 / 1e18);
+    console2.log(
+      '[%s] individualLiquidity0',
+      swapLabel,
+      individualLiquidity0[0] / 1e18,
+      individualLiquidity0[1] / 1e18
+    );
+    console2.log('[%s] individualLiquidity0', swapLabel, individualLiquidity0[0], individualLiquidity0[1]);
+
+    _doSwap(me, amountToSwap, swapIn, swapOut);
+
+    (uint256 totalLiquidityInNumeraire1, uint256[] memory individualLiquidity1) = IFXPool(LP_XSGD).liquidity();
+    console2.log(
+      '[%s] totalLiquidityInNumeraire added',
+      swapLabel,
+      totalLiquidityInNumeraire1 - totalLiquidityInNumeraire0
+    );
+    console2.log('[%s] totalLiquidityInNumeraire1', swapLabel, totalLiquidityInNumeraire1 / 1e18);
+    console2.log(
+      '[%s] individualLiquidity1',
+      swapLabel,
+      individualLiquidity1[0] / 1e18,
+      individualLiquidity1[1] / 1e18
+    );
+    console2.log('[%s] individualLiquidity1', swapLabel, individualLiquidity1[0], individualLiquidity1[1]);
+
+    int256 lpEthPrice1 = IOracle(lpOracle).latestAnswer();
+    console2.log('[%s] lpEthPrice1', swapLabel, uint256(lpEthPrice1));
+    console2.log('[%s] fees added', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees0);
+  }
+
+  function _deployAndSetLPOracle() private returns (address) {
     hlpPriceFeedOracle lpOracle = new hlpPriceFeedOracle(
       hlpContract(LP_XSGD),
       AggregatorV3Interface(ETH_USD_ORACLE),
@@ -132,7 +181,9 @@ contract HLPPriceFeedOracle is Test {
 
     uint256 _price = AaveOracle(aaveOracle).getAssetPrice(LP_XSGD);
 
-    console.log('price', _price);
+    console2.log('price', _price);
+
+    return address(lpOracle);
   }
 
   function _deployReserve() private {
@@ -324,6 +375,13 @@ interface IFXPool {
   function getPoolId() external view returns (bytes32);
 
   function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
+
+  // returns(totalLiquidityInNumeraire, individual liquidity)
+  function liquidity() external view returns (uint256, uint256[] memory);
+
+  function totalSupply() external view returns (uint256);
+
+  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
 }
 
 interface IHLPOracle {
