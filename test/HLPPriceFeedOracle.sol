@@ -4,6 +4,9 @@ pragma solidity ^0.6.12;
 import './SafeCast.sol';
 import 'forge-std/console2.sol';
 
+import './ABDKMath64x64.sol';
+
+// @TODO Safe math or Solidity >= 0.8
 interface AggregatorV3Interface {
   function latestRoundData()
     external
@@ -26,6 +29,10 @@ interface hlpContract {
 contract hlpPriceFeedOracle {
   using SafeCast for uint;
 
+  using ABDKMath64x64 for int128;
+  using ABDKMath64x64 for int256;
+  using ABDKMath64x64 for uint256;
+
   string public priceFeed;
 
   hlpContract public baseContract;
@@ -42,10 +49,23 @@ contract hlpPriceFeedOracle {
 
   function latestAnswer() external view returns (int256) {
     uint256 _decimals = uint256(10 ** uint256(decimals));
-    uint256 currentFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
-    uint256 protocolPercentFee = baseContract.protocolPercentFee();
-    uint256 liquidity = baseContract.liquidity() - ((currentFees * 1e2) / protocolPercentFee);
+    uint256 liquidity = baseContract.liquidity() - (2 * hlpContract(baseContract).totalUnclaimedFeesInNumeraire());
+    // uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
+    // uint256 liquidity = baseContract.liquidity();
+    // // simulate perfectly balanced pool
+    // // get Oracle rate for tokenA tokenB
+    // // totalNumeraire = tokenAAmount * tokenAPriceUSD + tokenBAmount * tokenBPriceUSD
+    // // tokenAmountDelta (0 when pool perfectly balanced)
+
+    // // uint256 lpTokenFeeAmount = (_oGLiq.inv()).mulu(totalUnclaimedFeesInNumeraire);
+
+    // // lpTokenFeeAmount = lpTokenFeeAmount.mul(totalSupply()).div(1e18);
     uint256 totalSupply = baseContract.totalSupply();
+
+    // uint256 lpTokenFeeAmount = (uint256(1).divu(liquidity).mulu(unclaimedFees) * totalSupply) / 1e18;
+
+    // console2.log('uint256(1).divu(liquidity)', liquidity.fromUInt().mulu(1));
+    // console2.log('lpTokenFeeAmount', lpTokenFeeAmount);
     uint256 hlp_usd = (totalSupply * (_decimals)) / (liquidity);
 
     // console2.log('[latestAnswer] hlp-usd: ', hlp_usd);

@@ -105,13 +105,44 @@ contract HLPPriceFeedOracle is Test {
 
     // IFXPool(LP_XSGD).viewParameters();
     // lp price in eth 452141146999509
-    _swapAndCheck(lpOracle, 10_000 * 1e6, XSGD, USDC, 'SWAP 1');
-    //lp price in eth  452141146997922
-    _swapAndCheck(lpOracle, 10_000 * 1e6, USDC, XSGD, 'SWAP 2');
-    // lp price in eth 455721063474353
-    _swapAndCheck(lpOracle, 10_000 * 1e6, XSGD, USDC, 'SWAP 3');
-    // lp price in eth 455721063472831
-    _swapAndCheck(lpOracle, 10_000 * 1e6, USDC, XSGD, 'SWAP 4');
+
+    _doSwap(me, 130_000 * 1e6, USDC, XSGD);
+
+    _swapAndCheck(lpOracle, 230_000 * 1e6, XSGD, USDC, 'SWAP 1');
+    _swapAndCheck(lpOracle, 230_000 * 1e6, USDC, XSGD, 'SWAP 2');
+
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 1');
+    // //lp price in eth  452141146997922
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 2');
+    // // lp price in eth 455721063474353
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 3');
+    // // lp price in eth 455721063472831
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 4');
+
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 5');
+    // //lp price in eth  452141146997922
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 6');
+    // // lp price in eth 455721063474353
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 7');
+    // // lp price in eth 455721063472831
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 8');
+
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 9');
+    // //lp price in eth  452141146997922
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 10');
+    // // lp price in eth 455721063474353
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 11');
+    // // lp price in eth 455721063472831
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 12');
+
+    // {
+    //   console2.log('minting protocol fees');
+    //   uint256 tsB4 = IFXPool(LP_XSGD).totalSupply();
+    //   _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 11 * 1e18, me, USDC, XSGD);
+    //   console2.log('totalSupply minted:', IFXPool(LP_XSGD).totalSupply() - tsB4);
+    // }
+    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 13');
+
     // lp price in eth 456793395455523
     // Note: the protocol does not get fees if the user swaps towards beta after getting out of beta. the reward for that swap goes to the user
   }
@@ -124,41 +155,91 @@ contract HLPPriceFeedOracle is Test {
     string memory swapLabel
   ) internal {
     int256 lpEthPrice0 = IOracle(lpOracle).latestAnswer();
-    console2.log('[%s] lpEthPrice0', swapLabel, uint256(lpEthPrice0));
+    console2.log('[%s] lpEthPrice0\t', swapLabel, uint256(lpEthPrice0));
     uint256 fees0 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
-    console2.log('[%s] fees0', swapLabel, fees0);
+    console2.log('[%s] fees0\t', swapLabel, fees0);
 
     (uint256 totalLiquidityInNumeraire0, uint256[] memory individualLiquidity0) = IFXPool(LP_XSGD).liquidity();
-    console2.log('[%s] totalLiquidityInNumeraire0', swapLabel, totalLiquidityInNumeraire0);
-    console2.log('[%s] totalLiquidityInNumeraire0', swapLabel, totalLiquidityInNumeraire0 / 1e18);
+    console2.log('[%s] totalLiquidityInNumeraire0\t', swapLabel, totalLiquidityInNumeraire0);
+    // console2.log('[%s] totalLiquidityInNumeraire0', swapLabel, totalLiquidityInNumeraire0 / 1e18);
     console2.log(
       '[%s] individualLiquidity0',
       swapLabel,
       individualLiquidity0[0] / 1e18,
       individualLiquidity0[1] / 1e18
     );
-    console2.log('[%s] individualLiquidity0', swapLabel, individualLiquidity0[0], individualLiquidity0[1]);
+    // console2.log('[%s] individualLiquidity0', swapLabel, individualLiquidity0[0], individualLiquidity0[1]);
 
     _doSwap(me, amountToSwap, swapIn, swapOut);
 
     (uint256 totalLiquidityInNumeraire1, uint256[] memory individualLiquidity1) = IFXPool(LP_XSGD).liquidity();
-    console2.log(
-      '[%s] totalLiquidityInNumeraire added',
-      swapLabel,
-      totalLiquidityInNumeraire1 - totalLiquidityInNumeraire0
-    );
-    console2.log('[%s] totalLiquidityInNumeraire1', swapLabel, totalLiquidityInNumeraire1 / 1e18);
-    console2.log(
-      '[%s] individualLiquidity1',
-      swapLabel,
-      individualLiquidity1[0] / 1e18,
-      individualLiquidity1[1] / 1e18
-    );
-    console2.log('[%s] individualLiquidity1', swapLabel, individualLiquidity1[0], individualLiquidity1[1]);
+
+    if (totalLiquidityInNumeraire0 < totalLiquidityInNumeraire1) {
+      console2.log(
+        '[%s] totalLiquidityInNumeraire ADDED\t',
+        swapLabel,
+        (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire0) / 1e18
+      );
+    } else {
+      console2.log(
+        '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
+        swapLabel,
+        (totalLiquidityInNumeraire0 - totalLiquidityInNumeraire1) / 1e18
+      );
+    }
+
+    // console2.log('[%s] totalLiquidityInNumeraire1\t', swapLabel, totalLiquidityInNumeraire1 / 1e18);
+    // console2.log(
+    //   '[%s] individualLiquidity1',
+    //   swapLabel,
+    //   individualLiquidity1[0] / 1e18,
+    //   individualLiquidity1[1] / 1e18
+    // );
+    // console2.log('[%s] individualLiquidity1', swapLabel, individualLiquidity1[0], individualLiquidity1[1]);
 
     int256 lpEthPrice1 = IOracle(lpOracle).latestAnswer();
-    console2.log('[%s] lpEthPrice1', swapLabel, uint256(lpEthPrice1));
-    console2.log('[%s] fees added', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees0);
+    console2.log('[%s] lpEthPrice1\t', swapLabel, uint256(lpEthPrice1));
+    console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees0);
+
+    // {
+    //   console2.log('minting protocol fees');
+    //   uint256 tsB4 = IFXPool(LP_XSGD).totalSupply();
+    //   _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 11 * 1e18, me, USDC, XSGD);
+    //   console2.log('totalSupply minted:', IFXPool(LP_XSGD).totalSupply() - tsB4);
+    // }
+
+    (uint256 totalLiquidityInNumeraire2, uint256[] memory individualLiquidity2) = IFXPool(LP_XSGD).liquidity();
+
+    if (totalLiquidityInNumeraire1 < totalLiquidityInNumeraire2) {
+      console2.log(
+        '[%s] totalLiquidityInNumeraire ADDED\t',
+        swapLabel,
+        (totalLiquidityInNumeraire2 - totalLiquidityInNumeraire1) / 1e18
+      );
+    } else {
+      console2.log(
+        '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
+        swapLabel,
+        (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire2) / 1e18
+      );
+    }
+
+    // console2.log('[%s] totalLiquidityInNumeraire1\t', swapLabel, totalLiquidityInNumeraire1 / 1e18);
+    // console2.log(
+    //   '[%s] individualLiquidity1',
+    //   swapLabel,
+    //   individualLiquidity1[0] / 1e18,
+    //   individualLiquidity1[1] / 1e18
+    // );
+    // console2.log('[%s] individualLiquidity1', swapLabel, individualLiquidity1[0], individualLiquidity1[1]);
+    uint256 fees1 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
+    int256 lpEthPrice2 = IOracle(lpOracle).latestAnswer();
+    console2.log('[%s] lpEthPrice2\t', swapLabel, uint256(lpEthPrice2));
+    console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees1);
+
+    console2.log(swapLabel);
+    console2.log('After fee minting: lpEthPrice2 - lpEthPrice1', lpEthPrice2 - lpEthPrice1);
+    console2.log('After swap: lpEthPrice1 - lpEthPrice0', lpEthPrice1 - lpEthPrice0);
   }
 
   function _deployAndSetLPOracle() private returns (address) {
@@ -270,6 +351,7 @@ contract HLPPriceFeedOracle is Test {
   }
 
   function _doSwap(address _senderRecipient, uint256 _swapAmt, address _tokenFrom, address _tokenTo) private {
+    console2.log('Swapping..');
     int256[] memory assetDeltas = new int256[](2);
 
     IVault.BatchSwapStep[] memory swaps = new IVault.BatchSwapStep[](1);
@@ -311,6 +393,74 @@ contract HLPPriceFeedOracle is Test {
       assetDeltas[1] = _assetDeltas[1];
     }
   }
+
+  function _addLiquidity(bytes32 _poolId, uint256 _depositNumeraire, address _user, address _tA, address _tB) private {
+    address[] memory assets = new address[](2);
+    assets[0] = _tA;
+    assets[1] = _tB;
+
+    uint256[] memory maxAmountsIn = new uint256[](2);
+    maxAmountsIn[0] = type(uint256).max;
+    maxAmountsIn[1] = type(uint256).max;
+
+    uint256[] memory minAmountsOut = new uint256[](2);
+    minAmountsOut[0] = 0;
+    minAmountsOut[1] = 0;
+
+    address[] memory userAssets = new address[](2);
+    userAssets[0] = _tA;
+    userAssets[1] = _tB;
+    bytes memory userDataJoin = abi.encode(_depositNumeraire, userAssets);
+
+    IVault.JoinPoolRequest memory reqJoin = IVault.JoinPoolRequest(
+      _asIAsset(assets),
+      maxAmountsIn,
+      userDataJoin,
+      false
+    );
+
+    vm.startPrank(_user);
+    IVault(BALANCER_VAULT).joinPool(_poolId, _user, _user, reqJoin);
+    vm.stopPrank();
+  }
+
+  // function _removeLiquidity(
+  //     bytes32 poolId,
+  //     uint256 lpTokensToBurn,
+  //     address user
+  // )
+  //     private
+  //     returns (
+  //         int256 vaultQuoteTokenRemoved,
+  //         int256 vaultBaseTokenRemoved,
+  //         uint256 poolTotalLiq,
+  //         uint256[] memory poolIndividualLiq
+  //     )
+  // {
+  //     vm.startPrank(user);
+
+  //     address[] memory sorted = _sortAssetsList(address(_eurs), address(_usdc));
+
+  //     bytes memory userData = abi.encode(lpTokensToBurn, sorted);
+
+  //     IVault.ExitPoolRequest memory req = IVault.ExitPoolRequest({
+  //         assets: _asIAsset(sorted),
+  //         minAmountsOut: _uint256ArrVal(2, 0),
+  //         userData: userData,
+  //         toInternalBalance: false
+  //     });
+
+  //     vault.exitPool(poolId, user, payable(user), req);
+  //     vm.stopPrank();
+  // }
+
+  // ERC20 helper functions copied from balancer-core-v2 ERC20Helpers.sol
+  function _asIAsset(address[] memory addresses) internal pure returns (IAsset[] memory assets) {
+    // solhint-disable-next-line no-inline-assembly
+    assembly {
+      assets := addresses
+    }
+  }
 }
 
 // function swapInFXPool() private {}
@@ -326,6 +476,24 @@ interface IFiatToken {
 }
 
 interface IVault {
+  function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request) external payable;
+
+  struct JoinPoolRequest {
+    IAsset[] assets;
+    uint256[] maxAmountsIn;
+    bytes userData;
+    bool fromInternalBalance;
+  }
+
+  function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request) external;
+
+  struct ExitPoolRequest {
+    IAsset[] assets;
+    uint256[] minAmountsOut;
+    bytes userData;
+    bool toInternalBalance;
+  }
+
   enum SwapKind {
     GIVEN_IN,
     GIVEN_OUT
