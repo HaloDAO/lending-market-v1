@@ -51,18 +51,39 @@ contract hlpPriceFeedOracle {
     uint256 _decimals = uint256(10 ** uint256(decimals));
     // uint256 liquidity = baseContract.liquidity() - hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
     uint256 liquidity = baseContract.liquidity();
-    // uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
+    uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
     // uint256 liquidity = baseContract.liquidity();
     // // simulate perfectly balanced pool
     // // get Oracle rate for tokenA tokenB
     // // totalNumeraire = tokenAAmount * tokenAPriceUSD + tokenBAmount * tokenBPriceUSD
     // // tokenAmountDelta (0 when pool perfectly balanced)
 
-    // // uint256 lpTokenFeeAmount = (_oGLiq.inv()).mulu(totalUnclaimedFeesInNumeraire);
+    int128 balUsdc = IAssimilator(0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a).viewNumeraireBalanceLPRatio(
+      500000000000000000,
+      500000000000000000,
+      0xBA12222222228d8Ba445958a75a0704d566BF2C8,
+      0xe6d8fcd23ed4e417d7e9d1195edf2ca634684e0e000200000000000000000caf
+    );
+
+    int128 balXsgd = IAssimilator(0xC933a270B922acBd72ef997614Ec46911747b799).viewNumeraireBalanceLPRatio(
+      500000000000000000,
+      500000000000000000,
+      0xBA12222222228d8Ba445958a75a0704d566BF2C8,
+      0xe6d8fcd23ed4e417d7e9d1195edf2ca634684e0e000200000000000000000caf
+    );
 
     // // lpTokenFeeAmount = lpTokenFeeAmount.mul(totalSupply()).div(1e18);
     uint256 totalSupply = baseContract.totalSupply();
-    uint256 totalSupplyWithUnclaimedFees =  totalSupply + ((totalSupply * hlpContract(baseContract).totalUnclaimedFeesInNumeraire()) / totalSupply);
+    // @todo use this instead?
+    uint256 totalSupplyWithUnclaimedFees = totalSupply +
+      (((hlpContract(baseContract).totalUnclaimedFeesInNumeraire()) / liquidity) * totalSupply);
+
+    int128 oGLiq = balUsdc + balXsgd;
+    // assimilator implementation
+    // uint256 totalSupplyWithUnclaimedFees = totalSupply +
+    //   (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
+
+    // console2.log('total tokens supply with fees: ', totalSupplyWithUnclaimedFees);
 
     // uint256 lpTokenFeeAmount = (uint256(1).divu(liquidity).mulu(unclaimedFees) * totalSupply) / 1e18;
 
@@ -89,4 +110,8 @@ contract hlpPriceFeedOracle {
     }
     return _price;
   }
+}
+
+interface IAssimilator {
+  function viewNumeraireBalanceLPRatio(uint256, uint256, address, bytes32) external view returns (int128);
 }
