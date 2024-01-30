@@ -49,7 +49,8 @@ contract hlpPriceFeedOracle {
 
   function latestAnswer() external view returns (int256) {
     uint256 _decimals = uint256(10 ** uint256(decimals));
-    uint256 liquidity = baseContract.liquidity() - (2 * hlpContract(baseContract).totalUnclaimedFeesInNumeraire());
+    // uint256 liquidity = baseContract.liquidity() - hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
+    uint256 liquidity = baseContract.liquidity();
     // uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
     // uint256 liquidity = baseContract.liquidity();
     // // simulate perfectly balanced pool
@@ -61,12 +62,13 @@ contract hlpPriceFeedOracle {
 
     // // lpTokenFeeAmount = lpTokenFeeAmount.mul(totalSupply()).div(1e18);
     uint256 totalSupply = baseContract.totalSupply();
+    uint256 totalSupplyWithUnclaimedFees =  totalSupply + ((totalSupply * hlpContract(baseContract).totalUnclaimedFeesInNumeraire()) / totalSupply);
 
     // uint256 lpTokenFeeAmount = (uint256(1).divu(liquidity).mulu(unclaimedFees) * totalSupply) / 1e18;
 
     // console2.log('uint256(1).divu(liquidity)', liquidity.fromUInt().mulu(1));
     // console2.log('lpTokenFeeAmount', lpTokenFeeAmount);
-    uint256 hlp_usd = (totalSupply * (_decimals)) / (liquidity);
+    uint256 hlp_usd = (totalSupplyWithUnclaimedFees * (_decimals)) / (liquidity);
 
     // console2.log('[latestAnswer] hlp-usd: ', hlp_usd);
 

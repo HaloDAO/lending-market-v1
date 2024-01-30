@@ -108,32 +108,32 @@ contract HLPPriceFeedOracle is Test {
 
     _doSwap(me, 130_000 * 1e6, USDC, XSGD);
 
-    _swapAndCheck(lpOracle, 230_000 * 1e6, XSGD, USDC, 'SWAP 1');
-    _swapAndCheck(lpOracle, 230_000 * 1e6, USDC, XSGD, 'SWAP 2');
+    // _swapAndCheck(lpOracle, 230_000 * 1e6, XSGD, USDC, 'SWAP 1');
+    // _swapAndCheck(lpOracle, 230_000 * 1e6, USDC, XSGD, 'SWAP 2');
 
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 1');
-    // //lp price in eth  452141146997922
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 2');
-    // // lp price in eth 455721063474353
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 3');
-    // // lp price in eth 455721063472831
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 4');
+    _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 1');
+    //lp price in eth  452141146997922
+    _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 2');
+    // lp price in eth 455721063474353
+    _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 3');
+    // lp price in eth 455721063472831
+    _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 4');
 
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 5');
-    // //lp price in eth  452141146997922
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 6');
-    // // lp price in eth 455721063474353
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 7');
-    // // lp price in eth 455721063472831
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 8');
+    _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 5');
+    //lp price in eth  452141146997922
+    _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 6');
+    // lp price in eth 455721063474353
+    _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 7');
+    // lp price in eth 455721063472831
+    _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 8');
 
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 9');
-    // //lp price in eth  452141146997922
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 10');
-    // // lp price in eth 455721063474353
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 11');
-    // // lp price in eth 455721063472831
-    // _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 12');
+    _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 9');
+    //lp price in eth  452141146997922
+    _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 10');
+    // lp price in eth 455721063474353
+    _swapAndCheck(lpOracle, 100_000 * 1e6, XSGD, USDC, 'SWAP 11');
+    // lp price in eth 455721063472831
+    _swapAndCheck(lpOracle, 100_000 * 1e6, USDC, XSGD, 'SWAP 12');
 
     // {
     //   console2.log('minting protocol fees');

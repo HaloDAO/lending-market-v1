@@ -150,7 +150,7 @@ S3 - S4: 451787779816214 - 451746134843830 = 41644972384
 [SWAP 5] lpEthPrice2 451289829137777
 [SWAP 6] lpEthPrice2 451206730336407
 [SWAP 7] lpEthPrice2 451144787016577
-[SWAP 8] lpEthPrice2 451061741616724
+[SWAP 8] lpEthPrice2 451061741616724 
 [SWAP 9] lpEthPrice2 450999838097767
 [SWAP 10] lpEthPrice2 450916846047970
 [SWAP 11] lpEthPrice2 450854982289879
@@ -170,6 +170,15 @@ S3 - S4: 451787779816214 - 451746134843830 = 41644972384
 [SWAP 10] lpEthPrice2 450916846047970
 [SWAP 11] lpEthPrice2 450854982289879
 [SWAP 12] lpEthPrice2 450045334556097
+
+
+--- Total Supply plus unclaimed fees in numeraire ---
+
+
+### Inflate the totalSupply on the same block attack vector
+- If attacker was to inflate `totalUnclaimedFeesInNumeraire` by doing 1000x swaps then calling joinPool or exitPool to invoke _mintProtocolFees()
+- What will be the effect of the inflated totalSupply to the latestAnswer()?
+
 
 ### Profit driven attack
 
