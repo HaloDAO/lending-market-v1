@@ -75,13 +75,13 @@ contract hlpPriceFeedOracle {
     // // lpTokenFeeAmount = lpTokenFeeAmount.mul(totalSupply()).div(1e18);
     uint256 totalSupply = baseContract.totalSupply();
     // @todo use this instead?
-    uint256 totalSupplyWithUnclaimedFees = totalSupply +
-      (((hlpContract(baseContract).totalUnclaimedFeesInNumeraire()) / liquidity) * totalSupply);
+    // uint256 totalSupplyWithUnclaimedFees = totalSupply +
+    //   (((hlpContract(baseContract).totalUnclaimedFeesInNumeraire()) / liquidity) * totalSupply);
 
     int128 oGLiq = balUsdc + balXsgd;
     // assimilator implementation
-    // uint256 totalSupplyWithUnclaimedFees = totalSupply +
-    //   (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
+    uint256 totalSupplyWithUnclaimedFees = totalSupply +
+      (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
 
     // console2.log('total tokens supply with fees: ', totalSupplyWithUnclaimedFees);
 

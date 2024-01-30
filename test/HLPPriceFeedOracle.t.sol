@@ -147,6 +147,42 @@ contract HLPPriceFeedOracle is Test {
     // Note: the protocol does not get fees if the user swaps towards beta after getting out of beta. the reward for that swap goes to the user
   }
 
+  function testOverloadUnclaimedFees() public {
+    _deployReserve();
+
+    address lpOracle = _deployAndSetLPOracle();
+    console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
+    console2.log('quotePriceFeed', IHLPOracle(lpOracle).quotePriceFeed());
+
+    // address[] memory rvs = LP.getReservesList();
+    // console2.log('rvs', rvs.length);
+    // console2.log('rvs 7', rvs[7]); // XSGD HLP
+
+    // IFXPool(LP_XSGD).viewParameters();
+    // lp price in eth 452141146999509
+
+    // _doSwap(me, 130_000 * 1e6, USDC, XSGD);
+    uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
+    console2.log('before loop: ', initial);
+    _loopSwaps(247, 10_000, address(lpOracle));
+    console2.log('after loop unclaimed fees: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
+  }
+
+  function _loopSwaps(uint256 times, uint256 amount, address lpOracle) public {
+    uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
+
+    int256 beforeLoop = IOracle(lpOracle).latestAnswer();
+    for (uint256 j = 0; j < times; j++) {
+      console2.log(j);
+
+      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, 'swap');
+      _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, 'swap');
+      console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
+      console2.log('intiial unclaimed fees: ', initial);
+      console2.log('intiial oracle price: ', beforeLoop);
+    }
+  }
+
   function _swapAndCheck(
     address lpOracle,
     uint256 amountToSwap,

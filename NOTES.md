@@ -250,7 +250,7 @@ S3 - S4: 451787779816214 - 451746134843830 = 41644972384
 
 -------------------------- Comparison --------------------------
 
-(451580193343823  - 451860496073837) / 1e18 = -2.8E-7
+(451580193343823 - 451860496073837) / 1e18 = -2.8E-7
 (450045334556097 - 451090806445253) / 1e18 = -1.05E-6
 ——————————————————————————————————————
 (451580193343823 - 451860670008869) / 1e18 = -2.8E-7
@@ -262,13 +262,18 @@ S3 - S4: 451787779816214 - 451746134843830 = 41644972384
 (451580193343823 - 451896023954064) / 1e18 = -3.16E-7
 (450045334556097 - 451832732622853 ) / 1e18 = -1.79E-6
 
--------------------------- ----------- --------------------------
-
+---
 
 ### Inflate the totalSupply on the same block attack vector
 
 - If attacker was to inflate `totalUnclaimedFeesInNumeraire` by doing 1000x swaps then calling joinPool or exitPool to invoke \_mintProtocolFees()
 - What will be the effect of the inflated totalSupply to the latestAnswer()?
+
+Swapping 10,000 247 times
+452126696179101
+355284872393123
+
+-0.2141917843 (-21.41%)
 
 ### Profit driven attack
 
