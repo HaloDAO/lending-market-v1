@@ -7,8 +7,6 @@ import 'forge-std/console2.sol';
 
 import './ABDKMath64x64.sol';
 
-
-
 // @TODO Safe math or Solidity >= 0.8
 interface AggregatorV3Interface {
   function latestRoundData()
@@ -19,21 +17,7 @@ interface AggregatorV3Interface {
   function decimals() external view returns (uint8);
 }
 
-interface IVault {
-
-}
-
-interface Assimilator {
-
-
-}
-
-interface IOracle {
-
-}
-
 interface hlpContract {
-
   function liquidity() external view returns (uint256);
 
   function totalSupply() external view returns (uint256);
@@ -42,13 +26,10 @@ interface hlpContract {
 
   function protocolPercentFee() external view returns (uint256);
 
- function viewDeposit(uint256) external view returns (uint256);
+  function viewDeposit(uint256) external view returns (uint256);
 
- function paused() external view returns (bool);
-  
+  function getPoolId() external view returns (bytes32);
 }
-
-
 
 contract hlpPriceFeedOracle {
   using SafeCast for uint;
@@ -61,60 +42,53 @@ contract hlpPriceFeedOracle {
 
   hlpContract public baseContract;
   AggregatorV3Interface public quotePriceFeed;
-
-
+  address public vault;
 
   uint8 public decimals;
+  bytes32 public poolId;
 
-  constructor(hlpContract _baseContract, AggregatorV3Interface _quotePriceFeed, string memory _priceFeed) public {
+  uint256 constant WEIGHT = 5e17;
+
+  constructor(
+    hlpContract _baseContract,
+    AggregatorV3Interface _quotePriceFeed,
+    string memory _priceFeed,
+    address _vault
+  ) public {
     baseContract = _baseContract;
     quotePriceFeed = _quotePriceFeed;
     priceFeed = _priceFeed;
     decimals = 18;
-
+    vault = _vault;
+    poolId = hlpContract(baseContract).getPoolId();
   }
 
   function latestAnswer() external view returns (int256) {
     uint256 _decimals = uint256(10 ** uint256(decimals));
-    // uint256 liquidity = baseContract.liquidity() - hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
     uint256 liquidity = baseContract.liquidity();
     uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
 
-    bool isPaused = hlpContract(baseContract).paused();
-
-    // uint256 liquidity = baseContract.liquidity();
-    // // simulate perfectly balanced pool
-    // // get Oracle rate for tokenA tokenB
-    // // totalNumeraire = tokenAAmount * tokenAPriceUSD + tokenBAmount * tokenBPriceUSD
-    // // tokenAmountDelta (0 when pool perfectly balanced)
-
-    int128 balUsdc = IAssimilator(0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a).viewNumeraireBalanceLPRatio(
-      500000000000000000,
-      500000000000000000,
-      0xBA12222222228d8Ba445958a75a0704d566BF2C8,
-      0xe6d8fcd23ed4e417d7e9d1195edf2ca634684e0e000200000000000000000caf
+    int128 balTokenA = IAssimilator(0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a).viewNumeraireBalanceLPRatio(
+      WEIGHT,
+      WEIGHT,
+      vault,
+      poolId
     );
 
-    int128 balXsgd = IAssimilator(0xC933a270B922acBd72ef997614Ec46911747b799).viewNumeraireBalanceLPRatio(
-      500000000000000000,
-      500000000000000000,
-      0xBA12222222228d8Ba445958a75a0704d566BF2C8,
-      0xe6d8fcd23ed4e417d7e9d1195edf2ca634684e0e000200000000000000000caf
+    int128 balTokenB = IAssimilator(0xC933a270B922acBd72ef997614Ec46911747b799).viewNumeraireBalanceLPRatio(
+      WEIGHT,
+      WEIGHT,
+      vault,
+      poolId
     );
 
-
-    // // lpTokenFeeAmount = lpTokenFeeAmount.mul(totalSupply()).div(1e18);
     uint256 totalSupply = baseContract.totalSupply();
-    // @todo use this instead?
-    // uint256 totalSupplyWithUnclaimedFees = totalSupply +
-    //   (((hlpContract(baseContract).totalUnclaimedFeesInNumeraire()) / liquidity) * totalSupply);
 
-    int128 oGLiq = balUsdc + balXsgd;
-    
+    int128 oGLiq = balTokenA + balTokenB;
+
     // assimilator implementation
-    uint256 totalSupplyWithUnclaimedFees = isPaused ? totalSupply +
-      (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals) : totalSupply + hlpContract(address(baseContract)).viewDeposit(unclaimedFees);
-
+    uint256 totalSupplyWithUnclaimedFees = totalSupply +
+      (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
 
     // uint256 totalSupplyWithUnclaimedFees = totalSupply + (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
 
@@ -127,8 +101,6 @@ contract hlpPriceFeedOracle {
     uint256 hlp_usd = (totalSupplyWithUnclaimedFees * (_decimals)) / (liquidity);
 
     // console2.log('[latestAnswer] hlp-usd: ', hlp_usd);
-
-
 
     (, int256 quotePrice, , , ) = quotePriceFeed.latestRoundData();
     uint8 quoteDecimals = quotePriceFeed.decimals();
