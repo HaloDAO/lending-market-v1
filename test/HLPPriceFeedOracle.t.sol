@@ -76,7 +76,17 @@ contract HLPPriceFeedOracle is Test {
 -     Price has changed
 
  */
-  function testPriceManipulation() public {
+
+  function testLpTokenPrice() public {
+    _deployReserve();
+    address lpOracle = _deployAndSetLPOracle();
+    int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
+    console.log('lpPrice', uint256(lpPrice));
+    console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
+    console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
+  }
+
+  function __testPriceManipulation() private {
     // OPS: [noop] Remove OR Disable the curve / HLP XSGD/USDC from the lending pool
     // [DONE] add LP XSGD/USDC to the lending pool
     //    - deploy AToken Implementation
@@ -96,8 +106,6 @@ contract HLPPriceFeedOracle is Test {
     _deployReserve();
 
     address lpOracle = _deployAndSetLPOracle();
-    console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
-    console2.log('quotePriceFeed', IHLPOracle(lpOracle).quotePriceFeed());
 
     // address[] memory rvs = LP.getReservesList();
     // console2.log('rvs', rvs.length);
@@ -151,8 +159,6 @@ contract HLPPriceFeedOracle is Test {
     _deployReserve();
 
     address lpOracle = _deployAndSetLPOracle();
-    console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
-    console2.log('quotePriceFeed', IHLPOracle(lpOracle).quotePriceFeed());
 
     // address[] memory rvs = LP.getReservesList();
     // console2.log('rvs', rvs.length);
@@ -162,9 +168,24 @@ contract HLPPriceFeedOracle is Test {
     // lp price in eth 452141146999509
 
     // _doSwap(me, 130_000 * 1e6, USDC, XSGD);
+    uint256 initialSupply = IFXPool(LP_XSGD).totalSupply();
+    (uint256 initialLiquidity, ) = IFXPool(LP_XSGD).liquidity();
+
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
     console2.log('before loop: ', initial);
     _loopSwaps(247, 10_000, address(lpOracle));
+
+    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 10 * 1e18, me, USDC, XSGD);
+
+    uint256 endSupply = IFXPool(LP_XSGD).totalSupply();
+    (uint256 endLiquidity, ) = IFXPool(LP_XSGD).liquidity();
+
+    console2.log('end liquidity', endLiquidity);
+    console2.log('end supply', endSupply);
+
+    console2.log('supply diff', endSupply - initialSupply);
+    console2.log('liquidity diff', endLiquidity - initialLiquidity);
+
     console2.log('after loop unclaimed fees: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
   }
 
@@ -597,6 +618,8 @@ interface IHLPOracle {
   function baseContract() external view returns (address);
 
   function quotePriceFeed() external view returns (address);
+
+  function latestAnswer() external view returns (int256);
 }
 
 interface IERC20Detailed {
