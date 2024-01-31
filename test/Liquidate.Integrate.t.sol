@@ -18,35 +18,39 @@ import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolD
 import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
 import {IAToken} from '../contracts/interfaces/IAToken.sol';
 
+import {LendingMarketTestHelper} from './LendingMarketTestHelper.t.sol';
+
 interface IOracle {
   function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80);
 }
 
-contract LiquididateIntegrationTest is Test {
-  address constant LENDINPOOL_PROXY_ADDRESS = 0xC73b2c6ab14F25e1EAd3DE75b4F6879DEde3968E;
-  address constant USDC_MAINNET = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-  string private RPC_URL = vm.envString('MAINNET_RPC_URL');
-  uint256 constant FORK_BLOCK = 15432282;
-  address constant ORACLE_OWNER = 0x21f73D42Eb58Ba49dDB685dc29D3bF5c0f0373CA;
-  address constant ETH_USD_CHAINLINK = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
-  address constant USDC_USD_CHAINLINK = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
-  address constant HLP_XSGD = 0x64DCbDeb83e39f152B7Faf83E5E5673faCA0D42A;
-  address constant HLP_XSGD_ORACLE = 0xE911bA4d01b64830160284E42BfC9b9933fA19BA;
-  address constant AAVE_ORACLE = 0x50FDeD029612F6417e9c9Cb9a42848EEc772b9cC;
-  address constant UI_DATA_PROVIDER = 0x6c00EC488A2D2EB06b2Ed28e1F9f12C38fBCF426;
-  address constant LENDINGPOOL_ADDRESS_PROVIDER = 0xD8708572AfaDccE523a8B8883a9b882a79cbC6f2;
-  address constant LP_USER = 0x01e198818a895f01562E0A087595E5b1C7bb8d5c;
-  ILendingPool constant LP = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
+contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
+  string private RPC_URL = vm.envString('POLYGON_RPC_URL');
+  address constant ETH_USD_CHAINLINK = 0xF9680D99D6C9589e2a93a78A04A279e509205945;
+  address constant USDC_USD_CHAINLINK = 0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7;
+  address constant AAVE_ORACLE = 0x0200889C2733bB78641126DF27A0103230452b62;
+  address constant UI_DATA_PROVIDER = 0x755E39Ba1a425548fF8990A5c223C34C5ce5f8a5;
+
+  // address constant LENDING_POOL_ADMIN = ILendingPoolAddressesProvider.getPoolAdmin();
+
+  // This will be the address of HLPPriceFeedOracle
+  address lpOracle;
+
+  // string memory walletLabel = "rich-guy";
+  // Vm.Wallet memory RICH_GUY = vm.createWallet(walletLabel);
+
+  address constant RICH_GUY = 0x1B736B89cd70Cf355d71f55E626Dc53E8D56Bc2E;
 
   function setUp() public {
     vm.createSelectFork(RPC_URL, FORK_BLOCK);
 
-    address me = address(this);
+    vm.prank(XSGD_HOLDER);
+    IERC20(XSGD).transfer(me, 5_000_000 * 1e6);
+    IERC20(XSGD).transfer(RICH_GUY, 1_000_000 * 1e6);
 
-    vm.prank(0xE982615d461DD5cD06575BbeA87624fda4e3de17); // usdc masterMinter
-    IUsdcToken(USDC_MAINNET).configureMinter(me, 2_000_000_000_000 * 1e6);
-    // mint usdc tokens to us
-    IUsdcToken(USDC_MAINNET).mint(me, 2_000_000_000_000 * 1e6);
+    vm.prank(USDC_HOLDER);
+    IERC20(USDC).transfer(me, 5_000_000 * 1e6);
+    IERC20(USDC).transfer(RICH_GUY, 1_000_000 * 1e6);
   }
 
   /**
@@ -57,27 +61,94 @@ contract LiquididateIntegrationTest is Test {
     - ensure add LP Token instead of HLP
     - \_deployReserve
     - \_deployAndSetLPOracle
+    - _loopSwaps for inflating/deflating price oracle rate
     - luquidate
     - profit!!!
    */
   function testLiquidate() public {
-    _printUserAccountData(LP_USER);
+    _printUserAccountData(me);
 
     (, int256 ethUsdPrice, , , ) = IOracle(ETH_USD_CHAINLINK).latestRoundData();
     (, int256 usdcUsdPrice, , , ) = IOracle(USDC_USD_CHAINLINK).latestRoundData();
     console.log('ethUsdPrice', uint256(ethUsdPrice));
     console.log('usdcUsdPrice', uint256(usdcUsdPrice));
 
-    _borrowToLimit(LP_USER);
+    _deployReserve();
+    lpOracle = _deployAndSetLPOracle();
 
-    // _repayLoan(LP_USER); // repay the loan
+    // Set Lending market oracle for XSGD_USDC token to use newly deployed HLPOracle
+    _setXsgdHLPOracle(lpOracle);
+
+    int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
+    // console.log('lpPrice', uint256(lpPrice));
+    // console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
+    console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
+
+    vm.startPrank(me);
+
+    // Add liq to FX Pool to get LP_XSGD balance
+    IERC20(XSGD).approve(BALANCER_VAULT, type(uint).max);
+    IERC20(USDC).approve(BALANCER_VAULT, type(uint).max);
+
+    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
+
+    console.log('LP_XSGD balance after add liq', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+
+    // Deposit collateral to use for borrowing later
+    IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.deposit(
+      LP_XSGD,
+      10_000 * 1e18,
+      me,
+      0 // referral code
+    );
+
+    // User sets LP_XSGD to be used as collateral in lending market pool
+    LP.setUserUseReserveAsCollateral(LP_XSGD, true);
+
+    vm.stopPrank();
+
+    // IERC20(aLPXSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max); // not needed
+
+    // idea: (other people deposit in lending pool to put collateral borrowable balance to solve VL_COLLATERAL_BALANCE_IS_0)
+    _putBorrowableLiquidityInLendingPool(RICH_GUY, 1_000_000 * 1e6);
+
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    address aLPXSGD = rdLPXSGD.aTokenAddress;
+
+    console.log('aLPXSGD', IERC20(aLPXSGD).balanceOf(me));
+
+    /**
+      1. Check borrowing enabled
+      2. Check all reserves tapos check kung tama yung aTokenAddresss ()
+      3. IAaveOracle(aaveOracle).getAssetPrice() if has price (yes)
+     */
+
+    address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
+    console.log('LP XSGD Aave asset price', IAaveOracle(aaveOracle).getAssetPrice(LP_XSGD));
+
+    _getLendingPoolReserveConfig();
+
+    console.log('---- User Lending Market Balance After Deposit Before Borrow ----');
+    _printUserAccountData(me);
+
+    // Enable borrowing for added LP assets
+    _enableBorrowingForAddedLPAssets(LP_XSGD, true);
+    console.log('--- Enabled borrowing for LP XSGD ---');
+
+    _getLendingPoolReserveConfig();
+
+    // Borrow up to the limit of your collateral
+    _borrowToLimit(me);
+
+    // _repayLoan(me); // repay the loan
 
     // _depositWithdraw(); // deposit and withdraw
 
     // get the price for the collateral
 
     IHaloUiPoolDataProvider.UserReserveData[] memory userReserves = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
-      .getUserReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER), LP_USER);
+      .getUserReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER), me);
 
     console.log(userReserves[0].underlyingAsset, userReserves[0].scaledATokenBalance);
     console.log(userReserves[1].underlyingAsset, userReserves[1].scaledATokenBalance);
@@ -89,13 +160,36 @@ contract LiquididateIntegrationTest is Test {
 
     _manipulateOraclePrice();
 
-    _liquididatePosition(LP_USER);
+    _liquididatePosition(me);
 
     // manipulate the oracle to make the loan undercollateralized
 
     // liquidate the loan
 
     // check that the liquidator received the collateral
+  }
+
+  function _putBorrowableLiquidityInLendingPool(address _donor, uint256 _amount) private {
+    vm.startPrank(_donor);
+
+    IERC20(XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+
+    LP.deposit(
+      XSGD,
+      _amount,
+      _donor,
+      0 // referral code
+    );
+
+    LP.deposit(
+      USDC,
+      _amount,
+      _donor,
+      0 // referral code
+    );
+
+    vm.stopPrank();
   }
 
   function _printLiqIndex(address _asset) private {
@@ -110,8 +204,8 @@ contract LiquididateIntegrationTest is Test {
 
     vm.warp(block.timestamp + 31536000);
 
-    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
-    LP.repay(USDC_MAINNET, 50_000 * 1e6, 2, _user);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.repay(USDC, 50_000 * 1e6, 2, _user);
 
     (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd2, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
       .getReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER));
@@ -122,46 +216,51 @@ contract LiquididateIntegrationTest is Test {
   function _depositWithdraw() private {
     // @TODO tbd deposit 50k USDC, receive 50K (+1 wei) aUSDC, withdraw 50K aUSDC, receive 50K USDC (+1 wei)
     address me = address(this);
-    uint256 balBefore = IERC20(USDC_MAINNET).balanceOf(me);
+    uint256 balBefore = IERC20(USDC).balanceOf(me);
     console.log('block.timestamp', block.timestamp);
-    _printLiqIndex(USDC_MAINNET);
-    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    _printLiqIndex(USDC);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
     LP.deposit(
-      USDC_MAINNET,
+      USDC,
       50_000 * 1e6,
       me,
       0 // referral code
     );
 
     // print amount of aTokens received
-    DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
+    DataTypes.ReserveData memory rd = LP.getReserveData(USDC);
     address aToken = rd.aTokenAddress;
 
     console.log('aToken', IERC20(aToken).balanceOf(me));
 
-    LP.withdraw(USDC_MAINNET, IERC20(aToken).balanceOf(me), me);
+    LP.withdraw(USDC, IERC20(aToken).balanceOf(me), me);
 
     console.log('block.timestamp', block.timestamp);
-    _printLiqIndex(USDC_MAINNET);
+    _printLiqIndex(USDC);
 
-    console.log('USDC Received After Deposit/Withdraw', IERC20(USDC_MAINNET).balanceOf(me) - balBefore);
+    console.log('USDC Received After Deposit/Withdraw', IERC20(USDC).balanceOf(me) - balBefore);
   }
 
   function _setXsgdHLPOracle(address _oracle) private {
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
 
     address[] memory assets = new address[](1);
-    assets[0] = HLP_XSGD;
+    assets[0] = LP_XSGD;
     address[] memory sources = new address[](1);
-    sources[0] = HLP_XSGD_ORACLE;
+    sources[0] = lpOracle;
 
     address oracleOwner = AaveOracle(aaveOracle).owner();
     vm.prank(oracleOwner);
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
+    vm.stopPrank();
+
+    console2.log('[_setXsgdHLPOracle] Done setting price oracle for XSGD_USDC collateral', lpOracle);
   }
 
   function _borrowToLimit(address _user) private {
-    _setXsgdHLPOracle(HLP_XSGD_ORACLE);
+    // Is this still needed if we are deploying a new lpOracle?
+    // I think yes to point the newly deployed lpOracle to the correct HLP
+    // _setXsgdHLPOracle(lpOracle);
 
     (
       ,
@@ -184,18 +283,18 @@ contract LiquididateIntegrationTest is Test {
 
     console.log('[_borrowToLimit] totalUsdcBorrows', totalUsdcBorrows);
 
-    uint256 balBefore = IERC20(USDC_MAINNET).balanceOf(_user);
+    uint256 balBefore = IERC20(USDC).balanceOf(_user);
     console.log('[_borrowToLimit] balBefore', balBefore);
 
     LP.borrow(
-      USDC_MAINNET,
+      USDC,
       totalUsdcBorrows + uint256(1169 * 1e6), // @todo check if it make sense: difference between total calculated usdc to be borrowed vs actual limit
       2, // stablecoin borrowing
       0, // referral code
       _user
     );
 
-    uint256 balAfter = IERC20(USDC_MAINNET).balanceOf(_user);
+    uint256 balAfter = IERC20(USDC).balanceOf(_user);
     console.log('[_borrowToLimit] balAfter', balAfter);
 
     (
@@ -210,6 +309,52 @@ contract LiquididateIntegrationTest is Test {
     console.log('[_borrowToLimit] availableBorrowsETH2', availableBorrowsETH2);
     console.log('[_borrowToLimit] healthFactor2: ', healthFactor2);
 
+    vm.stopPrank();
+  }
+
+  function _getLendingPoolReserveConfig()
+    private
+    view
+    returns (
+      // address _asset
+      DataTypes.ReserveConfigurationMap memory
+    )
+  {
+    // address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
+    (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
+      .getReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER));
+
+    for (uint32 i = 0; i < rd.length; i++) {
+      if (rd[i].underlyingAsset == LP_XSGD) {
+        console.log('rd[i].underlyingAsset', rd[i].underlyingAsset);
+        console.log('rd[i].baseLTVasCollateral', rd[i].baseLTVasCollateral);
+        console.log('rd[i].reserveFactor', rd[i].reserveFactor);
+        console.log('rd[i].usageAsCollateralEnabled', rd[i].usageAsCollateralEnabled);
+      }
+    }
+
+    // address[] memory reservesList = IHaloUiPoolDataProvider(UI_DATA_PROVIDER).getReservesList(
+    //   ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER)
+    // );
+
+    // for (uint32 i = 0; i < reservesList.length; i++) {
+    //   // if (reservesList[i] == _asset) {
+    //   //   return IHaloUiPoolDataProvider(UI_DATA_PROVIDER).getReserveConfigurationData(
+    //   //     ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER),
+    //   //     reservesList[i]
+    //   //   );
+    //   // }
+    //   console.log('reservesList[i]', reservesList[i]);
+    // }
+  }
+
+  function _enableBorrowingForAddedLPAssets(address _asset, bool doEnable) private {
+    address lendingPoolConfigurator = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER)
+      .getLendingPoolConfigurator();
+
+    // TODO: Left here jan 31
+    vm.startPrank(ILendingPoolAddressesProvider.getPoolAdmin());
+    ILendingPoolConfigurator(lendingPoolConfigurator).enableBorrowingOnReserve(_asset, doEnable);
     vm.stopPrank();
   }
 
@@ -250,7 +395,7 @@ contract LiquididateIntegrationTest is Test {
   function _liquididatePosition(address _lpUser) private {
     address me = address(this);
 
-    DataTypes.ReserveData memory rd = LP.getReserveData(USDC_MAINNET);
+    DataTypes.ReserveData memory rd = LP.getReserveData(USDC);
     address aToken = rd.aTokenAddress;
 
     // _printLiqIndex();
@@ -260,17 +405,17 @@ contract LiquididateIntegrationTest is Test {
 
     console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(me));
 
-    uint256 beforeBal = IERC20(USDC_MAINNET).balanceOf(me);
+    uint256 beforeBal = IERC20(USDC).balanceOf(me);
 
-    IERC20(USDC_MAINNET).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
-    LP.liquidationCall(USDC_MAINNET, USDC_MAINNET, _lpUser, type(uint).max, true);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.liquidationCall(USDC, USDC, _lpUser, type(uint).max, true);
     _printHealthFactor(_lpUser);
 
     // check that the liquidator received the collateral
     console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(me));
 
-    LP.withdraw(USDC_MAINNET, type(uint).max, me);
-    console.log('[_liquididatePosition] USDC received', IERC20(USDC_MAINNET).balanceOf(me) - beforeBal);
+    LP.withdraw(USDC, type(uint).max, me);
+    console.log('[_liquididatePosition] USDC received', IERC20(USDC).balanceOf(me) - beforeBal);
     console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(me));
   }
 
@@ -278,17 +423,17 @@ contract LiquididateIntegrationTest is Test {
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
 
     address oracleOwner = AaveOracle(aaveOracle).owner();
-    uint256 _price = AaveOracle(aaveOracle).getAssetPrice(HLP_XSGD);
+    uint256 _price = AaveOracle(aaveOracle).getAssetPrice(LP_XSGD);
 
     console.log('price', _price);
 
-    address assSource = AaveOracle(aaveOracle).getSourceOfAsset(HLP_XSGD);
+    address assSource = AaveOracle(aaveOracle).getSourceOfAsset(LP_XSGD);
     console.log('assSource', assSource);
     console.log('fallbackOracle', AaveOracle(aaveOracle).getFallbackOracle());
     console.log('BASE_CURRENCY', AaveOracle(aaveOracle).BASE_CURRENCY());
 
     address[] memory assets = new address[](1);
-    assets[0] = HLP_XSGD;
+    assets[0] = LP_XSGD;
     address[] memory sources = new address[](1);
     sources[0] = address(new MockAggregator(int256(_price / 2)));
     vm.prank(oracleOwner);
@@ -300,4 +445,34 @@ interface IUsdcToken {
   function mint(address to, uint256 amount) external;
 
   function configureMinter(address minter, uint256 minterAllowedAmount) external;
+}
+
+interface IHLPOracle {
+  function baseContract() external view returns (address);
+
+  function quotePriceFeed() external view returns (address);
+
+  function latestAnswer() external view returns (int256);
+}
+
+interface IFXPool {
+  struct Assimilator {
+    address addr;
+    uint8 ix;
+  }
+
+  function getPoolId() external view returns (bytes32);
+
+  function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
+
+  // returns(totalLiquidityInNumeraire, individual liquidity)
+  function liquidity() external view returns (uint256, uint256[] memory);
+
+  function totalSupply() external view returns (uint256);
+
+  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
+}
+
+interface ILendingPoolConfigurator {
+  function enableBorrowingOnReserve(address asset, bool stableBorrowRateEnabled) external;
 }

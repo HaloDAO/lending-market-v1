@@ -7,25 +7,6 @@ import 'forge-std/console2.sol';
 
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
-// import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
-
-// import {ILendingPool} from '../contracts/interfaces/ILendingPool.sol';
-// import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
-// import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
-// import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
-
-// import {MockAggregator} from '../contracts/mocks/oracle/CLAggregators/MockAggregator.sol';
-// import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolDataProvider.sol';
-
-// import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
-// import {IAToken} from '../contracts/interfaces/IAToken.sol';
-// import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
-// import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
-// import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
-// import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
-// import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
-// import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
-// import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 
 import {LendingMarketTestHelper} from './LendingMarketTestHelper.t.sol';
 import {hlpPriceFeedOracle, hlpContract, AggregatorV3Interface} from './HLPPriceFeedOracle.sol';
@@ -211,12 +192,6 @@ interface IHLPOracle {
 
   function latestAnswer() external view returns (int256);
 }
-
-// interface IERC20Detailed {
-//   function decimals() external view returns (uint8);
-// }
-
-//  DIto COpy paste
 
 
 interface IFiatToken {
