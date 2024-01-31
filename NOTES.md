@@ -323,3 +323,19 @@ FX price
 
 9259 / 542450 = 0.01706885
 ```
+
+### Test Price Manipulation
+
+OPS: [noop] Remove OR Disable the curve / HLP XSGD/USDC from the lending pool
+[DONE] add LP XSGD/USDC to the lending pool
+
+- deploy AToken Implementation
+- deploy StableDebtToken (optional?)
+- deploy VariableDebtToken
+- deploy DefaultReserveInterestStrategy
+  output:
+  ratio of tokens [DONE]
+  liquidity[DONE]
+  [DONE] price of XSGD/USDC LP token according to HLPOracle
+  swap XSGD for USDC [DONE]
+  output: price of XSGD/USDC LP token according to HLPOracle [DONE]

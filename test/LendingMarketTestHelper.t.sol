@@ -80,7 +80,8 @@ contract LendingMarketTestHelper is Test {
     hlpPriceFeedOracle lpOracle = new hlpPriceFeedOracle(
       hlpContract(LP_XSGD),
       AggregatorV3Interface(ETH_USD_ORACLE),
-      'LPXSGD-USDC/ETH'
+      'LPXSGD-USDC/ETH',
+      BALANCER_VAULT
     );
 
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
@@ -96,7 +97,7 @@ contract LendingMarketTestHelper is Test {
 
     uint256 _price = AaveOracle(aaveOracle).getAssetPrice(LP_XSGD);
 
-    console2.log('price', _price);
+    console2.log('Aave Oracle price', _price);
 
     return address(lpOracle);
   }
@@ -157,27 +158,28 @@ contract LendingMarketTestHelper is Test {
     uint256 amountToSwap,
     address swapIn,
     address swapOut,
-    string memory swapLabel
+    string memory swapLabel,
+    bool withLogs
   ) internal {
     int256 lpEthPrice0 = IOracle(lpOracle).latestAnswer();
-    console2.log('[%s] lpEthPrice0\t', swapLabel, uint256(lpEthPrice0));
     uint256 fees0 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
-    console2.log('[%s] fees0\t', swapLabel, fees0);
 
     (uint256 totalLiquidityInNumeraire0, uint256[] memory individualLiquidity0) = IFXPool(LP_XSGD).liquidity();
-    console2.log('[%s] totalLiquidityInNumeraire0\t', swapLabel, totalLiquidityInNumeraire0);
-    // console2.log('[%s] totalLiquidityInNumeraire0', swapLabel, totalLiquidityInNumeraire0 / 1e18);
-    console2.log(
-      '[%s] individualLiquidity0',
-      swapLabel,
-      individualLiquidity0[0] / 1e18,
-      individualLiquidity0[1] / 1e18
-    );
-    // console2.log('[%s] individualLiquidity0', swapLabel, individualLiquidity0[0], individualLiquidity0[1]);
+    if (withLogs) {
+      console2.log('[%s] lpEthPrice0\t', swapLabel, uint256(lpEthPrice0));
+      console2.log('[%s] fees0\t', swapLabel, fees0);
+      console2.log('[%s] totalLiquidityInNumeraire0\t', swapLabel, totalLiquidityInNumeraire0);
+      console2.log(
+        '[%s] individualLiquidity0',
+        swapLabel,
+        individualLiquidity0[0] / 1e18,
+        individualLiquidity0[1] / 1e18
+      );
+    }
 
     _doSwap(me, amountToSwap, swapIn, swapOut);
 
-    (uint256 totalLiquidityInNumeraire1, uint256[] memory individualLiquidity1) = IFXPool(LP_XSGD).liquidity();
+    (uint256 totalLiquidityInNumeraire1, ) = IFXPool(LP_XSGD).liquidity();
 
     if (totalLiquidityInNumeraire0 < totalLiquidityInNumeraire1) {
       console2.log(
@@ -193,27 +195,11 @@ contract LendingMarketTestHelper is Test {
       );
     }
 
-    // console2.log('[%s] totalLiquidityInNumeraire1\t', swapLabel, totalLiquidityInNumeraire1 / 1e18);
-    // console2.log(
-    //   '[%s] individualLiquidity1',
-    //   swapLabel,
-    //   individualLiquidity1[0] / 1e18,
-    //   individualLiquidity1[1] / 1e18
-    // );
-    // console2.log('[%s] individualLiquidity1', swapLabel, individualLiquidity1[0], individualLiquidity1[1]);
-
     int256 lpEthPrice1 = IOracle(lpOracle).latestAnswer();
     console2.log('[%s] lpEthPrice1\t', swapLabel, uint256(lpEthPrice1));
     console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees0);
 
-    // {
-    //   console2.log('minting protocol fees');
-    //   uint256 tsB4 = IFXPool(LP_XSGD).totalSupply();
-    //   _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 11 * 1e18, me, USDC, XSGD);
-    //   console2.log('totalSupply minted:', IFXPool(LP_XSGD).totalSupply() - tsB4);
-    // }
-
-    (uint256 totalLiquidityInNumeraire2, uint256[] memory individualLiquidity2) = IFXPool(LP_XSGD).liquidity();
+    (uint256 totalLiquidityInNumeraire2, ) = IFXPool(LP_XSGD).liquidity();
 
     if (totalLiquidityInNumeraire1 < totalLiquidityInNumeraire2) {
       console2.log(
@@ -229,14 +215,6 @@ contract LendingMarketTestHelper is Test {
       );
     }
 
-    // console2.log('[%s] totalLiquidityInNumeraire1\t', swapLabel, totalLiquidityInNumeraire1 / 1e18);
-    // console2.log(
-    //   '[%s] individualLiquidity1',
-    //   swapLabel,
-    //   individualLiquidity1[0] / 1e18,
-    //   individualLiquidity1[1] / 1e18
-    // );
-    // console2.log('[%s] individualLiquidity1', swapLabel, individualLiquidity1[0], individualLiquidity1[1]);
     uint256 fees1 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
     int256 lpEthPrice2 = IOracle(lpOracle).latestAnswer();
     console2.log('[%s] lpEthPrice2\t', swapLabel, uint256(lpEthPrice2));
@@ -247,24 +225,28 @@ contract LendingMarketTestHelper is Test {
     console2.log('After swap: lpEthPrice1 - lpEthPrice0', lpEthPrice1 - lpEthPrice0);
   }
 
-  function _loopSwaps(uint256 times, uint256 amount, address lpOracle) internal {
+  function _loopSwaps(uint256 times, uint256 amount, address lpOracle, bool withLogs) internal {
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
 
     int256 beforeLoop = IOracle(lpOracle).latestAnswer();
     for (uint256 j = 0; j < times; j++) {
-      console2.log(j);
+      console2.log('LOOP #', j);
 
-      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, 'swap');
-      _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, 'swap');
-      console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
-      console2.log('intiial unclaimed fees: ', initial);
-      console2.log('intiial oracle price: ', beforeLoop);
+      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs);
+      _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, '[SWAP]', withLogs);
+      if (withLogs) {
+        console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
+        console2.log('intiial unclaimed fees: ', initial);
+        console2.log('intiial oracle price: ', beforeLoop);
+      }
     }
   }
 
   function _doSwap(address _senderRecipient, uint256 _swapAmt, address _tokenFrom, address _tokenTo) internal {
     console2.log('Swapping..');
     int256[] memory assetDeltas = new int256[](2);
+
+    IERC20(_tokenFrom).approve(_senderRecipient, type(uint256).max);
 
     IVault.BatchSwapStep[] memory swaps = new IVault.BatchSwapStep[](1);
     swaps[0] = IVault.BatchSwapStep({
