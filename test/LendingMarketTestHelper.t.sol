@@ -26,8 +26,13 @@ import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConf
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 
 import {hlpPriceFeedOracle, hlpContract, AggregatorV3Interface} from './HLPPriceFeedOracle.sol';
+import './ABDKMath64x64.sol';
 
 contract LendingMarketTestHelper is Test {
+  using ABDKMath64x64 for int128;
+  using ABDKMath64x64 for int256;
+  using ABDKMath64x64 for uint256;
+
   address constant LENDINPOOL_PROXY_ADDRESS = 0x78a5B2B028Fa6Fb0862b0961EB5131C95273763B;
   address constant USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
   address constant USDC_HOLDER = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
@@ -76,12 +81,14 @@ contract LendingMarketTestHelper is Test {
     lpc.batchInitReserve(input);
   }
 
-  function _deployAndSetLPOracle() internal returns (address) {
+  function _deployAndSetLPOracle(address baseAssim, address quoteAssim) internal returns (address) {
     hlpPriceFeedOracle lpOracle = new hlpPriceFeedOracle(
       hlpContract(LP_XSGD),
       AggregatorV3Interface(ETH_USD_ORACLE),
       'LPXSGD-USDC/ETH',
-      BALANCER_VAULT
+      BALANCER_VAULT,
+      baseAssim,
+      quoteAssim
     );
 
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
@@ -182,22 +189,28 @@ contract LendingMarketTestHelper is Test {
     (uint256 totalLiquidityInNumeraire1, ) = IFXPool(LP_XSGD).liquidity();
 
     if (totalLiquidityInNumeraire0 < totalLiquidityInNumeraire1) {
-      console2.log(
-        '[%s] totalLiquidityInNumeraire ADDED\t',
-        swapLabel,
-        (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire0) / 1e18
-      );
+      if (withLogs) {
+        console2.log(
+          '[%s] totalLiquidityInNumeraire ADDED\t',
+          swapLabel,
+          (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire0) / 1e18
+        );
+      }
     } else {
-      console2.log(
-        '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
-        swapLabel,
-        (totalLiquidityInNumeraire0 - totalLiquidityInNumeraire1) / 1e18
-      );
+      if (withLogs) {
+        console2.log(
+          '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
+          swapLabel,
+          (totalLiquidityInNumeraire0 - totalLiquidityInNumeraire1) / 1e18
+        );
+      }
     }
 
     int256 lpEthPrice1 = IOracle(lpOracle).latestAnswer();
-    console2.log('[%s] lpEthPrice1\t', swapLabel, uint256(lpEthPrice1));
-    console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees0);
+    if (withLogs) {
+      console2.log('[%s] lpEthPrice1\t', swapLabel, uint256(lpEthPrice1));
+      console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees0);
+    }
 
     (uint256 totalLiquidityInNumeraire2, ) = IFXPool(LP_XSGD).liquidity();
 
@@ -234,6 +247,28 @@ contract LendingMarketTestHelper is Test {
 
       _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs);
       _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, '[SWAP]', withLogs);
+      if (withLogs) {
+        console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
+        console2.log('intiial unclaimed fees: ', initial);
+        console2.log('intiial oracle price: ', beforeLoop);
+      }
+    }
+  }
+
+  function _loopSwapsExact(uint256 times, uint256 amount, address lpOracle, bool withLogs) internal {
+    uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
+
+    uint256 xsgdInRawAmount = IAssimilator(0xC933a270B922acBd72ef997614Ec46911747b799).viewRawAmount(
+      ABDKMath64x64.fromUInt(amount)
+    );
+
+    console.log(xsgdInRawAmount);
+    int256 beforeLoop = IOracle(lpOracle).latestAnswer();
+    for (uint256 j = 0; j < times; j++) {
+      console2.log('LOOP #', j);
+
+      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs);
+      _swapAndCheck(lpOracle, xsgdInRawAmount, XSGD, USDC, '[SWAP]', withLogs);
       if (withLogs) {
         console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
         console2.log('intiial unclaimed fees: ', initial);
@@ -318,41 +353,64 @@ contract LendingMarketTestHelper is Test {
     vm.stopPrank();
   }
 
-  //   function _removeLiquidity(
-  //       bytes32 poolId,
-  //       uint256 lpTokensToBurn,
-  //       address user
-  //   )
-  //       private
-  //       returns (
-  //           int256 vaultQuoteTokenRemoved,
-  //           int256 vaultBaseTokenRemoved,
-  //           uint256 poolTotalLiq,
-  //           uint256[] memory poolIndividualLiq
-  //       )
-  //   {
-  //       vm.startPrank(user);
+  function _removeLiquidity(
+    bytes32 poolId,
+    uint256 lpTokensToBurn,
+    address user,
+    address _tA,
+    address _tB
+  )
+    internal
+    returns (
+      int256 vaultQuoteTokenRemoved,
+      int256 vaultBaseTokenRemoved,
+      uint256 poolTotalLiq,
+      uint256[] memory poolIndividualLiq
+    )
+  {
+    vm.startPrank(user);
 
-  //       address[] memory sorted = _sortAssetsList(address(_eurs), address(_usdc));
+    address[] memory sorted = _sortAssetsList(address(_tA), address(_tB));
 
-  //       bytes memory userData = abi.encode(lpTokensToBurn, sorted);
+    bytes memory userData = abi.encode(lpTokensToBurn, sorted);
 
-  //       IVault.ExitPoolRequest memory req = IVault.ExitPoolRequest({
-  //           assets: _asIAsset(sorted),
-  //           minAmountsOut: _uint256ArrVal(2, 0),
-  //           userData: userData,
-  //           toInternalBalance: false
-  //       });
+    IVault.ExitPoolRequest memory req = IVault.ExitPoolRequest({
+      assets: _asIAsset(sorted),
+      minAmountsOut: _uint256ArrVal(2, 0),
+      userData: userData,
+      toInternalBalance: false
+    });
 
-  //       vault.exitPool(poolId, user, payable(user), req);
-  //       vm.stopPrank();
-  //   }
+    IVault(BALANCER_VAULT).exitPool(poolId, user, payable(user), req);
+    vm.stopPrank();
+  }
 
   function _asIAsset(address[] memory addresses) internal pure returns (IAsset[] memory assets) {
     // solhint-disable-next-line no-inline-assembly
     assembly {
       assets := addresses
     }
+  }
+
+  function _uint256ArrVal(uint256 arrSize, uint256 _val) internal pure returns (uint256[] memory) {
+    uint256[] memory arr = new uint256[](arrSize);
+    for (uint256 i = 0; i < arrSize; i++) {
+      arr[i] = _val;
+    }
+    return arr;
+  }
+
+  function _sortAssets(address _t0, address _t1) internal pure returns (address, address) {
+    return _t0 < _t1 ? (_t0, _t1) : (_t1, _t0);
+  }
+
+  function _sortAssetsList(address _t0, address _t1) private pure returns (address[] memory) {
+    (address t0, address t1) = _sortAssets(_t0, _t1);
+    address[] memory sortedTokens = new address[](2);
+    sortedTokens[0] = t0;
+    sortedTokens[1] = t1;
+
+    return sortedTokens;
   }
 }
 
@@ -456,4 +514,12 @@ interface IOracle {
 
 interface IERC20Detailed {
   function decimals() external view returns (uint8);
+}
+
+interface IAssimilator {
+  function getRate() external view returns (uint256);
+
+  function viewRawAmount(int128) external view returns (uint256);
+
+  function viewNumeraireAmount(uint256) external view returns (int128);
 }

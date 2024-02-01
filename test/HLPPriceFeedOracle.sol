@@ -43,17 +43,19 @@ contract hlpPriceFeedOracle {
   hlpContract public baseContract;
   AggregatorV3Interface public quotePriceFeed;
   address public vault;
-
   uint8 public decimals;
   bytes32 public poolId;
-
   uint256 constant WEIGHT = 5e17;
+  address immutable baseAssimilator;
+  address immutable quoteAssimilator;
 
   constructor(
     hlpContract _baseContract,
     AggregatorV3Interface _quotePriceFeed,
     string memory _priceFeed,
-    address _vault
+    address _vault,
+    address _baseAssimilator,
+    address _quoteAssimilator
   ) public {
     baseContract = _baseContract;
     quotePriceFeed = _quotePriceFeed;
@@ -61,6 +63,8 @@ contract hlpPriceFeedOracle {
     decimals = 18;
     vault = _vault;
     poolId = hlpContract(baseContract).getPoolId();
+    baseAssimilator = _baseAssimilator;
+    quoteAssimilator = _quoteAssimilator;
   }
 
   function latestAnswer() external view returns (int256) {
@@ -68,37 +72,19 @@ contract hlpPriceFeedOracle {
     uint256 liquidity = baseContract.liquidity();
     uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
 
-    int128 balTokenA = IAssimilator(0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a).viewNumeraireBalanceLPRatio(
-      WEIGHT,
-      WEIGHT,
-      vault,
-      poolId
-    );
+    int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
-    int128 balTokenB = IAssimilator(0xC933a270B922acBd72ef997614Ec46911747b799).viewNumeraireBalanceLPRatio(
-      WEIGHT,
-      WEIGHT,
-      vault,
-      poolId
-    );
+    int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
     uint256 totalSupply = baseContract.totalSupply();
 
-    int128 oGLiq = balTokenA + balTokenB;
+    int128 oGLiq = balTokenQuote + balTokenBase;
 
     // assimilator implementation
     uint256 totalSupplyWithUnclaimedFees = totalSupply +
       (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
 
-    // uint256 totalSupplyWithUnclaimedFees = totalSupply + (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
-
-    // console2.log('total tokens supply with fees: ', totalSupplyWithUnclaimedFees);
-
-    // uint256 lpTokenFeeAmount = (uint256(1).divu(liquidity).mulu(unclaimedFees) * totalSupply) / 1e18;
-
-    // console2.log('uint256(1).divu(liquidity)', liquidity.fromUInt().mulu(1));
-    // console2.log('lpTokenFeeAmount', lpTokenFeeAmount);
-    uint256 hlp_usd = (totalSupplyWithUnclaimedFees * (_decimals)) / (liquidity);
+    uint256 hlp_usd = (liquidity * (_decimals)) / (totalSupplyWithUnclaimedFees);
 
     // console2.log('[latestAnswer] hlp-usd: ', hlp_usd);
 

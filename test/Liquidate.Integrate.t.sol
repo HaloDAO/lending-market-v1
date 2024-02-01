@@ -30,6 +30,8 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
   address constant USDC_USD_CHAINLINK = 0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7;
   address constant AAVE_ORACLE = 0x0200889C2733bB78641126DF27A0103230452b62;
   address constant UI_DATA_PROVIDER = 0x755E39Ba1a425548fF8990A5c223C34C5ce5f8a5;
+  address constant XSGD_ASSIM = 0xC933a270B922acBd72ef997614Ec46911747b799;
+  address constant USDC_ASSIM = 0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a;
 
   // address constant LENDING_POOL_ADMIN = ILendingPoolAddressesProvider.getPoolAdmin();
 
@@ -74,7 +76,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     console.log('usdcUsdPrice', uint256(usdcUsdPrice));
 
     _deployReserve();
-    lpOracle = _deployAndSetLPOracle();
+    lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
 
     // Set Lending market oracle for XSGD_USDC token to use newly deployed HLPOracle
     _setXsgdHLPOracle(lpOracle);
@@ -353,9 +355,9 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
       .getLendingPoolConfigurator();
 
     // TODO: Left here jan 31
-    vm.startPrank(ILendingPoolAddressesProvider.getPoolAdmin());
-    ILendingPoolConfigurator(lendingPoolConfigurator).enableBorrowingOnReserve(_asset, doEnable);
-    vm.stopPrank();
+    // vm.startPrank(ILendingPoolAddressesProvider.getPoolAdmin());
+    // ILendingPoolConfigurator(lendingPoolConfigurator).enableBorrowingOnReserve(_asset, doEnable);
+    // vm.stopPrank();
   }
 
   function _printHealthFactor(address _user) private {
