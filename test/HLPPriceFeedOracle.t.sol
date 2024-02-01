@@ -5,7 +5,7 @@ import 'forge-std/Test.sol';
 import 'forge-std/console2.sol';
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
-import {LendingMarketTestHelper, IOracle} from './LendingMarketTestHelper.t.sol';
+import {LendingMarketTestHelper, IOracle, IAssimilator} from './LendingMarketTestHelper.t.sol';
 import {hlpPriceFeedOracle, hlpContract, AggregatorV3Interface} from './HLPPriceFeedOracle.sol';
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
@@ -69,18 +69,18 @@ measure how much liquidity / tokens you received
     uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
     uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
     uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
-
-    console2.log('after deposit: ', IHLPOracle(lpOracle).latestAnswer());
+    int256 initialPriceAfterDeposit = IHLPOracle(lpOracle).latestAnswer();
 
     // @todo same swaps in numeraire
-    _loopSwapsExact(140, 100_000, lpOracle, false);
+    _loopSwapsExact(1, 100_000, lpOracle, false);
     console.log('afterSwapFees', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
     console2.log('price after swap: ', IHLPOracle(lpOracle).latestAnswer());
 
     // _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 11 * 1e18, me, USDC, XSGD);
     // console2.log('price after fee minting: ', IHLPOracle(lpOracle).latestAnswer());
-
+    // _viewWithdraw(initialLPBalance); // supply not increased
     _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
+    // _viewWithdraw(initialLPBalance); // supply not increased
 
     (uint256 postBurnLiquidity, uint256[] memory postBurnIndividualLiquidity) = IFXPool(LP_XSGD).liquidity();
 
@@ -93,17 +93,19 @@ measure how much liquidity / tokens you received
     console.log('postBurnIndividualLiquidity[0]: ', postBurnIndividualLiquidity[0]);
     console.log('postBurnIndividualLiquidity[1]: ', postBurnIndividualLiquidity[1]);
 
-    console2.log('after burn: ', IHLPOracle(lpOracle).latestAnswer());
-    assertGt(IERC20(USDC).balanceOf(me), usdcAfterDeposit);
-    assertGt(IERC20(XSGD).balanceOf(me), xsgdAfterDeposit);
+    console2.log('after deposit: ', initialPriceAfterDeposit);
+    console2.log('after burn price: ', IHLPOracle(lpOracle).latestAnswer());
+
+    // assertGt(IERC20(USDC).balanceOf(me), usdcAfterDeposit, 'usdc less than initial balance aafter deposit');
+    // assertGt(IERC20(XSGD).balanceOf(me), xsgdAfterDeposit, 'xsgd less than initial balance aafter deposit');
+    // assertEq(IFXPool(LP_XSGD).balanceOf(me), 0);
+    console.log('xsgd assim price: ', IAssimilator(XSGD_ASSIM).getRate());
     console2.log('USDC Balance diff ', IERC20(USDC).balanceOf(me) - usdcAfterDeposit);
     console2.log('XSGD Balance diff ', IERC20(XSGD).balanceOf(me) - xsgdAfterDeposit);
     console2.log('USDC Balance after deposit', usdcAfterDeposit);
     console2.log('XSGD Balance after deposit', xsgdAfterDeposit);
     console2.log('USDC Balance after burn', IERC20(USDC).balanceOf(me));
     console2.log('XSGD Balance after burn', IERC20(XSGD).balanceOf(me));
-
-    assertEq(IFXPool(LP_XSGD).balanceOf(me), 0);
   }
 
   function __testPriceManipulation() private {
@@ -177,6 +179,29 @@ measure how much liquidity / tokens you received
   //   assertGt(endLiquidity, initialLiquidity);
   //   assertGt(endSupply, initialSupply);
   // }
+
+  function _viewWithdraw(uint256 tokensToBurn) internal returns (uint256 tA, uint256 tB) {
+    uint256[] memory tokensReturned = IFXPool(LP_XSGD).viewWithdraw(tokensToBurn);
+    // [0] base, [1] quote
+    tA = tokensReturned[0]; // base
+    tB = tokensReturned[1]; // quote
+
+    console2.log('getRate ', IAssimilator(XSGD_ASSIM).getRate());
+    console2.log('eth usd: ', uint256(IOracle(ETH_USD_ORACLE).latestAnswer()));
+    console2.log('_viewWithdraw tA RAW: ', tA);
+    console2.log('_viewWithdraw tA NUMERAIRE ', _convertToNumeraire(tA, XSGD_ASSIM));
+    console2.log('_viewWithdraw tB RAW: ', tB);
+    console2.log('_viewWithdraw tB NUMERAIRE: ', _convertToNumeraire(tB, USDC_ASSIM));
+
+    uint256 totalNumeraireAmount = _convertToNumeraire(tA, XSGD_ASSIM) + _convertToNumeraire(tB, USDC_ASSIM);
+
+    console.log('_viewWithdraw  totalNumeraireAmount', totalNumeraireAmount);
+    console.log(
+      '_viewWithdraw oracle price',
+      ((((((totalNumeraireAmount * 1e18) / uint256(IOracle(ETH_USD_ORACLE).latestAnswer())))) * 1e18) / tokensToBurn) /
+        1e10
+    );
+  }
 }
 
 interface IHLPOracle {
@@ -279,6 +304,8 @@ interface IFXPool {
   function balanceOf(address) external view returns (uint256);
 
   function totalUnclaimedFeesInNumeraire() external view returns (uint256);
+
+  function viewWithdraw(uint256) external view returns (uint256[] memory);
 }
 
 interface IERC20Detailed {

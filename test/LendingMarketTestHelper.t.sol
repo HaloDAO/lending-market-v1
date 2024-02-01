@@ -255,12 +255,18 @@ contract LendingMarketTestHelper is Test {
     }
   }
 
+  function _convertToRawAmount(uint256 amount, address assimilator) internal returns (uint256) {
+    return IAssimilator(assimilator).viewRawAmount(ABDKMath64x64.fromUInt(amount));
+  }
+
+  function _convertToNumeraire(uint256 amount, address assimilator) internal returns (uint256) {
+    return IAssimilator(assimilator).viewNumeraireAmount(amount).mulu(1e18);
+  }
+
   function _loopSwapsExact(uint256 times, uint256 amount, address lpOracle, bool withLogs) internal {
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
 
-    uint256 xsgdInRawAmount = IAssimilator(0xC933a270B922acBd72ef997614Ec46911747b799).viewRawAmount(
-      ABDKMath64x64.fromUInt(amount)
-    );
+    uint256 xsgdInRawAmount = _convertToRawAmount(amount, 0xC933a270B922acBd72ef997614Ec46911747b799);
 
     console.log(xsgdInRawAmount);
     int256 beforeLoop = IOracle(lpOracle).latestAnswer();
