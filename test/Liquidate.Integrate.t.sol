@@ -133,9 +133,10 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     console.log('---- User Lending Market Balance After Deposit Before Borrow ----');
     _printUserAccountData(me);
-
     // Enable borrowing for added LP assets
     _enableBorrowingForAddedLPAssets(LP_XSGD, true);
+
+    _enableCollaterizationOfLPAssets(LP_XSGD);
     console.log('--- Enabled borrowing for LP XSGD ---');
 
     _getLendingPoolReserveConfig();
@@ -290,7 +291,8 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     LP.borrow(
       USDC,
-      totalUsdcBorrows + uint256(1169 * 1e6), // @todo check if it make sense: difference between total calculated usdc to be borrowed vs actual limit
+      // totalUsdcBorrows + uint256(1169 * 1e6), // @todo check if it make sense: difference between total calculated usdc to be borrowed vs actual limit
+      10000,
       2, // stablecoin borrowing
       0, // referral code
       _user
@@ -355,9 +357,22 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
       .getLendingPoolConfigurator();
 
     // TODO: Left here jan 31
-    // vm.startPrank(ILendingPoolAddressesProvider.getPoolAdmin());
-    // ILendingPoolConfigurator(lendingPoolConfigurator).enableBorrowingOnReserve(_asset, doEnable);
-    // vm.stopPrank();
+    address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
+    console.log('poolAdmin:', poolAdmin);
+    vm.startPrank(poolAdmin);
+    ILendingPoolConfigurator(lendingPoolConfigurator).enableBorrowingOnReserve(_asset, doEnable);
+    vm.stopPrank();
+  }
+
+  function _enableCollaterizationOfLPAssets(address _asset) private {
+    address lendingPoolConfigurator = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER)
+      .getLendingPoolConfigurator();
+
+    // TODO: Left here jan 31
+    address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
+    vm.startPrank(poolAdmin);
+    ILendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(_asset, 7500, 8000, 10500);
+    vm.stopPrank();
   }
 
   function _printHealthFactor(address _user) private {
@@ -477,4 +492,11 @@ interface IFXPool {
 
 interface ILendingPoolConfigurator {
   function enableBorrowingOnReserve(address asset, bool stableBorrowRateEnabled) external;
+
+  function configureReserveAsCollateral(
+    address asset,
+    uint256 ltv,
+    uint256 liquidationThreshold,
+    uint256 liquidationBonus
+  ) external;
 }
