@@ -60,7 +60,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
   /**
     ## Liquidation test
-
     - `Liquidate.Integrate.t.sol`
     - update to use Polygon (same like HLPPriceFeedOracle.t.sol)
     - ensure add LP Token instead of HLP
@@ -70,7 +69,13 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     - luquidate
     - profit!!!
    */
-  function testLiquidate() public {
+
+  // @TODO:
+  // refactor to make code reusable?
+  // test for liquidation bonus: check how much liquidation bonus it gets in actual and check calculation based on known constants from the
+  // lending market confid
+
+  function testLiquidateGetATokens() public {
     _printUserAccountData(me);
     uint256 depositLPXSGD = 1_000 * 1e18;
 
@@ -84,27 +89,29 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     // Set Lending market oracle for XSGD_USDC token to use newly deployed HLPOracle
     _setXsgdHLPOracle(lpOracle);
-
     _enableBorrowingForAddedLPAssets(LP_XSGD, true);
-
     _enableCollaterizationOfLPAssets(LP_XSGD);
 
+    DataTypes.ReserveData memory rdUSDC = LP.getReserveData(USDC);
+    address aUSDC = rdUSDC.aTokenAddress;
+
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    address aLPXSGD = rdLPXSGD.aTokenAddress;
+
     int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
-    // console.log('lpPrice', uint256(lpPrice));
-    // console2.log('baseContract', IHLPOracle(lpOracle).baseContract());
     console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
 
     vm.startPrank(me);
-
     // Add liq to FX Pool to get LP_XSGD balance
     IERC20(XSGD).approve(BALANCER_VAULT, type(uint).max);
     IERC20(USDC).approve(BALANCER_VAULT, type(uint).max);
+    vm.stopPrank();
 
     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
 
     console.log('LP_XSGD balance after add liq', IERC20(LP_XSGD).balanceOf(me) / 1e18);
-
     console.log('Total LP XSGD before deposit:', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+
     // Deposit collateral to use for borrowing later
     IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
     LP.deposit(
@@ -113,9 +120,9 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
       me,
       0 // referral code
     );
+
     // Check how much is depositLPXSGD in HLP oracle
     console.log('Deposited ETH (wei)', (depositLPXSGD * uint256(IHLPOracle(lpOracle).latestAnswer())) / 1e18);
-
     console.log('Total LP XSGD after deposit:', IERC20(LP_XSGD).balanceOf(me) / 1e18);
     console.log('------ After LP XSGD Deposit --------');
     _printUserAccountData(me);
@@ -125,15 +132,10 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // User sets LP_XSGD to be used as collateral in lending market pool
     LP.setUserUseReserveAsCollateral(LP_XSGD, true);
 
-    vm.stopPrank();
-
     // IERC20(aLPXSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max); // not needed
 
-    // idea: (other people deposit in lending pool to put collateral borrowable balance to solve VL_COLLATERAL_BALANCE_IS_0)
+    // Add an asset to the lending pool so there is some USDC we can borrow
     _putBorrowableLiquidityInLendingPool(RICH_GUY, 1_000_000 * 1e6);
-
-    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
-    address aLPXSGD = rdLPXSGD.aTokenAddress;
 
     console.log('aLPXSGD', IERC20(aLPXSGD).balanceOf(me));
 
@@ -153,41 +155,236 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // Enable borrowing for added LP assets
     console.log('--- Enabled borrowing for LP XSGD ---');
 
-    // _getLendingPoolReserveConfig();
-
     // Borrow up to the limit of your collateral
     _borrowToLimit(me);
-
-    // _repayLoan(me); // repay the loan
-
-    // _depositWithdraw(); // deposit and withdraw
-
-    // get the price for the collateral
 
     IHaloUiPoolDataProvider.UserReserveData[] memory userReserves = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
       .getUserReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER), me);
 
-    // console.log(userReserves[0].underlyingAsset, userReserves[0].scaledATokenBalance);
-    // console.log(userReserves[1].underlyingAsset, userReserves[1].scaledATokenBalance);
-    // console.log(userReserves[2].underlyingAsset, userReserves[2].scaledATokenBalance);
-    // console.log(userReserves[3].underlyingAsset, userReserves[3].scaledATokenBalance);
-    // console.log(userReserves[4].underlyingAsset, userReserves[4].scaledATokenBalance);
-    // console.log(userReserves[5].underlyingAsset, userReserves[5].scaledATokenBalance);
-    // console.log(userReserves[6].underlyingAsset, userReserves[6].scaledATokenBalance);
-
+    // manipulate the oracle to make the loan undercollateralized
     _manipulateOraclePrice(50);
+
+    console.log('------ After Price Manipulation --------');
+    _printUserAccountData(me);
+    console.log('------ Before Liquidation --------');
+
+    uint256 liquidator_aLPXSGDBalanceBeforeLiquidation = IERC20(aLPXSGD).balanceOf(LIQUIDATOR);
+    uint256 liquidated_aLPXSGDBalanceBeforeLiquidation = IERC20(aLPXSGD).balanceOf(me);
+
+    _liquidatePosition(LIQUIDATOR, me, true);
+
+    // liquidated user has less aLPXSGD after liquidation
+    assertGt(liquidated_aLPXSGDBalanceBeforeLiquidation, IERC20(aLPXSGD).balanceOf(me));
+    // liquidator gets the liquidated collateral + collateral bonus
+    // @todo: check how to compute for liquidated collateral + collateral bonus in aTokens
+    assertGt(IERC20(aLPXSGD).balanceOf(LIQUIDATOR), liquidator_aLPXSGDBalanceBeforeLiquidation);
+  }
+
+  function testLiquidateGetCollateralTokens() public {
+    _printUserAccountData(me);
+    uint256 depositLPXSGD = 1_000 * 1e18;
+
+    (, int256 ethUsdPrice, , , ) = IOracle(ETH_USD_CHAINLINK).latestRoundData();
+    (, int256 usdcUsdPrice, , , ) = IOracle(USDC_USD_CHAINLINK).latestRoundData();
+    console.log('ethUsdPrice', uint256(ethUsdPrice));
+    console.log('usdcUsdPrice', uint256(usdcUsdPrice));
+
+    _deployReserve();
+    lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+
+    // Set Lending market oracle for XSGD_USDC token to use newly deployed HLPOracle
+    _setXsgdHLPOracle(lpOracle);
+    _enableBorrowingForAddedLPAssets(LP_XSGD, true);
+    _enableCollaterizationOfLPAssets(LP_XSGD);
+
+    DataTypes.ReserveData memory rdUSDC = LP.getReserveData(USDC);
+    address aUSDC = rdUSDC.aTokenAddress;
+
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    address aLPXSGD = rdLPXSGD.aTokenAddress;
+
+    int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
+    console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
+
+    vm.startPrank(me);
+    // Add liq to FX Pool to get LP_XSGD balance
+    IERC20(XSGD).approve(BALANCER_VAULT, type(uint).max);
+    IERC20(USDC).approve(BALANCER_VAULT, type(uint).max);
+    vm.stopPrank();
+
+    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
+
+    console.log('LP_XSGD balance after add liq', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+    console.log('Total LP XSGD before deposit:', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+
+    // Deposit collateral to use for borrowing later
+    IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.deposit(
+      LP_XSGD,
+      depositLPXSGD,
+      me,
+      0 // referral code
+    );
+
+    // Check how much is depositLPXSGD in HLP oracle
+    console.log('Deposited ETH (wei)', (depositLPXSGD * uint256(IHLPOracle(lpOracle).latestAnswer())) / 1e18);
+    console.log('Total LP XSGD after deposit:', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+    console.log('------ After LP XSGD Deposit --------');
+    _printUserAccountData(me);
+
+    // Calculate equivalent USDC amount of LP_XSGD
+
+    // User sets LP_XSGD to be used as collateral in lending market pool
+    LP.setUserUseReserveAsCollateral(LP_XSGD, true);
+
+    // IERC20(aLPXSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max); // not needed
+
+    // Add an asset to the lending pool so there is some USDC we can borrow
+    _putBorrowableLiquidityInLendingPool(RICH_GUY, 1_000_000 * 1e6);
+
+    console.log('aLPXSGD', IERC20(aLPXSGD).balanceOf(me));
+
+    /**
+      1. Check borrowing enabled
+      2. Check all reserves tapos check kung tama yung aTokenAddresss ()
+      3. IAaveOracle(aaveOracle).getAssetPrice() if has price (yes)
+     */
+
+    address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
+    console.log('LP XSGD Aave asset price', IAaveOracle(aaveOracle).getAssetPrice(LP_XSGD));
+
+    // _getLendingPoolReserveConfig();
+
+    console.log('---- User Lending Market Balance After Deposit Before Borrow ----');
+    // _printUserAccountData(me);
+    // Enable borrowing for added LP assets
+    console.log('--- Enabled borrowing for LP XSGD ---');
+
+    // Borrow up to the limit of your collateral
+    _borrowToLimit(me);
+
+    IHaloUiPoolDataProvider.UserReserveData[] memory userReserves = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
+      .getUserReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER), me);
+
+    // manipulate the oracle to make the loan undercollateralized
+    _manipulateOraclePrice(50);
+
+    console.log('------ After Price Manipulation --------');
+    _printUserAccountData(me);
+    console.log('------ Before Liquidation --------');
+
+    uint256 liquidator_LPXSGDBalanceBeforeLiquidation = IERC20(LP_XSGD).balanceOf(LIQUIDATOR);
+    uint256 liquidated_aLPXSGDBalanceBeforeLiquidation = IERC20(aLPXSGD).balanceOf(me);
+
+    _liquidatePosition(LIQUIDATOR, me, false);
+
+    // liquidated user has less aLPXSGD after liquidation
+    assertGt(liquidated_aLPXSGDBalanceBeforeLiquidation, IERC20(aLPXSGD).balanceOf(me));
+    // liquidator gets the liquidated collateral + collateral bonus in collateral value
+    // @todo: check how to compute for liquidated collateral + collateral bonus
+    assertGt(IERC20(LP_XSGD).balanceOf(LIQUIDATOR), liquidator_LPXSGDBalanceBeforeLiquidation);
+  }
+
+  function testFullLiquidation() public {
+    _printUserAccountData(me);
+    uint256 depositLPXSGD = 1_000 * 1e18;
+
+    (, int256 ethUsdPrice, , , ) = IOracle(ETH_USD_CHAINLINK).latestRoundData();
+    (, int256 usdcUsdPrice, , , ) = IOracle(USDC_USD_CHAINLINK).latestRoundData();
+    console.log('ethUsdPrice', uint256(ethUsdPrice));
+    console.log('usdcUsdPrice', uint256(usdcUsdPrice));
+
+    _deployReserve();
+    lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+
+    // Set Lending market oracle for XSGD_USDC token to use newly deployed HLPOracle
+    _setXsgdHLPOracle(lpOracle);
+    _enableBorrowingForAddedLPAssets(LP_XSGD, true);
+    _enableCollaterizationOfLPAssets(LP_XSGD);
+
+    DataTypes.ReserveData memory rdUSDC = LP.getReserveData(USDC);
+    address aUSDC = rdUSDC.aTokenAddress;
+
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    address aLPXSGD = rdLPXSGD.aTokenAddress;
+
+    int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
+    console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
+
+    vm.startPrank(me);
+    // Add liq to FX Pool to get LP_XSGD balance
+    IERC20(XSGD).approve(BALANCER_VAULT, type(uint).max);
+    IERC20(USDC).approve(BALANCER_VAULT, type(uint).max);
+    vm.stopPrank();
+
+    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
+
+    console.log('LP_XSGD balance after add liq', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+    console.log('Total LP XSGD before deposit:', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+
+    // Deposit collateral to use for borrowing later
+    IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    LP.deposit(
+      LP_XSGD,
+      depositLPXSGD,
+      me,
+      0 // referral code
+    );
+
+    // Check how much is depositLPXSGD in HLP oracle
+    console.log('Deposited ETH (wei)', (depositLPXSGD * uint256(IHLPOracle(lpOracle).latestAnswer())) / 1e18);
+    console.log('Total LP XSGD after deposit:', IERC20(LP_XSGD).balanceOf(me) / 1e18);
+    console.log('------ After LP XSGD Deposit --------');
+    _printUserAccountData(me);
+
+    // Calculate equivalent USDC amount of LP_XSGD
+
+    // User sets LP_XSGD to be used as collateral in lending market pool
+    LP.setUserUseReserveAsCollateral(LP_XSGD, true);
+
+    // IERC20(aLPXSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max); // not needed
+
+    // Add an asset to the lending pool so there is some USDC we can borrow
+    _putBorrowableLiquidityInLendingPool(RICH_GUY, 1_000_000 * 1e6);
+
+    console.log('aLPXSGD', IERC20(aLPXSGD).balanceOf(me));
+
+    /**
+      1. Check borrowing enabled
+      2. Check all reserves tapos check kung tama yung aTokenAddresss ()
+      3. IAaveOracle(aaveOracle).getAssetPrice() if has price (yes)
+     */
+
+    address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
+    console.log('LP XSGD Aave asset price', IAaveOracle(aaveOracle).getAssetPrice(LP_XSGD));
+
+    // _getLendingPoolReserveConfig();
+
+    console.log('---- User Lending Market Balance After Deposit Before Borrow ----');
+    // _printUserAccountData(me);
+    // Enable borrowing for added LP assets
+    console.log('--- Enabled borrowing for LP XSGD ---');
+
+    // Borrow up to the limit of your collateral
+    _borrowToLimit(me);
+
+    IHaloUiPoolDataProvider.UserReserveData[] memory userReserves = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
+      .getUserReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER), me);
+
+    // lowest oracle price deviation to be full liquidated
+    _manipulateOraclePrice(59);
+
     console.log('------ After Price Manipulation --------');
     _printUserAccountData(me);
 
-    console.log('------ Before Liquidation --------');
-    // _printUserAccountData(LIQUIDATOR);
-    _liquididatePosition(LIQUIDATOR, me);
+    uint256 liquidator_aLPXSGDBalanceBeforeLiquidation = IERC20(aLPXSGD).balanceOf(LIQUIDATOR);
+    uint256 liquidated_aLPXSGDBalanceBeforeLiquidation = IERC20(aLPXSGD).balanceOf(me);
 
-    // manipulate the oracle to make the loan undercollateralized
+    _liquidatePosition(LIQUIDATOR, me, true);
 
-    // liquidate the loan
-
-    // check that the liquidator received the collateral
+    // All aTokens be transferred to the liquidator upon full liquidation
+    assertEq(IERC20(aLPXSGD).balanceOf(me), 0);
+    assertEq(IERC20(aLPXSGD).balanceOf(LIQUIDATOR), liquidated_aLPXSGDBalanceBeforeLiquidation);
   }
 
   function _putBorrowableLiquidityInLendingPool(address _donor, uint256 _amount) private {
@@ -273,7 +470,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     address oracleOwner = AaveOracle(aaveOracle).owner();
     vm.prank(oracleOwner);
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
-    vm.stopPrank();
 
     console2.log('[_setXsgdHLPOracle] Done setting price oracle for XSGD_USDC collateral', lpOracle);
   }
@@ -282,7 +478,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // Is this still needed if we are deploying a new lpOracle?
     // I think yes to point the newly deployed lpOracle to the correct HLP
     // _setXsgdHLPOracle(lpOracle);
-
     (
       ,
       /*uint256 totalCollateralETH*/
@@ -300,7 +495,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // @note might be rounding off issue?
     // uint256 totalUsdcBorrows = (((availableBorrowsETH - totalDebtETH) * (uint256(ethUsdPrice))) /
     //   uint256(usdcUsdPrice)) / 1e12;
-    uint256 totalUsdcBorrows = ((availableBorrowsETH * uint256(ethUsdPrice)) / uint256(usdcUsdPrice)) / 1e18;
+    uint256 totalUsdcBorrows = (((availableBorrowsETH * uint256(ethUsdPrice)) / uint256(usdcUsdPrice)) / 1e18);
     console.log('[_borrowToLimit] totalUsdcBorrows:', totalUsdcBorrows);
     console.log('[_borrowToLimit] totalDebtETH:', totalDebtETH);
     console.log('[_borrowToLimit] ltv:', ltv);
@@ -423,51 +618,20 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // console.log('ltv', ltv);
   }
 
-  function _liquididatePosition(address liquidator, address liquidatedGuy) private {
-    // address me = address(this);
-
+  function _liquidatePosition(address liquidator, address liquidatedGuy, bool isAtokens) private {
     vm.startPrank(liquidator);
 
-    DataTypes.ReserveData memory rdUSDC = LP.getReserveData(USDC);
-    address aUSDC = rdUSDC.aTokenAddress;
-
-    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
-    address aLPXSGD = rdLPXSGD.aTokenAddress;
-
-    // _printLiqIndex();
-
     uint256 liquidatorLPXGDBefore = IERC20(LP_XSGD).balanceOf(liquidator);
-
     IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
 
-    console.log('[_liquididatePosition] liquidator aUSDC before', IERC20(aUSDC).balanceOf(liquidator));
-    console.log('[_liquididatePosition] liquidator aLPXSGD before', IERC20(aLPXSGD).balanceOf(liquidator));
-    console.log('[_liquididatePosition] liquidator lPXSGD before', IERC20(LP_XSGD).balanceOf(liquidator));
-
-    console.log('[_liquididatePosition] liquidatedGuy aUSDC before', IERC20(aUSDC).balanceOf(liquidatedGuy));
-    console.log('[_liquididatePosition] liquidatedGuy aLPXSGD before', IERC20(aLPXSGD).balanceOf(liquidatedGuy));
-    // console.log('[_liquididatePosition] liquidatedGuy lPXSGD before', IERC20(LP_XSGD).balanceOf(liquidatedGuy));
-
-    // TODO: Separate to two tests (true, false)
-    // LP.liquidationCall(LP_XSGD, USDC, liquidatedGuy, type(uint).max, false);
-    LP.liquidationCall(LP_XSGD, USDC, liquidatedGuy, type(uint).max, true);
-
-    // check that the liquidator received the collateral
-    // console.log('[_liquididatePosition] aToken', IERC20(aToken).balanceOf(liquidator));
-
-    // NOTE: Only works if liquidator opted to receive aTokens
-    LP.withdraw(LP_XSGD, type(uint).max, liquidator);
-
+    if (isAtokens) {
+      // get aTokens
+      LP.liquidationCall(LP_XSGD, USDC, liquidatedGuy, type(uint).max, true);
+      // LP.withdraw(LP_XSGD, type(uint).max, liquidator);
+    } else {
+      LP.liquidationCall(LP_XSGD, USDC, liquidatedGuy, type(uint).max, false);
+    }
     vm.stopPrank();
-
-    // console.log('[_liquididatePosition] liquidator LP_XSGD received after liqudation', IERC20(LP_XSGD).balanceOf(liquidator) - liquidatorLPXGDBefore);
-    console.log('[_liquididatePosition] liquidator aUSDC after', IERC20(aUSDC).balanceOf(liquidator));
-    console.log('[_liquididatePosition] liquidator aLPXSGD after', IERC20(aLPXSGD).balanceOf(liquidator));
-    console.log('[_liquididatePosition] liquidator lPXSGD after', IERC20(LP_XSGD).balanceOf(liquidator));
-
-    console.log('[_liquididatePosition] liquidatedGuy aUSDC after', IERC20(aUSDC).balanceOf(liquidatedGuy));
-    console.log('[_liquididatePosition] liquidatedGuy aLPXSGD after', IERC20(aLPXSGD).balanceOf(liquidatedGuy));
-    // console.log('[_liquididatePosition] liquidatedGuy lPXSGD after', IERC20(LP_XSGD).balanceOf(liquidatedGuy));
   }
 
   function _manipulateOraclePrice(uint256 priceLossPercentage) private {

@@ -339,3 +339,28 @@ OPS: [noop] Remove OR Disable the curve / HLP XSGD/USDC from the lending pool
   [DONE] price of XSGD/USDC LP token according to HLPOracle
   swap XSGD for USDC [DONE]
   output: price of XSGD/USDC LP token according to HLPOracle [DONE]
+
+// intiial unclaimed fees: 0
+// intiial oracle price: 452254034096056
+// initial liquidity 542450333445999999999998
+// initial base liquidity: 401743725007999999999999
+// initial quote liquidity: 140706608437999999999999
+
+// post base liquidity: 418321169591999999999999
+// post quote liquidity: 159011451129999999999999
+// gain in liq: 34882287276000000000000
+// gain in base liq: 16577444584000000000000
+// gain in quote liq: 18304842692000000000000
+// gain in usdcBalance: 6457
+// gain in xsgdBalance: 7733
+
+// initial: 2.8551873254
+// post: 2.6307612856
+
+// initial liq/totalsupply: 1.0008642884076
+// after burn: 0.990942995
+
+// liq / supply
+
+// why is total supply increasing faster than the liquidity?
+// is something not updated?

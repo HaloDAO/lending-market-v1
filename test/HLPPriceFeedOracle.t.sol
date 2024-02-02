@@ -10,7 +10,7 @@ import {hlpPriceFeedOracle, hlpContract, AggregatorV3Interface} from './HLPPrice
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
 
-contract HLPPriceFeedOracle is Test, LendingMarketTestHelper {
+contract HLPPriceFeedOracleTest is Test, LendingMarketTestHelper {
   string private RPC_URL = vm.envString('POLYGON_RPC_URL');
   address constant XSGD_ASSIM = 0xC933a270B922acBd72ef997614Ec46911747b799;
   address constant USDC_ASSIM = 0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a;
@@ -45,19 +45,10 @@ contract HLPPriceFeedOracle is Test, LendingMarketTestHelper {
     // console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
   }
 
-  /**
-  deposit $100_000 worth of liquidity
-record individual liquidity of the pool
-swap 140 times
-record individual liquidity of the pool (make sure it's same/very similar to before swaps)
-burn all LP tokens
-measure how much liquidity / tokens you received
-   */
-
   function testLpPriceCalculation() public {
     _deployReserve();
     address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
-    int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
+    int256 initialOraclePrice = IHLPOracle(lpOracle).latestAnswer();
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
     uint256 tokenPriceInAaveOracle = (IAaveOracle(aaveOracle).getAssetPrice(IHLPOracle(lpOracle).baseContract()));
 
@@ -77,170 +68,129 @@ measure how much liquidity / tokens you received
     uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
     int256 initialPriceAfterDeposit = IHLPOracle(lpOracle).latestAnswer();
 
-    // @todo same swaps in numeraire
-    _loopSwapsExact(1, 100_000, lpOracle, false, me);
-    console.log('afterSwapFees', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
-    console2.log('price after swap: ', IHLPOracle(lpOracle).latestAnswer());
+    _loopSwapsExact(100, 10_000, lpOracle, false, me);
+    int256 oraclePriceBeforeMint = IHLPOracle(lpOracle).latestAnswer();
 
-    // _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 11 * 1e18, me, USDC, XSGD);
-    // console2.log('price after fee minting: ', IHLPOracle(lpOracle).latestAnswer());
-    // _viewWithdraw(initialLPBalance); // supply not increased
-    _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
-    // _viewWithdraw(initialLPBalance); // supply not increased
+    // trigger mint fees without affecting supply
+    _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), 1, me, USDC, XSGD);
 
     (uint256 postBurnLiquidity, uint256[] memory postBurnIndividualLiquidity) = IFXPool(LP_XSGD).liquidity();
 
-    // @todo check hehe
-    console.log('initial liquidity', initialLiquidity);
-    console.log('initial quote liquidity: ', individualLiquidity[0]);
-    console.log('initial base liquidity: ', individualLiquidity[1]);
+    assertEq(IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire(), 0);
 
+    // oraclePriceBeforeFeeMint vs oraclePriceAfterFeeMint
+    assertEq(oraclePriceBeforeMint, IHLPOracle(lpOracle).latestAnswer());
+
+    console.log('initial liquidity', initialLiquidity);
     console.log('postBurnLiquidity: ', postBurnLiquidity);
-    console.log('postBurnIndividualLiquidity[0]: ', postBurnIndividualLiquidity[0]);
-    console.log('postBurnIndividualLiquidity[1]: ', postBurnIndividualLiquidity[1]);
-
-    console2.log('after deposit: ', initialPriceAfterDeposit);
-    console2.log('after burn price: ', IHLPOracle(lpOracle).latestAnswer());
-
-    // assertGt(IERC20(USDC).balanceOf(me), usdcAfterDeposit, 'usdc less than initial balance aafter deposit');
-    // assertGt(IERC20(XSGD).balanceOf(me), xsgdAfterDeposit, 'xsgd less than initial balance aafter deposit');
-    // assertEq(IFXPool(LP_XSGD).balanceOf(me), 0);
-    console.log('xsgd assim price: ', IAssimilator(XSGD_ASSIM).getRate());
-    console2.log('USDC Balance diff ', IERC20(USDC).balanceOf(me) - usdcAfterDeposit);
-    console2.log('XSGD Balance diff ', IERC20(XSGD).balanceOf(me) - xsgdAfterDeposit);
-    console2.log('USDC Balance after deposit', usdcAfterDeposit);
-    console2.log('XSGD Balance after deposit', xsgdAfterDeposit);
-    console2.log('USDC Balance after burn', IERC20(USDC).balanceOf(me));
-    console2.log('XSGD Balance after burn', IERC20(XSGD).balanceOf(me));
   }
 
-  function testExploitLP() public {
+  function testFuzzLpPriceCalculation(uint256 loopTimes) public {
+    vm.assume(loopTimes < 2000);
+    _deployReserve();
     address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+    int256 initialOraclePrice = IHLPOracle(lpOracle).latestAnswer();
+    address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
+    uint256 tokenPriceInAaveOracle = (IAaveOracle(aaveOracle).getAssetPrice(IHLPOracle(lpOracle).baseContract()));
 
-    vm.startPrank(me);
-    IERC20(USDC).approve(BALANCER_VAULT, type(uint256).max);
-    IERC20(XSGD).approve(BALANCER_VAULT, type(uint256).max);
-    vm.stopPrank();
-    uint256 initialOraclePrice = uint256(IOracle(lpOracle).latestAnswer());
-
+    uint256 initialSupply = IFXPool(LP_XSGD).totalSupply();
     (uint256 initialLiquidity, uint256[] memory individualLiquidity) = IFXPool(LP_XSGD).liquidity();
-
-    uint256 usdcBeforeDeposit = IERC20(USDC).balanceOf(me);
-    uint256 xsgdBeforeDeposit = IERC20(XSGD).balanceOf(me);
-
-    // 1 - add 100k liquidity
-    // can be flashloaned
-    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
-
-    uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
-    // uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
-    // uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
-
-    // 2 - loop exact in numeraire 100 times. 10K in numeraire.
-    _loopSwapsExact(2355, 10_000, address(lpOracle), true, user2);
-
-    uint256 lpPriceBeforeBurn = uint256(IOracle(lpOracle).latestAnswer());
-    // remove the liquidity, mint protocol fees, inflate totalSupply
-    _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
-
-    // trigger without inflating supply
-    (uint256 postLiquidity, uint256[] memory postIndLiquidity) = IFXPool(LP_XSGD).liquidity();
-    uint256 usdcAfterBurn = IERC20(USDC).balanceOf(me);
-    uint256 xsgdAfterBurn = IERC20(XSGD).balanceOf(me);
-
-    console.log('initial liquidity', initialLiquidity);
-    console.log('initial base liquidity: ', individualLiquidity[0]);
-    console.log('initial quote liquidity: ', individualLiquidity[1]);
-    console.log('post liquidity', postLiquidity);
-    console.log('post base liquidity: ', postIndLiquidity[0]);
-    console.log('post quote liquidity: ', postIndLiquidity[1]);
-    console.log('initial oracle price', initialOraclePrice);
-    console.log('oracle price before burn', lpPriceBeforeBurn);
-    console.log('oracle price after burn', uint256(IOracle(lpOracle).latestAnswer())); // higher
-    /**
-  intiial unclaimed fees:  0
-  intiial oracle price:  452254034096056
-  initial liquidity 542450333445999999999998
-  initial base liquidity:  401743725007999999999999
-  initial quote liquidity:  140706608437999999999999
-
-  post base liquidity:  418321169591999999999999
-  post quote liquidity:  159011451129999999999999
-  gain in liq:  34882287276000000000000
-  gain in base liq:  16577444584000000000000
-  gain in quote liq:  18304842692000000000000
-  gain in usdcBalance:  6457
-  gain in xsgdBalance:  7733
-
-  initial: 2.8551873254
-  post: 2.6307612856
-
- */
-
-    // LP Balances
-    console.log('gain in liq: ', postLiquidity - initialLiquidity);
-    console.log('gain in base liq: ', postIndLiquidity[0] - individualLiquidity[0]);
-    console.log('gain in quote liq: ', postIndLiquidity[1] - individualLiquidity[1]);
-
-    // user: me
-    console.log('gain in usdcBalance: ', (usdcAfterBurn - usdcBeforeDeposit) / 1e6);
-    console.log('gain in xsgdBalance: ', (xsgdAfterBurn - xsgdBeforeDeposit) / 1e6);
-  }
-
-  function testFuzzExploitLP(uint256 amount) public {
-    vm.assume(amount > 10_000);
-    vm.assume(amount < 100_000);
-    address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
 
     vm.startPrank(me);
     IERC20(USDC).approve(BALANCER_VAULT, type(uint256).max);
     IERC20(XSGD).approve(BALANCER_VAULT, type(uint256).max);
     vm.stopPrank();
 
-    // 1 - add 100k liquidity
-    // can be flashloaned
     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
-
-    (uint256 initialLiquidity, uint256[] memory individualLiquidity) = IFXPool(LP_XSGD).liquidity();
-    console.log('initial liquidity', initialLiquidity);
-    console.log('initial base liquidity: ', individualLiquidity[0]);
-    console.log('initial quote liquidity: ', individualLiquidity[1]);
+    // fees will be zero after deposit
 
     uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
     uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
     uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
+    int256 initialPriceAfterDeposit = IHLPOracle(lpOracle).latestAnswer();
 
-    // 2 - loop exact in numeraire 100 times. 10K in numeraire
-    _loopSwapsExact(100, 10_000, address(lpOracle), true, user2);
+    _loopSwapsExact(loopTimes, 10_000, lpOracle, false, me);
+    int256 oraclePriceBeforeMint = IHLPOracle(lpOracle).latestAnswer();
 
-    // remove the liquidity, mint protocol fees, inflate totalSupply
-    _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
+    // trigger mint fees without affecting supply
+    _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), 1, me, USDC, XSGD);
 
-    // trigger without inflating supply
-    // _viewWithdraw(initialLPBalance); // supply not increased
-    (uint256 postLiquidity, uint256[] memory postIndLiquidity) = IFXPool(LP_XSGD).liquidity();
-    uint256 usdcAfterBurn = IERC20(USDC).balanceOf(me);
-    uint256 xsgdAfterBurn = IERC20(XSGD).balanceOf(me);
-    console.log('post liquidity', postLiquidity);
-    console.log('post base liquidity: ', postIndLiquidity[0]);
-    console.log('post quote liquidity: ', postIndLiquidity[1]);
+    (uint256 postBurnLiquidity, uint256[] memory postBurnIndividualLiquidity) = IFXPool(LP_XSGD).liquidity();
 
-    // Extract more assets in LP
-    console.log('loss in liq: ', initialLiquidity - postLiquidity);
-    console.log('loss in base liq: ', individualLiquidity[0] - postIndLiquidity[0]);
-    console.log('loss in quote liq: ', individualLiquidity[1] - postIndLiquidity[1]);
-    console.log('gain in usdcBalance: ', (usdcAfterBurn - usdcAfterDeposit));
-    console.log('gain in xsgdBalance: ', (xsgdAfterBurn - xsgdAfterDeposit));
+    assertEq(IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire(), 0);
 
-    // assert pool losses
-    assertGt(individualLiquidity[0], postIndLiquidity[0]);
-    assertGt(individualLiquidity[1], postIndLiquidity[1]);
-    assertGt(initialLiquidity, postLiquidity);
+    // oraclePriceBeforeFeeMint vs oraclePriceAfterFeeMint
+    assertEq(oraclePriceBeforeMint, IHLPOracle(lpOracle).latestAnswer());
 
-    // assert user gains
-    assertGt(usdcAfterBurn, usdcAfterDeposit);
-    assertGt(xsgdAfterBurn, xsgdAfterDeposit);
+    console.log('initial liquidity', initialLiquidity);
+    console.log('postBurnLiquidity: ', postBurnLiquidity);
   }
+
+  //   function testExploitLP() public {
+  //     address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+
+  //     vm.startPrank(me);
+  //     IERC20(USDC).approve(BALANCER_VAULT, type(uint256).max);
+  //     IERC20(XSGD).approve(BALANCER_VAULT, type(uint256).max);
+  //     vm.stopPrank();
+  //     uint256 initialOraclePrice = uint256(IOracle(lpOracle).latestAnswer());
+
+  //     (uint256 initialLiquidity, uint256[] memory individualLiquidity) = IFXPool(LP_XSGD).liquidity();
+
+  //     uint256 initialTotalSupply = IFXPool(LP_XSGD).totalSupply();
+
+  //     uint256 usdcBeforeDeposit = IERC20(USDC).balanceOf(me);
+  //     uint256 xsgdBeforeDeposit = IERC20(XSGD).balanceOf(me);
+
+  //     // 1 - add 100k liquidity
+  //     // can be flashloaned
+  //     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
+
+  //     uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
+  //     // uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
+  //     // uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
+
+  // uint256 lpPriceBeforeBurn = uint256(IOracle(lpOracle).latestAnswer());
+  // // remove the liquidity, mint protocol fees, inflate totalSupply
+  // _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
+
+  //     uint256 lpPriceBeforeBurn = uint256(IOracle(lpOracle).latestAnswer());
+  //     console.log('unclaimed fees in numeraire before burn', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
+  //     // remove the liquidity, mint protocol fees, inflate totalSupply
+  //     // _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
+  //     _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), 1, me, USDC, XSGD);
+  //     assertEq(IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire(), 0);
+
+  //     // trigger without inflating supply
+  //     (uint256 postLiquidity, uint256[] memory postIndLiquidity) = IFXPool(LP_XSGD).liquidity();
+  //     uint256 usdcAfterBurn = IERC20(USDC).balanceOf(me);
+  //     uint256 xsgdAfterBurn = IERC20(XSGD).balanceOf(me);
+
+  //     console.log('initial liquidity', initialLiquidity);
+  //     console.log('initial base liquidity: ', individualLiquidity[0]);
+  //     console.log('initial quote liquidity: ', individualLiquidity[1]);
+  //     console.log('post liquidity', postLiquidity);
+  //     console.log('post base liquidity: ', postIndLiquidity[0]);
+  //     console.log('post quote liquidity: ', postIndLiquidity[1]);
+  //     console.log('initial oracle price', initialOraclePrice);
+  //     console.log('oracle price before burn', lpPriceBeforeBurn);
+  //     console.log('oracle price after burn', uint256(IOracle(lpOracle).latestAnswer())); // higher
+  //     console.log('initial total supply', initialTotalSupply);
+  //     console.log('total supply after burn', IFXPool(LP_XSGD).totalSupply());
+  //     console.log('protocolPercentFee', IFXPool(LP_XSGD).protocolPercentFee());
+  //     /**
+
+  //
+
+  //     // LP Balances
+  //     console.log('gain in liq: ', postLiquidity - initialLiquidity);
+  //     console.log('gain in base liq: ', postIndLiquidity[0] - individualLiquidity[0]);
+  //     console.log('gain in quote liq: ', postIndLiquidity[1] - individualLiquidity[1]);
+
+  //     // user: me
+  //     console.log('gain in usdcBalance: ', (usdcAfterBurn - usdcBeforeDeposit) / 1e6);
+  //     console.log('gain in xsgdBalance: ', (xsgdAfterBurn - xsgdBeforeDeposit) / 1e6);
+  //   }
 
   function __testPriceManipulation() private {
     _deployReserve();
@@ -283,36 +233,36 @@ measure how much liquidity / tokens you received
     assertGt(oraclePriceAfterSwaps, oraclePriceBeforeSwaps);
   }
 
-  // function testFuzz_FuzzLoopTimesUnclaimedFees(uint256 loopTimes) public {
-  //   vm.assume(loopTimes < 247);
-  //   vm.assume(loopTimes > 12);
+  function testFuzzLoopTimesUnclaimedFees(uint256 loopTimes) public {
+    vm.assume(loopTimes < 247);
+    vm.assume(loopTimes > 12);
 
-  //   _deployReserve();
+    _deployReserve();
 
-  //   address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+    address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
 
-  //   uint256 initialSupply = IFXPool(LP_XSGD).totalSupply();
-  //   (uint256 initialLiquidity, ) = IFXPool(LP_XSGD).liquidity();
+    uint256 initialSupply = IFXPool(LP_XSGD).totalSupply();
+    (uint256 initialLiquidity, ) = IFXPool(LP_XSGD).liquidity();
 
-  //   uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
-  //   console2.log('before loop unclaimed fees: ', initial);
-  //   _loopSwaps(loopTimes, 10_000, address(lpOracle), true);
+    uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
+    console2.log('before loop unclaimed fees: ', initial);
+    _loopSwaps(loopTimes, 10_000, address(lpOracle), true, me);
 
-  //   // trigger minting
-  //   _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 10 * 1e18, me, USDC, XSGD);
+    // trigger minting
+    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 10 * 1e18, me, USDC, XSGD);
 
-  //   uint256 endSupply = IFXPool(LP_XSGD).totalSupply();
-  //   (uint256 endLiquidity, ) = IFXPool(LP_XSGD).liquidity();
+    uint256 endSupply = IFXPool(LP_XSGD).totalSupply();
+    (uint256 endLiquidity, ) = IFXPool(LP_XSGD).liquidity();
 
-  //   console2.log('end liquidity', endLiquidity);
-  //   console2.log('end supply', endSupply);
-  //   console2.log('supply diff', endSupply - initialSupply);
-  //   console2.log('liquidity diff', endLiquidity - initialLiquidity);
-  //   console2.log('after loop unclaimed fees: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
-  //   assertEq(IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire(), 0);
-  //   assertGt(endLiquidity, initialLiquidity);
-  //   assertGt(endSupply, initialSupply);
-  // }
+    console2.log('end liquidity', endLiquidity);
+    console2.log('end supply', endSupply);
+    console2.log('supply diff', endSupply - initialSupply);
+    console2.log('liquidity diff', endLiquidity - initialLiquidity);
+    console2.log('after loop unclaimed fees: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
+    assertEq(IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire(), 0);
+    assertGt(endLiquidity, initialLiquidity);
+    assertGt(endSupply, initialSupply);
+  }
 
   function _viewWithdraw(uint256 tokensToBurn) internal returns (uint256 tA, uint256 tB) {
     uint256[] memory tokensReturned = IFXPool(LP_XSGD).viewWithdraw(tokensToBurn);
@@ -427,6 +377,8 @@ interface IFXPool {
   }
 
   function getPoolId() external view returns (bytes32);
+
+  function protocolPercentFee() external view returns (uint256);
 
   function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
 
