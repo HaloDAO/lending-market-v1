@@ -292,7 +292,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     LP.borrow(
       USDC,
       // totalUsdcBorrows + uint256(1169 * 1e6), // @todo check if it make sense: difference between total calculated usdc to be borrowed vs actual limit
-      10000,
+      10000,  
       2, // stablecoin borrowing
       0, // referral code
       _user
@@ -358,7 +358,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     // TODO: Left here jan 31
     address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
-    console.log('poolAdmin:', poolAdmin);
+    // console.log('poolAdmin:', poolAdmin);
     vm.startPrank(poolAdmin);
     ILendingPoolConfigurator(lendingPoolConfigurator).enableBorrowingOnReserve(_asset, doEnable);
     vm.stopPrank();
@@ -371,7 +371,8 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // TODO: Left here jan 31
     address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
     vm.startPrank(poolAdmin);
-    ILendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(_asset, 7500, 8000, 10500);
+
+    ILendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(_asset, 8000, 8500, 10500);
     vm.stopPrank();
   }
 

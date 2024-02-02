@@ -139,7 +139,7 @@ measure how much liquidity / tokens you received
     // 2 - loop exact in numeraire 100 times. 10K in numeraire.
     _loopSwapsExact(2355, 10_000, address(lpOracle), true, user2);
 
-    uint256 lpPriceBeforeBurn = uint256(IOracle(lpOracle).latestAnswer();
+    uint256 lpPriceBeforeBurn = uint256(IOracle(lpOracle).latestAnswer());
     // remove the liquidity, mint protocol fees, inflate totalSupply
     _removeLiquidity(IFXPool(LP_XSGD).getPoolId(), initialLPBalance, me, USDC, XSGD);
 
