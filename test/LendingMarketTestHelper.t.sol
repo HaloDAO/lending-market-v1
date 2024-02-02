@@ -166,7 +166,8 @@ contract LendingMarketTestHelper is Test {
     address swapIn,
     address swapOut,
     string memory swapLabel,
-    bool withLogs
+    bool withLogs,
+    address user
   ) internal {
     int256 lpEthPrice0 = IOracle(lpOracle).latestAnswer();
     uint256 fees0 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
@@ -184,7 +185,7 @@ contract LendingMarketTestHelper is Test {
       );
     }
 
-    _doSwap(me, amountToSwap, swapIn, swapOut);
+    _doSwap(user, amountToSwap, swapIn, swapOut);
 
     (uint256 totalLiquidityInNumeraire1, ) = IFXPool(LP_XSGD).liquidity();
 
@@ -238,15 +239,15 @@ contract LendingMarketTestHelper is Test {
     console2.log('After swap: lpEthPrice1 - lpEthPrice0', lpEthPrice1 - lpEthPrice0);
   }
 
-  function _loopSwaps(uint256 times, uint256 amount, address lpOracle, bool withLogs) internal {
+  function _loopSwaps(uint256 times, uint256 amount, address lpOracle, bool withLogs, address user) internal {
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
 
     int256 beforeLoop = IOracle(lpOracle).latestAnswer();
     for (uint256 j = 0; j < times; j++) {
       console2.log('LOOP #', j);
 
-      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs);
-      _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, '[SWAP]', withLogs);
+      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs, user);
+      _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, '[SWAP]', withLogs, user);
       if (withLogs) {
         console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
         console2.log('intiial unclaimed fees: ', initial);
@@ -263,7 +264,7 @@ contract LendingMarketTestHelper is Test {
     return IAssimilator(assimilator).viewNumeraireAmount(amount).mulu(1e18);
   }
 
-  function _loopSwapsExact(uint256 times, uint256 amount, address lpOracle, bool withLogs) internal {
+  function _loopSwapsExact(uint256 times, uint256 amount, address lpOracle, bool withLogs, address user) internal {
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
 
     uint256 xsgdInRawAmount = _convertToRawAmount(amount, 0xC933a270B922acBd72ef997614Ec46911747b799);
@@ -273,8 +274,8 @@ contract LendingMarketTestHelper is Test {
     for (uint256 j = 0; j < times; j++) {
       console2.log('LOOP #', j);
 
-      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs);
-      _swapAndCheck(lpOracle, xsgdInRawAmount, XSGD, USDC, '[SWAP]', withLogs);
+      _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs, user);
+      _swapAndCheck(lpOracle, xsgdInRawAmount, XSGD, USDC, '[SWAP]', withLogs, user);
       if (withLogs) {
         console2.log('after swap: ', IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire());
         console2.log('intiial unclaimed fees: ', initial);
