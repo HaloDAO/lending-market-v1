@@ -73,8 +73,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
   function testLiquidateGetATokens() public {
     _printUserAccountData(me);
-   _printUserAccountData(me);
-    // uint256 depositLPXSGD = 1_000 * 1e18;
 
     uint256 liquidatorUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(LIQUIDATOR);
     uint256 liquidatedUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(me);
@@ -86,29 +84,39 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     uint256 liquidatorLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(LIQUIDATOR);
     uint256 liquidatedLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(me);
 
-    console.log('[testLiquidateGetATokens] liquidatorLPXSGDBalBeforeLiquidation:', liquidatorLPXSGDBalBeforeLiquidation);
-
-    console.log('[testLiquidateGetATokens] liquidatedLPXSGDBalBeforeLiquidation:', liquidatedLPXSGDBalBeforeLiquidation);
-
-    (
-      uint256 liquidator_aLPXSGDBalanceAfterLiquidation,
-      uint256 liquidated_aLPXSGDBalanceAfterLiquidation,
-      uint256 liquidatorUSDCBalAfterLiquidation,
-      uint256 liquidatedUSDCBalAfterLiquidation
-    ) = _testLiquidate(1_000 * 1e18, 50, 200 * 1e6, true);
-
-    console.log('[testLiquidateGetATokens] liquidatorUSDCBalAfterLiquidation:', liquidatorUSDCBalAfterLiquidation);
-
-    console.log('[testLiquidateGetATokens] liquidatedUSDCBalAfterLiquidation:', liquidatedUSDCBalAfterLiquidation);
-
     console.log(
-      '[testLiquidateGetATokens] liquidator_aLPXSGDBalanceAfterLiquidation:',
-      liquidator_aLPXSGDBalanceAfterLiquidation
+      '[testLiquidateGetATokens] liquidatorLPXSGDBalBeforeLiquidation:',
+      liquidatorLPXSGDBalBeforeLiquidation
     );
     console.log(
-      '[testLiquidateGetATokens] liquidated_aLPXSGDBalanceAfterLiquidation:',
-      liquidated_aLPXSGDBalanceAfterLiquidation
+      '[testLiquidateGetATokens] liquidatedLPXSGDBalBeforeLiquidation:',
+      liquidatedLPXSGDBalBeforeLiquidation
     );
+
+    _testLiquidate(1_000 * 1e18, 10, type(uint256).max, true, false);
+
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    address aLPXSGD = rdLPXSGD.aTokenAddress;
+
+    // console.log('[testLiquidateGetATokens] liquidatorUSDCBalAfterLiquidation:', liquidatorUSDCBalAfterLiquidation);
+    // console.log('[testLiquidateGetATokens] liquidatedUSDCBalAfterLiquidation:', liquidatedUSDCBalAfterLiquidation);
+
+    // console.log(
+    //   '[testLiquidateGetATokens] liquidator_aLPXSGDBalanceAfterLiquidation:',
+    //   liquidator_aLPXSGDBalanceAfterLiquidation
+    // );
+    // console.log(
+    //   '[testLiquidateGetATokens] liquidated_aLPXSGDBalanceAfterLiquidation:',
+    //   liquidated_aLPXSGDBalanceAfterLiquidation
+    // );
+
+    // liquidator gets aTokens
+    assertGt(IERC20(aLPXSGD).balanceOf(LIQUIDATOR), 0, 'no liquidation');
+    // @todo liquidated person lost collateral, find before balance since addition of LP asset in the reserve is inside testLiquidate
+    // assertGt(liquidatedLPXSGDBalBeforeLiquidation, IERC20(aLPXSGD).balanceOf(me));
+
+    // liquidator repay liquidated guy's debt to buy collateral
+    assertGt(liquidatorUSDCBalBeforeLiquidation, IERC20(USDC).balanceOf(LIQUIDATOR));
   }
 
   function testLiquidateGetCollateralTokens() public {
@@ -117,93 +125,129 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     uint256 liquidatorUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(LIQUIDATOR);
     uint256 liquidatedUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(me);
 
-    console.log('[testLiquidateGetCollateralTokens] liquidatorUSDCBalBeforeLiquidation:', liquidatorUSDCBalBeforeLiquidation);
+    console.log(
+      '[testLiquidateGetCollateralTokens] liquidatorUSDCBalBeforeLiquidation:',
+      liquidatorUSDCBalBeforeLiquidation
+    );
 
-    console.log('[testLiquidateGetCollateralTokens] liquidatedUSDCBalBeforeLiquidation:', liquidatedUSDCBalBeforeLiquidation);
+    console.log(
+      '[testLiquidateGetCollateralTokens] liquidatedUSDCBalBeforeLiquidation:',
+      liquidatedUSDCBalBeforeLiquidation
+    );
 
     uint256 liquidatorLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(LIQUIDATOR);
     uint256 liquidatedLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(me);
 
-    console.log('[testLiquidateGetCollateralTokens] liquidatorLPXSGDBalBeforeLiquidation:', liquidatorLPXSGDBalBeforeLiquidation);
+    console.log(
+      '[testLiquidateGetCollateralTokens] liquidatorLPXSGDBalBeforeLiquidation:',
+      liquidatorLPXSGDBalBeforeLiquidation
+    );
 
-    console.log('[testLiquidateGetCollateralTokens] liquidatedLPXSGDBalBeforeLiquidation:', liquidatedLPXSGDBalBeforeLiquidation);
+    console.log(
+      '[testLiquidateGetCollateralTokens] liquidatedLPXSGDBalBeforeLiquidation:',
+      liquidatedLPXSGDBalBeforeLiquidation
+    );
 
     (
       uint256 liquidator_aLPXSGDBalanceAfterLiquidation,
       uint256 liquidated_aLPXSGDBalanceAfterLiquidation,
       uint256 liquidatorUSDCBalAfterLiquidation,
       uint256 liquidatedUSDCBalAfterLiquidation
-    ) = _testLiquidate(1_000 * 1e18, 50, 200 * 1e6, false);
+    ) = _testLiquidate(1_000 * 1e18, 10, 200 * 1e6, false, false);
 
-    console.log('[testLiquidateGetCollateralTokens] liquidatorUSDCBalAfterLiquidation:', liquidatorUSDCBalAfterLiquidation);
+    // console.log(
+    //   '[testLiquidateGetCollateralTokens] liquidatorUSDCBalAfterLiquidation:',
+    //   liquidatorUSDCBalAfterLiquidation
+    // );
 
-    console.log('[testLiquidateGetCollateralTokens] liquidatedUSDCBalAfterLiquidation:', liquidatedUSDCBalAfterLiquidation);
+    // console.log(
+    //   '[testLiquidateGetCollateralTokens] liquidatedUSDCBalAfterLiquidation:',
+    //   liquidatedUSDCBalAfterLiquidation
+    // );
 
-    console.log(
-      '[testLiquidateGetCollateralTokens] liquidator_aLPXSGDBalanceAfterLiquidation:',
-      liquidator_aLPXSGDBalanceAfterLiquidation
-    );
-    console.log(
-      '[testLiquidateGetCollateralTokens] liquidated_aLPXSGDBalanceAfterLiquidation:',
-      liquidated_aLPXSGDBalanceAfterLiquidation
-    );
+    // console.log(
+    //   '[testLiquidateGetCollateralTokens] liquidator_aLPXSGDBalanceAfterLiquidation:',
+    //   liquidator_aLPXSGDBalanceAfterLiquidation
+    // );
+    // console.log(
+    //   '[testLiquidateGetCollateralTokens] liquidated_aLPXSGDBalanceAfterLiquidation:',
+    //   liquidated_aLPXSGDBalanceAfterLiquidation
+    // );
 
-    // liquidated user has less aLPXSGD after liquidation
-    // assertGt(liquidated_aLPXSGDBalanceBeforeLiquidation, IERC20(aLPXSGD).balanceOf(me));
-    // liquidator gets the liquidated collateral + collateral bonus in collateral value
-    // @todo: check how to compute for liquidated collateral + collateral bonus
-    // assertGt(IERC20(LP_XSGD).balanceOf(LIQUIDATOR), liquidator_LPXSGDBalanceBeforeLiquidation);
+    // liquidator gets aTokens
+    assertGt(IERC20(LP_XSGD).balanceOf(LIQUIDATOR), 0, 'no liquidation');
+    // @todo liquidated person lost collateral, find before balance since addition of LP asset in the reserve is inside testLiquidate
+    // assertGt(liquidatedLPXSGDBalBeforeLiquidation, IERC20(aLPXSGD).balanceOf(me));
+
+    // liquidator repay liquidated guy's debt to buy collateral
+    assertGt(liquidatorUSDCBalBeforeLiquidation, IERC20(USDC).balanceOf(LIQUIDATOR));
   }
 
-  function testFullLiquidation() public {
+  function testLiquidateLoseMoreHealthFactor() public {
     _printUserAccountData(me);
-    // uint256 depositLPXSGD = 1_000 * 1e18;
 
     uint256 liquidatorUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(LIQUIDATOR);
     uint256 liquidatedUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(me);
 
-    console.log('[testFullLiquidation] liquidatorUSDCBalBeforeLiquidation:', liquidatorUSDCBalBeforeLiquidation);
+    console.log('[testLiquidateGetATokens] liquidatorUSDCBalBeforeLiquidation:', liquidatorUSDCBalBeforeLiquidation);
 
-    console.log('[testFullLiquidation] liquidatedUSDCBalBeforeLiquidation:', liquidatedUSDCBalBeforeLiquidation);
+    console.log('[testLiquidateGetATokens] liquidatedUSDCBalBeforeLiquidation:', liquidatedUSDCBalBeforeLiquidation);
 
     uint256 liquidatorLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(LIQUIDATOR);
     uint256 liquidatedLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(me);
 
-    console.log('[testFullLiquidation] liquidatorLPXSGDBalBeforeLiquidation:', liquidatorLPXSGDBalBeforeLiquidation);
-
-    console.log('[testFullLiquidation] liquidatedLPXSGDBalBeforeLiquidation:', liquidatedLPXSGDBalBeforeLiquidation);
-
-    (
-      uint256 liquidator_aLPXSGDBalanceAfterLiquidation,
-      uint256 liquidated_aLPXSGDBalanceAfterLiquidation,
-      uint256 liquidatorUSDCBalAfterLiquidation,
-      uint256 liquidatedUSDCBalAfterLiquidation
-    ) = _testLiquidate(1_000 * 1e18, 59, 200 * 1e6, true);
-
-    console.log('[testFullLiquidation] liquidatorUSDCBalAfterLiquidation:', liquidatorUSDCBalAfterLiquidation);
-
-    console.log('[testFullLiquidation] liquidatedUSDCBalAfterLiquidation:', liquidatedUSDCBalAfterLiquidation);
-
     console.log(
-      '[testFullLiquidation] liquidator_aLPXSGDBalanceAfterLiquidation:',
-      liquidator_aLPXSGDBalanceAfterLiquidation
+      '[testLiquidateGetATokens] liquidatorLPXSGDBalBeforeLiquidation:',
+      liquidatorLPXSGDBalBeforeLiquidation
     );
     console.log(
-      '[testFullLiquidation] liquidated_aLPXSGDBalanceAfterLiquidation:',
-      liquidated_aLPXSGDBalanceAfterLiquidation
+      '[testLiquidateGetATokens] liquidatedLPXSGDBalBeforeLiquidation:',
+      liquidatedLPXSGDBalBeforeLiquidation
     );
 
-    // All aTokens be transferred to the liquidator upon full liquidation
-    // assertEq(IERC20(aLPXSGD).balanceOf(me), 0);
-    // assertEq(IERC20(aLPXSGD).balanceOf(LIQUIDATOR), liquidated_aLPXSGDBalanceBeforeLiquidation);
+    _testLiquidate(1_000 * 1e18, 50, type(uint256).max, true, true);
+
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    address aLPXSGD = rdLPXSGD.aTokenAddress;
+
+    // console.log('[testLiquidateGetATokens] liquidatorUSDCBalAfterLiquidation:', liquidatorUSDCBalAfterLiquidation);
+    // console.log('[testLiquidateGetATokens] liquidatedUSDCBalAfterLiquidation:', liquidatedUSDCBalAfterLiquidation);
+
+    // console.log(
+    //   '[testLiquidateGetATokens] liquidator_aLPXSGDBalanceAfterLiquidation:',
+    //   liquidator_aLPXSGDBalanceAfterLiquidation
+    // );
+    // console.log(
+    //   '[testLiquidateGetATokens] liquidated_aLPXSGDBalanceAfterLiquidation:',
+    //   liquidated_aLPXSGDBalanceAfterLiquidation
+    // );
+
+    // liquidator gets aTokens
+    assertGt(IERC20(aLPXSGD).balanceOf(LIQUIDATOR), 0, 'no liquidation');
+    // @todo liquidated person lost collateral, find before balance since addition of LP asset in the reserve is inside testLiquidate
+    // assertGt(liquidatedLPXSGDBalBeforeLiquidation, IERC20(aLPXSGD).balanceOf(me));
+
+    // liquidator repay liquidated guy's debt to buy collateral
+    assertGt(liquidatorUSDCBalBeforeLiquidation, IERC20(USDC).balanceOf(LIQUIDATOR));
   }
+
+  // @todo tbd: cannot liquidate with LP tokens because you cannot borrow LP tokens
 
   function _testLiquidate(
     uint256 _depositLPXSGD,
     uint256 _oraclePriceDecline,
     uint256 _debtToCover,
-    bool _toATokens
-  ) public returns (uint256, uint256, uint256, uint256) {
+    bool _toATokens,
+    bool isLosingMoreCollateral
+  )
+    public
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     {
       (, int256 ethUsdPrice, , , ) = IOracle(ETH_USD_CHAINLINK).latestRoundData();
       (, int256 usdcUsdPrice, , , ) = IOracle(USDC_USD_CHAINLINK).latestRoundData();
@@ -225,20 +269,18 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
     address aLPXSGD = rdLPXSGD.aTokenAddress;
 
-    int256 lpPrice = IHLPOracle(lpOracle).latestAnswer();
     console2.log('ETC/USD price', uint256(IHLPOracle(IHLPOracle(lpOracle).quotePriceFeed()).latestAnswer()));
 
     vm.startPrank(me);
     // Add liq to FX Pool to get LP_XSGD balance
-    IERC20(XSGD).approve(BALANCER_VAULT, type(uint).max);
-    IERC20(USDC).approve(BALANCER_VAULT, type(uint).max);
+    IERC20(XSGD).approve(BALANCER_VAULT, type(uint256).max);
+    IERC20(USDC).approve(BALANCER_VAULT, type(uint256).max);
     vm.stopPrank();
 
     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
 
-
     // Deposit collateral to use for borrowing later
-    IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
     LP.deposit(
       LP_XSGD,
       _depositLPXSGD,
@@ -251,20 +293,11 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // console.log('------ After LP XSGD Deposit --------');
     _printUserAccountData(me);
 
-
     // User sets LP_XSGD to be used as collateral in lending market pool
     LP.setUserUseReserveAsCollateral(LP_XSGD, true);
 
     // Add an asset to the lending pool so there is some USDC we can borrow
     _putBorrowableLiquidityInLendingPool(WHALE_LM_LP, 1_000_000 * 1e6);
-
-    // address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
-    // console.log('LP XSGD Aave asset price', IAaveOracle(aaveOracle).getAssetPrice(LP_XSGD));
-
-    // _getLendingPoolReserveConfig();
-
-    // IHaloUiPoolDataProvider.UserReserveData[] memory userReserves = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
-    //   .getUserReservesData(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER), me);
 
     {
       // Borrow up to the limit of your collateral
@@ -274,7 +307,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
       // lowest oracle price deviation to be full liquidated
       int256 newLPXSGDPrice = _manipulateOraclePrice(_oraclePriceDecline);
-      // TODO: What is pool ratio at this time?
+
       console.log('LP XSGD Oracle Price: ', uint256(newLPXSGDPrice));
 
       uint256 calculatedCollateralAmount = (usdcBorrowLimit * (1 + 500)) / (uint256(newLPXSGDPrice) / 1e12);
@@ -288,7 +321,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     _printUserAccountData(me);
     console.log('</ Printing liquidated guy account before liquidation');
 
-    _liquidatePosition(LIQUIDATOR, me, _toATokens, _debtToCover);
+    _liquidatePosition(LIQUIDATOR, me, _toATokens, _debtToCover, isLosingMoreCollateral);
 
     console.log('< Printing liquidated guy account after liquidation');
     _printUserAccountData(me);
@@ -299,6 +332,8 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     uint256 liquidatorUSDCBalAfterLiquidation = IERC20(USDC).balanceOf(LIQUIDATOR);
     uint256 liquidatedUSDCBalAfterLiquidation = IERC20(USDC).balanceOf(me);
+
+    console.log('Balance after: ', liquidator_aLPXSGDBalanceAfterLiquidation);
 
     return (
       liquidator_aLPXSGDBalanceAfterLiquidation,
@@ -311,8 +346,8 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
   function _putBorrowableLiquidityInLendingPool(address _donor, uint256 _amount) private {
     vm.startPrank(_donor);
 
-    IERC20(XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
-    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    IERC20(XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
 
     LP.deposit(
       XSGD,
@@ -343,7 +378,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     vm.warp(block.timestamp + 31536000);
 
-    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
     LP.repay(USDC, 50_000 * 1e6, 2, _user);
 
     (IHaloUiPoolDataProvider.AggregatedReserveData[] memory rd2, ) = IHaloUiPoolDataProvider(UI_DATA_PROVIDER)
@@ -358,7 +393,7 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     uint256 balBefore = IERC20(USDC).balanceOf(me);
     console.log('block.timestamp', block.timestamp);
     _printLiqIndex(USDC);
-    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
     LP.deposit(
       USDC,
       50_000 * 1e6,
@@ -396,18 +431,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
   }
 
   function _borrowToLimit(address _user) private returns (uint256) {
-    // Is this still needed if we are deploying a new lpOracle?
-    // I think yes to point the newly deployed lpOracle to the correct HLP
-    // _setXsgdHLPOracle(lpOracle);
-    // (
-    //   ,
-    //   /*uint256 totalCollateralETH*/
-    //   uint256 totalDebtETH,
-    //   uint256 availableBorrowsETH,
-    //   uint256 currentLiquidationThreshold,
-    //   uint256 ltv,
-    //   uint256 healthFactor
-    // ) = LP.getUserAccountData(_user);
     (
       ,
       ,
@@ -504,7 +527,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     address lendingPoolConfigurator = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER)
       .getLendingPoolConfigurator();
 
-    // TODO: Left here jan 31
     address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
     // console.log('poolAdmin:', poolAdmin);
     vm.startPrank(poolAdmin);
@@ -550,23 +572,86 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     // console.log('ltv', ltv);
   }
 
-  function _liquidatePosition(address liquidator, address liquidatedGuy, bool isAtokens, uint256 debtToCover) private {
+  function _liquidatePosition(
+    address liquidator,
+    address liquidatedGuy,
+    bool isAtokens,
+    uint256 debtToCover,
+    bool isLosingMoreCollateral
+  ) private {
+    (
+      uint256 totalCollateralETHBeforeLiquidation,
+      uint256 totalDebtETHBeforeLiquidation,
+      ,
+      ,
+      ,
+      uint256 healthFactorBeforeLiquidation
+    ) = LP.getUserAccountData(me);
+
+    DataTypes.ReserveData memory rdUSDC = LP.getReserveData(USDC);
+    DataTypes.ReserveData memory rdLPXSGD = LP.getReserveData(LP_XSGD);
+    // we only have variable rates
+    uint256 liquidatedGuyVariableDebtTokensBeforeLiquidation = IERC20(rdUSDC.variableDebtTokenAddress).balanceOf(me);
+    uint256 liquidatedGuyCollateralBeforeLiquidation = IERC20(rdLPXSGD.aTokenAddress).balanceOf(me);
+
+    console.log(IERC20(rdLPXSGD.aTokenAddress).balanceOf(me));
+
     vm.startPrank(liquidator);
 
     uint256 liquidatorLPXGDBefore = IERC20(LP_XSGD).balanceOf(liquidator);
-    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint).max);
+    IERC20(USDC).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
 
     if (isAtokens) {
       // get aTokens
       LP.liquidationCall(LP_XSGD, USDC, liquidatedGuy, debtToCover, true);
-      // LP.withdraw(LP_XSGD, type(uint).max, liquidator);
     } else {
       LP.liquidationCall(LP_XSGD, USDC, liquidatedGuy, debtToCover, false);
     }
+
+    (
+      uint256 totalCollateralETHAfterLiquidation,
+      uint256 totalDebtETHAfterLiquidation,
+      ,
+      ,
+      ,
+      uint256 healthFactorAfterLiquidation
+    ) = LP.getUserAccountData(me);
+
+    // burning of debt tokens
+    assertGt(
+      liquidatedGuyVariableDebtTokensBeforeLiquidation,
+      IERC20(rdUSDC.variableDebtTokenAddress).balanceOf(me),
+      'tokens not burned'
+    );
+
+    // collateral loss
+    assertGt(
+      liquidatedGuyCollateralBeforeLiquidation,
+      IERC20(rdLPXSGD.aTokenAddress).balanceOf(me),
+      'no collateral loss'
+    );
+
+    // improve health factor
+    isLosingMoreCollateral
+      ? assertGt(healthFactorBeforeLiquidation, healthFactorAfterLiquidation, 'health factor condition not met')
+      : assertGt(healthFactorAfterLiquidation, healthFactorBeforeLiquidation, 'health factor condition not met');
+
+    assertGt(
+      totalCollateralETHBeforeLiquidation,
+      totalCollateralETHAfterLiquidation,
+      'total collateral not liquidated'
+    );
+    // console.log(currentLiquidationThreshold, totalCollateralETHAfterLiquidation, totalDebtETHAfterLiquidation);
+    // total liquidatable asset is 50%
+    // >50% of the debt is only liquidated per liquidation call
+    assertGe(
+      50,
+      ((totalDebtETHBeforeLiquidation - totalDebtETHAfterLiquidation) * 100) / totalDebtETHBeforeLiquidation,
+      'total debt liquidated is more than 50%'
+    );
+
     vm.stopPrank();
   }
-
-  function _liquidateUsingAddedLPAsset() private {}
 
   function _manipulateOraclePrice(uint256 priceLossPercentage) private returns (int256) {
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
@@ -597,7 +682,16 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 }
 
 interface IOracle {
-  function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80);
+  function latestRoundData()
+    external
+    view
+    returns (
+      uint80,
+      int256,
+      uint256,
+      uint256,
+      uint80
+    );
 }
 
 interface IUsdcToken {
@@ -622,7 +716,16 @@ interface IFXPool {
 
   function getPoolId() external view returns (bytes32);
 
-  function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
+  function viewParameters()
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
 
   // returns(totalLiquidityInNumeraire, individual liquidity)
   function liquidity() external view returns (uint256, uint256[] memory);
