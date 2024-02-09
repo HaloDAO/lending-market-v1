@@ -37,10 +37,13 @@ task('halo:dev:initialize-lending-pool', 'Initialize lending pool configuration.
     const network = <eNetwork>localBRE.network.name;
     const signer = await getFirstSigner();
     const poolConfig = loadPoolConfig(pool);
+
     const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix, WethGateway } =
       poolConfig;
     const mockTokens = await getAllHaloMockedTokens();
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
+    //console.log('mock tokens');
+    //console.log(mockTokens);
 
     const addressesProvider = await getLendingPoolAddressesProvider();
 

@@ -20,7 +20,7 @@ task('halo:dev', 'Deploy development enviroment')
 
     console.log('Migration started\n');
 
-    if (withmocktokens == true) {
+    if (withmocktokens === 'true') {
       console.log('0. Deploy mock tokens');
       await localBRE.run('halo:dev:deploy-mock-tokens', { verify });
     }
@@ -31,7 +31,7 @@ task('halo:dev', 'Deploy development enviroment')
     console.log('Done deploying address provider');
 
     console.log('2. Deploy lending pool');
-    await localBRE.run('halo:dev:deploy-lending-pool', { verify });
+    await localBRE.run('halo:dev:deploy-lending-pool', { verify, pool: POOL_NAME });
 
     console.log('3. Deploy oracles');
     await localBRE.run('halo:dev:deploy-oracles', { verify, pool: POOL_NAME });

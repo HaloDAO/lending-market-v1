@@ -75,6 +75,7 @@ export const initReservesByHelper = async (
   const reserves = Object.entries(reservesParams);
 
   for (let [symbol, params] of reserves) {
+    console.log('Current iteration: ', symbol);
     if (!tokenAddresses[symbol]) {
       console.log(`- Skipping init of ${symbol} due token address is not set at markets config`);
       continue;
@@ -134,6 +135,7 @@ export const initReservesByHelper = async (
   const configurator = await getLendingPoolConfiguratorProxy();
 
   console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
+
   for (let chunkIndex = 0; chunkIndex < chunkedInitInputParams.length; chunkIndex++) {
     const tx3 = await waitForTx(await configurator.batchInitReserve(chunkedInitInputParams[chunkIndex]));
 

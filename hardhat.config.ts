@@ -4,9 +4,22 @@ import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { eAvalancheNetwork, eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
+import {
+  eAvalancheNetwork,
+  eEthereumNetwork,
+  eNetwork,
+  ePolygonNetwork,
+  eXDaiNetwork,
+  eArbitrumNetwork,
+} from './helpers/types';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
-import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS, BLOCK_TO_FORK, buildForkConfig } from './helper-hardhat-config';
+import {
+  NETWORKS_RPC_URL,
+  NETWORKS_DEFAULT_GAS,
+  NETWORK_DEFAULT_PRIORITYFEE,
+  BLOCK_TO_FORK,
+  buildForkConfig,
+} from './helper-hardhat-config';
 
 require('dotenv').config();
 
@@ -40,7 +53,11 @@ if (!SKIP_LOAD) {
     'helpers',
     'halo-dev',
     'halo-main',
+    'halo-arb',
+    'halo-arb-dev',
     'helpers/halo-helpers',
+    'halo-new-asset',
+    'halo-matic',
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)
@@ -59,6 +76,8 @@ const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
   blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
   gasMultiplier: DEFAULT_GAS_MUL,
   gasPrice: NETWORKS_DEFAULT_GAS[networkName],
+  maxPriorityFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
+  maxFeePerGas: NETWORK_DEFAULT_PRIORITYFEE[networkName],
   chainId: networkId,
   accounts: {
     mnemonic: MNEMONIC,
@@ -107,6 +126,9 @@ const buidlerConfig: HardhatUserConfig = {
     xdai: getCommonNetworkConfig(eXDaiNetwork.xdai, 100),
     avalanche: getCommonNetworkConfig(eAvalancheNetwork.avalanche, 43114),
     fuji: getCommonNetworkConfig(eAvalancheNetwork.fuji, 43113),
+    arbitrum: getCommonNetworkConfig(eArbitrumNetwork.arbitrum, 42161),
+    arbitrumRinkeby: getCommonNetworkConfig(eArbitrumNetwork.arbitrumRinkeby, 421611),
+    /*
     hardhat: {
       hardfork: 'berlin',
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
@@ -121,7 +143,24 @@ const buidlerConfig: HardhatUserConfig = {
         balance,
       })),
       forking: buildForkConfig(),
-    },
+    }, //  NOTE: use this for running yarn test
+
+   */
+    hardhat: {
+      chainId: 1,
+      forking: {
+        enabled: true,
+        url: 'https://eth-mainnet.alchemyapi.io/v2/DiPOcqLZRi6pPRizpQTbb5AGppuRI0dI',
+        blockNumber: 16166868,
+        // blockNumber: 14632357, // before deploying new assets
+        // blockNumber: 14651807,
+      },
+      accounts: {
+        accountsBalance: '100000000000000000000000', // 100000 ETH
+        mnemonic: MNEMONIC,
+      },
+    }, // NOTE: use this for simulating transcations
+
     buidlerevm_docker: {
       hardfork: 'berlin',
       blockGasLimit: 9500000,

@@ -19,9 +19,11 @@ import {
   iXDaiParamsPerNetwork,
   iAvalancheParamsPerNetwork,
   eAvalancheNetwork,
+  eArbitrumNetwork,
+  iArbitrumParamsPerNetwork,
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
-import { Artifact } from 'hardhat/types';
+import { Artifact, HardhatRuntimeEnvironment } from 'hardhat/types';
 import { Artifact as BuidlerArtifact } from '@nomiclabs/buidler/types';
 import { verifyEtherscanContract } from './etherscan-verification';
 import { getFirstSigner, getIErc20Detailed } from './contracts-getters';
@@ -80,6 +82,15 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
   return ethersSigners;
 };
 
+export const getLedgerSigner = async (): Promise<Signer> => {
+  const framerRPC = 'http://127.0.0.1:1248';
+
+  const ledgerProvider = await new DRE.ethers.providers.JsonRpcProvider(framerRPC);
+  const signer = await ledgerProvider.getSigner(0);
+
+  return signer;
+};
+
 export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =>
   await Promise.all((await getEthersSigners()).map((signer) => signer.getAddress()));
 
@@ -96,6 +107,18 @@ export const deployContract = async <ContractType extends Contract>(
 ): Promise<ContractType> => {
   const contract = (await (await DRE.ethers.getContractFactory(contractName))
     .connect(await getFirstSigner())
+    .deploy(...args)) as ContractType;
+  await waitForTx(contract.deployTransaction);
+  await registerContractInJsonDb(<eContractid>contractName, contract);
+  return contract;
+};
+
+export const deployContractWithLedger = async <ContractType extends Contract>(
+  contractName: string,
+  args: any[]
+): Promise<ContractType> => {
+  const contract = (await (await DRE.ethers.getContractFactory(contractName))
+    .connect(await getLedgerSigner())
     .deploy(...args)) as ContractType;
   await waitForTx(contract.deployTransaction);
   await registerContractInJsonDb(<eContractid>contractName, contract);
@@ -149,6 +172,7 @@ export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNet
   const { matic, mumbai } = param as iPolygonParamsPerNetwork<T>;
   const { xdai } = param as iXDaiParamsPerNetwork<T>;
   const { avalanche, fuji } = param as iAvalancheParamsPerNetwork<T>;
+  const { arbitrum, arbitrumRinkeby } = param as iArbitrumParamsPerNetwork<T>;
   if (process.env.FORK) {
     return param[process.env.FORK as eNetwork] as T;
   }
@@ -178,6 +202,10 @@ export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNet
       return avalanche;
     case eAvalancheNetwork.fuji:
       return fuji;
+    case eArbitrumNetwork.arbitrum:
+      return arbitrum;
+    case eArbitrumNetwork.arbitrumRinkeby:
+      return arbitrumRinkeby;
   }
 };
 
@@ -196,6 +224,8 @@ export const getParamPerPool = <T>({ proto, amm, matic, avalanche }: iParamsPerP
     case AavePools.proto:
       return proto;
     case AavePools.halo:
+      return proto;
+    case AavePools.haloArb:
       return proto;
     case AavePools.amm:
       return amm;

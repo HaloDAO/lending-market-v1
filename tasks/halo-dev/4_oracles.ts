@@ -39,6 +39,7 @@ task('halo:dev:deploy-oracles', 'Deploy oracles for dev enviroment')
       prev[curr as keyof iAssetBase<string>] = mockTokens[curr].address;
       return prev;
     }, defaultTokenList);
+
     const addressesProvider = await getLendingPoolAddressesProvider();
     const admin = await addressesProvider.getPoolAdmin();
 

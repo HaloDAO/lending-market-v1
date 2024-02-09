@@ -4,7 +4,7 @@ export interface SymbolMap<T> {
   [symbol: string]: T;
 }
 
-export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAvalancheNetwork;
+export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork | eAvalancheNetwork | eArbitrumNetwork;
 
 export enum eEthereumNetwork {
   buidlerevm = 'buidlerevm',
@@ -23,6 +23,11 @@ export enum ePolygonNetwork {
 
 export enum eXDaiNetwork {
   xdai = 'xdai',
+}
+
+export enum eArbitrumNetwork {
+  arbitrum = 'arbitrum',
+  arbitrumRinkeby = 'arbitrumRinkeby',
 }
 
 export enum eAvalancheNetwork {
@@ -47,6 +52,7 @@ export enum AavePools {
   amm = 'amm',
   avalanche = 'avalanche',
   halo = 'halo',
+  haloArb = 'haloArb',
 }
 
 export enum eContractid {
@@ -266,6 +272,17 @@ export interface iAssetBase<T> {
   WAVAX: T;
   XSGD: T;
   THKD: T;
+  RNBW?: T;
+  FXPHP?: T;
+  HLPPHP?: T;
+  UST?: T;
+  HLP_XSGD_USDC?: T;
+  HLP_UST_USDC?: T;
+  MockUSDC?: T;
+  BPT_XSGD_USDC?: T;
+  LP_FXPHP_USDC?: T;
+  LP_EURS_USDC?: T;
+  TAGPHP?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -299,7 +316,29 @@ export type iAavePoolAssets<T> = Pick<
   | 'THKD'
 >;
 
-export type iHaloPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH'>;
+export type iHaloPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  | 'DAI'
+  | 'USDC'
+  | 'USDT'
+  | 'WBTC'
+  | 'WETH'
+  | 'RNBW'
+  | 'XSGD'
+  | 'FXPHP'
+  | 'UST'
+  | 'HLP_XSGD_USDC'
+  | 'HLP_UST_USDC'
+  | 'MockUSDC'
+  | 'BPT_XSGD_USDC'
+  | 'LP_FXPHP_USDC'
+  | 'LP_EURS_USDC'
+>;
+
+export type iHaloMaticPoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP' | 'BPT_XSGD_USDC'
+>;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -343,16 +382,16 @@ export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
 export enum HaloTokenContractId {
   DAI = 'DAI',
-  TUSD = 'TUSD',
+  // TUSD = 'TUSD',
   WETH = 'WETH',
   USDC = 'USDC',
   USDT = 'USDT',
-  SUSD = 'SUSD',
+  // SUSD = 'SUSD',
   WBTC = 'WBTC',
-  BUSD = 'BUSD',
+  //BUSD = 'BUSD',
   USD = 'USD',
   XSGD = 'XSGD',
-  THKD = 'THKD',
+  // THKD = 'THKD',
   RNBW = 'RNBW',
 }
 
@@ -409,6 +448,7 @@ export enum TokenContractId {
   WAVAX = 'WAVAX',
   XSGD = 'XSGD',
   THKD = 'THKD',
+  RNBW = 'RNBW',
 }
 
 export interface IReserveParams extends IReserveBorrowParams, IReserveCollateralParams {
@@ -452,7 +492,8 @@ export type iParamsPerNetwork<T> =
   | iEthereumParamsPerNetwork<T>
   | iPolygonParamsPerNetwork<T>
   | iXDaiParamsPerNetwork<T>
-  | iAvalancheParamsPerNetwork<T>;
+  | iAvalancheParamsPerNetwork<T>
+  | iArbitrumParamsPerNetwork<T>;
 
 export interface iParamsPerNetworkAll<T>
   extends iEthereumParamsPerNetwork<T>,
@@ -483,10 +524,16 @@ export interface iAvalancheParamsPerNetwork<T> {
   [eAvalancheNetwork.fuji]: T;
 }
 
+export interface iArbitrumParamsPerNetwork<T> {
+  [eArbitrumNetwork.arbitrum]: T;
+  [eArbitrumNetwork.arbitrumRinkeby]: T;
+}
+
 export interface iParamsPerPool<T> {
   [AavePools.proto]: T;
   [AavePools.matic]: T;
   [AavePools.halo]: T;
+  [AavePools.haloArb]: T;
   [AavePools.amm]: T;
   [AavePools.avalanche]: T;
 }
@@ -574,6 +621,10 @@ export interface IAaveConfiguration extends ICommonConfiguration {
 
 export interface IHaloConfiguration extends ICommonConfiguration {
   ReservesConfig: iHaloPoolAssets<IReserveParams>;
+}
+
+export interface IHaloMaticConfiguration extends ICommonConfiguration {
+  ReservesConfig: iHaloMaticPoolAssets<IReserveParams>;
 }
 
 export interface IAmmConfiguration extends ICommonConfiguration {
