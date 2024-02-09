@@ -6,11 +6,11 @@ import 'forge-std/console2.sol';
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
 import {LendingMarketTestHelper, IOracle, IAssimilator} from './LendingMarketTestHelper.t.sol';
-import {hlpPriceFeedOracle, hlpContract, AggregatorV3Interface} from './HLPPriceFeedOracle.sol';
+import {FXEthPriceFeedOracle, FXPool, AggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
 
-contract HLPPriceFeedOracleTest is Test, LendingMarketTestHelper {
+contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
   string private RPC_URL = vm.envString('POLYGON_RPC_URL');
   address constant XSGD_ASSIM = 0xC933a270B922acBd72ef997614Ec46911747b799;
   address constant USDC_ASSIM = 0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a;
@@ -79,6 +79,8 @@ contract HLPPriceFeedOracleTest is Test, LendingMarketTestHelper {
     assertEq(IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire(), 0);
 
     // oraclePriceBeforeFeeMint vs oraclePriceAfterFeeMint
+    console2.log(oraclePriceBeforeMint);
+
     assertEq(oraclePriceBeforeMint, IHLPOracle(lpOracle).latestAnswer());
 
     console.log('initial liquidity', initialLiquidity);
@@ -307,7 +309,12 @@ interface IFiatToken {
 }
 
 interface IVault {
-  function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request) external payable;
+  function joinPool(
+    bytes32 poolId,
+    address sender,
+    address recipient,
+    JoinPoolRequest memory request
+  ) external payable;
 
   struct JoinPoolRequest {
     IAsset[] assets;
@@ -316,7 +323,12 @@ interface IVault {
     bool fromInternalBalance;
   }
 
-  function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request) external;
+  function exitPool(
+    bytes32 poolId,
+    address sender,
+    address payable recipient,
+    ExitPoolRequest memory request
+  ) external;
 
   struct ExitPoolRequest {
     IAsset[] assets;
@@ -380,7 +392,16 @@ interface IFXPool {
 
   function protocolPercentFee() external view returns (uint256);
 
-  function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
+  function viewParameters()
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
 
   // returns(totalLiquidityInNumeraire, individual liquidity)
   function liquidity() external view returns (uint256, uint256[] memory);

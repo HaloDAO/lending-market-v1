@@ -2,22 +2,27 @@
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
-import './SafeCast.sol';
-import 'forge-std/console2.sol';
+import './libraries/SafeCast.sol';
 
-import './ABDKMath64x64.sol';
+import './libraries/ABDKMath64x64.sol';
 
 // @TODO Safe math or Solidity >= 0.8
 interface AggregatorV3Interface {
   function latestRoundData()
     external
     view
-    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    );
 
   function decimals() external view returns (uint8);
 }
 
-interface hlpContract {
+interface FXPool {
   function liquidity() external view returns (uint256);
 
   function totalSupply() external view returns (uint256);
@@ -31,8 +36,8 @@ interface hlpContract {
   function getPoolId() external view returns (bytes32);
 }
 
-contract hlpPriceFeedOracle {
-  using SafeCast for uint;
+contract FXEthPriceFeedOracle {
+  using SafeCast for uint256;
 
   using ABDKMath64x64 for int128;
   using ABDKMath64x64 for int256;
@@ -40,7 +45,7 @@ contract hlpPriceFeedOracle {
 
   string public priceFeed;
 
-  hlpContract public baseContract;
+  FXPool public baseContract;
   AggregatorV3Interface public quotePriceFeed;
   address public vault;
   uint8 public decimals;
@@ -50,7 +55,7 @@ contract hlpPriceFeedOracle {
   address immutable quoteAssimilator;
 
   constructor(
-    hlpContract _baseContract,
+    FXPool _baseContract,
     AggregatorV3Interface _quotePriceFeed,
     string memory _priceFeed,
     address _vault,
@@ -62,15 +67,15 @@ contract hlpPriceFeedOracle {
     priceFeed = _priceFeed;
     decimals = 18;
     vault = _vault;
-    poolId = hlpContract(baseContract).getPoolId();
+    poolId = FXPool(baseContract).getPoolId();
     baseAssimilator = _baseAssimilator;
     quoteAssimilator = _quoteAssimilator;
   }
 
   function latestAnswer() external view returns (int256) {
-    uint256 _decimals = uint256(10 ** uint256(decimals));
+    uint256 _decimals = uint256(10**uint256(decimals));
     uint256 liquidity = baseContract.liquidity();
-    uint256 unclaimedFees = hlpContract(baseContract).totalUnclaimedFeesInNumeraire();
+    uint256 unclaimedFees = FXPool(baseContract).totalUnclaimedFeesInNumeraire();
 
     int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
@@ -86,27 +91,32 @@ contract hlpPriceFeedOracle {
 
     uint256 hlp_usd = (liquidity * (_decimals)) / (totalSupplyWithUnclaimedFees);
 
-    // console2.log('[latestAnswer] hlp-usd: ', hlp_usd);
-
     (, int256 quotePrice, , , ) = quotePriceFeed.latestRoundData();
     uint8 quoteDecimals = quotePriceFeed.decimals();
     quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
-    // console2.log('[hlpPriceFeedOracle] price:', (hlp_usd * _decimals) / uint256(quotePrice));
-    // console2.logInt(((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice));
 
-    return ((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice);
+    return ((hlp_usd.toInt256()) * ((uint256(10**18)).toInt256())) / (quotePrice);
   }
 
-  function _scaleprice(int256 _price, uint8 _priceDecimals, uint8 _decimals) internal pure returns (int256) {
+  function _scaleprice(
+    int256 _price,
+    uint8 _priceDecimals,
+    uint8 _decimals
+  ) internal pure returns (int256) {
     if (_priceDecimals < _decimals) {
-      return _price * ((10 ** (uint256(_decimals - _priceDecimals))).toInt256());
+      return _price * ((10**(uint256(_decimals - _priceDecimals))).toInt256());
     } else if (_priceDecimals > _decimals) {
-      return _price / ((10 ** (uint256(_priceDecimals - _decimals))).toInt256());
+      return _price / ((10**(uint256(_priceDecimals - _decimals))).toInt256());
     }
     return _price;
   }
 }
 
 interface IAssimilator {
-  function viewNumeraireBalanceLPRatio(uint256, uint256, address, bytes32) external view returns (int128);
+  function viewNumeraireBalanceLPRatio(
+    uint256,
+    uint256,
+    address,
+    bytes32
+  ) external view returns (int128);
 }
