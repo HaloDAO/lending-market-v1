@@ -132,7 +132,6 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
     assertGt(liquidatorUSDCBalBeforeLiquidation, IERC20(USDC).balanceOf(LIQUIDATOR));
   }
 
-  // Analysis: https://docs.google.com/spreadsheets/d/1O1p9oWt4wPGyyacjOhg46jDxNxD0o_eeASSsgf-wTIk/edit?usp=sharing
   function testLiquidateLoseMoreHealthFactor() public {
     _printUserAccountData(me);
 
@@ -215,6 +214,84 @@ contract LiquididateIntegrationTest is Test, LendingMarketTestHelper {
 
     // liquidator repay liquidated guy's debt to buy collateral
     assertGt(liquidatorUSDCBalBeforeLiquidation, IERC20(USDC).balanceOf(LIQUIDATOR), 'usdc not liquidated');
+  }
+
+  function testBorrowRates() public {
+    _printUserAccountData(me);
+
+    uint256 liquidatorUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(LIQUIDATOR);
+    uint256 liquidatedUSDCBalBeforeLiquidation = IERC20(USDC).balanceOf(me);
+
+    console.log('[testLiquidateGetATokens] liquidatorUSDCBalBeforeLiquidation:', liquidatorUSDCBalBeforeLiquidation);
+    console.log('[testLiquidateGetATokens] liquidatedUSDCBalBeforeLiquidation:', liquidatedUSDCBalBeforeLiquidation);
+
+    uint256 liquidatorLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(LIQUIDATOR);
+    uint256 liquidatedLPXSGDBalBeforeLiquidation = IERC20(LP_XSGD).balanceOf(me);
+
+    console.log(
+      '[testLiquidateGetATokens] liquidatorLPXSGDBalBeforeLiquidation:',
+      liquidatorLPXSGDBalBeforeLiquidation
+    );
+    console.log(
+      '[testLiquidateGetATokens] liquidatedLPXSGDBalBeforeLiquidation:',
+      liquidatedLPXSGDBalBeforeLiquidation
+    );
+
+    lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+
+    // Set Lending market oracle for XSGD_USDC token to use newly deployed HLPOracle
+    _setXsgdHLPOracle(lpOracle);
+    _enableBorrowingForAddedLPAssets(LP_XSGD, true);
+    _enableCollaterizationOfLPAssets(LP_XSGD);
+
+    // vm.startPrank(me);
+    // // Add liq to FX Pool to get LP_XSGD balance
+    // IERC20(XSGD).approve(BALANCER_VAULT, type(uint256).max);
+    // IERC20(USDC).approve(BALANCER_VAULT, type(uint256).max);
+    // vm.stopPrank();
+
+    // _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
+
+    // // Deposit collateral to use for borrowing later
+    // IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
+    // LP.deposit(
+    //   LP_XSGD,
+    //   10_000 * 1e18,
+    //   me,
+    //   0 // referral code
+    // );
+
+    // // Check how much is depositLPXSGD in HLP oracle
+    // // console.log('Deposited ETH (wei)', (_depositLPXSGD * uint256(IHLPOracle(lpOracle).latestAnswer())) / 1e18);
+    // // console.log('------ After LP XSGD Deposit --------');
+    // _printUserAccountData(me);
+
+    // // User sets LP_XSGD to be used as collateral in lending market pool
+    // LP.setUserUseReserveAsCollateral(LP_XSGD, true);
+
+    // DataTypes.ReserveData memory dUSDC = LP.getReserveData(USDC);
+
+    // console.log(IERC20(rUSDC.aTokenAddress).totalSupply());
+    // // _testLiquidate(1_000 * 1e18, 30, 10 * 1e6, false, true, 1);
+
+    // Add an asset to the lending pool so there is some USDC we can borrow
+    _putBorrowableLiquidityInLendingPool(WHALE_LM_LP, 1_000_000 * 1e6);
+
+    DataTypes.ReserveData memory rdUSDC = LP.getReserveData(USDC);
+    address aUSDC = rdUSDC.aTokenAddress;
+
+    console.log('borrow rate of USDC variable: ', rdUSDC.currentVariableBorrowRate);
+    console.log('borrow rate of USDC stable: ', rdUSDC.currentStableBorrowRate);
+    console.log('totalBorrowed stable USDC: ', IERC20(rdUSDC.stableDebtTokenAddress).totalSupply());
+
+    console.log('totalBorrowed variable  USDC: ', IERC20(rdUSDC.variableDebtTokenAddress).totalSupply());
+    console.log(
+      'totalBorrowed USDC: ',
+      IERC20(rdUSDC.stableDebtTokenAddress).totalSupply() + IERC20(rdUSDC.variableDebtTokenAddress).totalSupply()
+    );
+
+    console.log('USDC Liquidity in lending market', IERC20(USDC).balanceOf(rdUSDC.aTokenAddress));
+    console.log(IERC20(rdUSDC.aTokenAddress).totalSupply());
   }
 
   function _testLiquidate(
