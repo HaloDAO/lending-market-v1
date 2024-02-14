@@ -208,11 +208,11 @@ contract LendingMarketTestHelper is Test {
       }
     } else {
       if (withLogs) {
-        console2.log(
-          '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
-          swapLabel,
-          (totalLiquidityInNumeraire0 - totalLiquidityInNumeraire1) / 1e18
-        );
+        // console2.log(
+        //   '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
+        //   swapLabel,
+        //   (totalLiquidityInNumeraire0 - totalLiquidityInNumeraire1) / 1e18
+        // );
       }
     }
 
@@ -231,21 +231,21 @@ contract LendingMarketTestHelper is Test {
         (totalLiquidityInNumeraire2 - totalLiquidityInNumeraire1) / 1e18
       );
     } else {
-      console2.log(
-        '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
-        swapLabel,
-        (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire2) / 1e18
-      );
+      // console2.log(
+      //   '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
+      //   swapLabel,
+      //   (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire2) / 1e18
+      // );
     }
 
     uint256 fees1 = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
     int256 lpEthPrice2 = IOracle(lpOracle).latestAnswer();
-    console2.log('[%s] lpEthPrice2\t', swapLabel, uint256(lpEthPrice2));
-    console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees1);
+    // console2.log('[%s] lpEthPrice2\t', swapLabel, uint256(lpEthPrice2));
+    // console2.log('[%s] fees ADDED\t', swapLabel, IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire() - fees1);
 
-    console2.log(swapLabel);
-    console2.log('After fee minting: lpEthPrice2 - lpEthPrice1', lpEthPrice2 - lpEthPrice1);
-    console2.log('After swap: lpEthPrice1 - lpEthPrice0', lpEthPrice1 - lpEthPrice0);
+    // console2.log(swapLabel);
+    // console2.log('After fee minting: lpEthPrice2 - lpEthPrice1', lpEthPrice2 - lpEthPrice1);
+    // console2.log('After swap: lpEthPrice1 - lpEthPrice0', lpEthPrice1 - lpEthPrice0);
   }
 
   function _loopSwaps(
@@ -259,7 +259,9 @@ contract LendingMarketTestHelper is Test {
 
     int256 beforeLoop = IOracle(lpOracle).latestAnswer();
     for (uint256 j = 0; j < times; j++) {
-      console2.log('LOOP #', j);
+      if (withLogs) {
+        console2.log('LOOP #', j);
+      }
 
       _swapAndCheck(lpOracle, amount * 1e6, USDC, XSGD, '[SWAP]', withLogs, user);
       _swapAndCheck(lpOracle, amount * 1e6, XSGD, USDC, '[SWAP]', withLogs, user);
@@ -311,7 +313,7 @@ contract LendingMarketTestHelper is Test {
     address _tokenFrom,
     address _tokenTo
   ) internal {
-    console2.log('Swapping..');
+    // console2.log('Swapping..');
     int256[] memory assetDeltas = new int256[](2);
 
     IERC20(_tokenFrom).approve(_senderRecipient, type(uint256).max);
