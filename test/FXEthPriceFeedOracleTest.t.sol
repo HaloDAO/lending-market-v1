@@ -267,42 +267,48 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
   }
 
   // @TODO write a test that compares the price of the LP token at different pool ratios:
-  //       - 20% : 80% (halts) - Current pool ratio
   //       - 50% : 50%
   //       - 80% : 20% (halts)
+  //       - 20% : 80% (halts) - Current pool ratio at start
   function testLPTokenPriceComparisonAtDifferentPoolRatio() public {
     _deployReserve();
 
-    (uint256 twentyEightyPoolRatioLpPriceBefore, uint256 twentyEightyPoolRatioLpPriceAfter) =
-      __testLPTokenPriceComparisonAtPoolRatio(1, USDC, XSGD);
+    address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
 
-    uint256 twentyEightyPoolRatioLpPriceDiffPercentage =
-      ((twentyEightyPoolRatioLpPriceAfter - twentyEightyPoolRatioLpPriceBefore) * 1e18) / twentyEightyPoolRatioLpPriceAfter;
-
-    console2.log('twentyEightyPoolRatioLpPriceBefore', twentyEightyPoolRatioLpPriceBefore);
-    console2.log('twentyEightyPoolRatioLpPriceAfter', twentyEightyPoolRatioLpPriceAfter);
-    console2.log('twentyEightyPoolRatioLpPriceDiffPercentage', twentyEightyPoolRatioLpPriceDiffPercentage / 1e11);
+    uint256 startLpPrice = _getLPOraclePrice(LP_XSGD);
 
     (uint256 fiftyFiftyPoolRatioLpPriceBefore, uint256 fiftyFiftyPoolRatioLpPriceAfter) =
       __testLPTokenPriceComparisonAtPoolRatio(170_120, USDC, XSGD);
 
-    uint256 fiftyFiftyPoolRatioLpPriceDiffPercentage =
-      ((fiftyFiftyPoolRatioLpPriceAfter - fiftyFiftyPoolRatioLpPriceBefore) * 1e18) / fiftyFiftyPoolRatioLpPriceBefore;
+    uint256 fiftyFiftyPrice = _getLPOraclePrice(LP_XSGD);
 
-    console2.log('fiftyFiftyPoolRatioLpPriceBefore', fiftyFiftyPoolRatioLpPriceBefore);
-    console2.log('fiftyFiftyPoolRatioLpPriceAfter', fiftyFiftyPoolRatioLpPriceAfter);
-    console2.log('fiftyFiftyPoolRatioLpPriceDiffPercentage', fiftyFiftyPoolRatioLpPriceDiffPercentage / 1e11);
+    uint256 fiftyFiftyPoolRatioLpPriceDiffPercentage =
+      ((fiftyFiftyPrice - startLpPrice) * 1e18) / startLpPrice;
+
+    console2.log('fiftyFiftyPrice', fiftyFiftyPrice);
+    console.log('[From 20:80 to 50:50 LP Price] 1e-3:', fiftyFiftyPoolRatioLpPriceDiffPercentage / 1e11); // 0.0006
 
     (uint256 eightyTwentyPoolRatioLpPriceBefore, uint256 eightyTwentyPoolRatioLpPriceAfter) =
       __testLPTokenPriceComparisonAtPoolRatio(152_000, USDC, XSGD);
 
+    uint256 eightyTwentyPrice = _getLPOraclePrice(LP_XSGD);
 
     uint256 eightyTwentyPoolRatioLpPriceDiffPercentage =
-      ((eightyTwentyPoolRatioLpPriceAfter - eightyTwentyPoolRatioLpPriceBefore) * 1e18) / eightyTwentyPoolRatioLpPriceBefore;
+      ((eightyTwentyPrice - fiftyFiftyPrice) * 1e18) / fiftyFiftyPrice;
 
-    console2.log('eightyTwentyPoolRatioLpPriceBefore', eightyTwentyPoolRatioLpPriceBefore);
-    console2.log('eightyTwentyPoolRatioLpPriceAfter', eightyTwentyPoolRatioLpPriceAfter);
-    console2.log('eightyTwentyPoolRatioLpPriceDiffPercentage', eightyTwentyPoolRatioLpPriceDiffPercentage / 1e11);
+    console2.log('eightyTwentyPrice', eightyTwentyPrice);
+    console2.log('[From 50:50 to 80:20 LP Price] 1e-3:', eightyTwentyPoolRatioLpPriceDiffPercentage / 1e11);
+
+    (uint256 twentyEightyPoolRatioLpPriceBefore, uint256 twentyEightyPoolRatioLpPriceAfter) =
+      __testLPTokenPriceComparisonAtPoolRatio(434_200, XSGD, USDC);
+
+    uint256 twentyEightyPrice = _getLPOraclePrice(LP_XSGD);
+
+    uint256 twentyEightyPoolRatioLpPriceDiffPercentage =
+      ((eightyTwentyPrice - twentyEightyPrice) * 1e18) / eightyTwentyPrice; // due to math underflow, we reverse for absolute value 
+
+    console2.log('twentyEightyPrice', twentyEightyPrice);
+    console2.log('[From 80:20 to 20:80 LP Price] 1e-3:', twentyEightyPoolRatioLpPriceDiffPercentage / 1e11);
   }
 
   function __testLPTokenPriceComparisonAtPoolRatio(
@@ -317,9 +323,6 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
     // Get pool ratio prior to looping swaps
     (uint256 tokenAPercentage, uint256 tokenBPercentage) = _getPoolTokenRatio(IFXPool(LP_XSGD).getPoolId());
 
-    // console.log('before tokenAPercentage', tokenAPercentage);
-    // console.log('before tokenBPercentage', tokenBPercentage);
-
     _doSwap(me, _amountToSwap * 1e6, tokenA, tokenB);
 
     {
@@ -329,11 +332,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
       console.log('after tokenBPercentage token B ratio', tokenBPercentage);
     }
 
-    // Get pool ratio after looping swaps if it matches the given tokenA:tokenB ratio
-
     int256 lpPriceAfter = IOracle(lpOracle).latestAnswer();
-
-    // TODO: Return the price of the LP token at given pool ratio
 
     return (uint256(lpPriceBefore), uint256(lpPriceAfter));
   }
