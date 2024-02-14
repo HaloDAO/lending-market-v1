@@ -21,7 +21,9 @@ import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
-import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+import {
+  DefaultReserveInterestRateStrategy
+} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 
@@ -53,9 +55,8 @@ contract LendingMarketTestHelper is Test {
     (AToken at, StableDebtToken sdt, VariableDebtToken vdt) = _deployAaveTokens();
     DefaultReserveInterestRateStrategy dris = _deployDefaultReserveInterestStrategy();
 
-    LendingPoolConfigurator lpc = LendingPoolConfigurator(
-      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
-    );
+    LendingPoolConfigurator lpc =
+      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
 
     ILendingPoolConfigurator.InitReserveInput[] memory input = new ILendingPoolConfigurator.InitReserveInput[](1);
     input[0] = ILendingPoolConfigurator.InitReserveInput({
@@ -82,14 +83,15 @@ contract LendingMarketTestHelper is Test {
   }
 
   function _deployAndSetLPOracle(address baseAssim, address quoteAssim) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
-      FXPool(LP_XSGD),
-      AggregatorV3Interface(ETH_USD_ORACLE),
-      'LPXSGD-USDC/ETH',
-      BALANCER_VAULT,
-      baseAssim,
-      quoteAssim
-    );
+    FXEthPriceFeedOracle lpOracle =
+      new FXEthPriceFeedOracle(
+        FXPool(LP_XSGD),
+        AggregatorV3Interface(ETH_USD_ORACLE),
+        'LPXSGD-USDC/ETH',
+        BALANCER_VAULT,
+        baseAssim,
+        quoteAssim
+      );
 
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
 
@@ -327,12 +329,13 @@ contract LendingMarketTestHelper is Test {
     assets[0] = IAsset(_tokenFrom);
     assets[1] = IAsset(_tokenTo);
 
-    IVault.FundManagement memory funds = IVault.FundManagement({
-      sender: _senderRecipient,
-      fromInternalBalance: false,
-      recipient: payable(_senderRecipient),
-      toInternalBalance: false
-    });
+    IVault.FundManagement memory funds =
+      IVault.FundManagement({
+        sender: _senderRecipient,
+        fromInternalBalance: false,
+        recipient: payable(_senderRecipient),
+        toInternalBalance: false
+      });
     int256[] memory limits = new int256[](2);
     limits[0] = type(int256).max;
     limits[1] = type(int256).max;
@@ -340,14 +343,8 @@ contract LendingMarketTestHelper is Test {
     {
       vm.startPrank(_senderRecipient);
       IERC20(_tokenFrom).approve(BALANCER_VAULT, type(uint256).max);
-      int256[] memory _assetDeltas = IVault(BALANCER_VAULT).batchSwap(
-        IVault.SwapKind.GIVEN_IN,
-        swaps,
-        assets,
-        funds,
-        limits,
-        block.timestamp
-      );
+      int256[] memory _assetDeltas =
+        IVault(BALANCER_VAULT).batchSwap(IVault.SwapKind.GIVEN_IN, swaps, assets, funds, limits, block.timestamp);
       vm.stopPrank();
       assetDeltas[0] = _assetDeltas[0];
       assetDeltas[1] = _assetDeltas[1];
@@ -378,12 +375,8 @@ contract LendingMarketTestHelper is Test {
     userAssets[1] = _tB;
     bytes memory userDataJoin = abi.encode(_depositNumeraire, userAssets);
 
-    IVault.JoinPoolRequest memory reqJoin = IVault.JoinPoolRequest(
-      _asIAsset(assets),
-      maxAmountsIn,
-      userDataJoin,
-      false
-    );
+    IVault.JoinPoolRequest memory reqJoin =
+      IVault.JoinPoolRequest(_asIAsset(assets), maxAmountsIn, userDataJoin, false);
 
     vm.startPrank(_user);
     IVault(BALANCER_VAULT).joinPool(_poolId, _user, _user, reqJoin);
@@ -411,15 +404,36 @@ contract LendingMarketTestHelper is Test {
 
     bytes memory userData = abi.encode(lpTokensToBurn, sorted);
 
-    IVault.ExitPoolRequest memory req = IVault.ExitPoolRequest({
-      assets: _asIAsset(sorted),
-      minAmountsOut: _uint256ArrVal(2, 0),
-      userData: userData,
-      toInternalBalance: false
-    });
+    IVault.ExitPoolRequest memory req =
+      IVault.ExitPoolRequest({
+        assets: _asIAsset(sorted),
+        minAmountsOut: _uint256ArrVal(2, 0),
+        userData: userData,
+        toInternalBalance: false
+      });
 
     IVault(BALANCER_VAULT).exitPool(poolId, user, payable(user), req);
     vm.stopPrank();
+  }
+
+  function _getPoolTokenRatio(bytes32 poolId) internal view returns (uint256 tokenARatio, uint256 tokenBRatio) {
+    // Get the pool tokens and their balances
+    (address[] memory tokens, uint256[] memory balances, ) = IVault(BALANCER_VAULT).getPoolTokens(poolId);
+
+    // Assuming tokens[0] is tokenA and tokens[1] is tokenB
+    // This might need adjustment based on the actual pool configuration
+    uint256 balanceTokenA = balances[0];
+    uint256 balanceTokenB = balances[1];
+
+    // Assuming tokens[0] is tokenA and tokens[1] is tokenB
+    uint256 totalBalance = balanceTokenA + balanceTokenB;
+
+    // Calculate the percentage share of each token in the pool
+    uint256 tokenAPercentage = (balanceTokenA * 100) / totalBalance;
+    uint256 tokenBPercentage = (balanceTokenB * 100) / totalBalance;
+
+    // Return the percentages
+    return (tokenAPercentage, tokenBPercentage);
   }
 
   function _asIAsset(address[] memory addresses) internal pure returns (IAsset[] memory assets) {
@@ -490,10 +504,7 @@ interface IVault {
     bool toInternalBalance;
   }
 
-  enum SwapKind {
-    GIVEN_IN,
-    GIVEN_OUT
-  }
+  enum SwapKind {GIVEN_IN, GIVEN_OUT}
 
   function batchSwap(
     SwapKind kind,
@@ -529,6 +540,15 @@ interface IVault {
     address payable recipient;
     bool toInternalBalance;
   }
+
+  function getPoolTokens(bytes32 poolId)
+    external
+    view
+    returns (
+      address[] memory tokens,
+      uint256[] memory balances,
+      uint256 lastChangeBlock
+    );
 }
 
 interface IAsset {

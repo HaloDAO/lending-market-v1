@@ -10,6 +10,7 @@ import {FXEthPriceFeedOracle, FXPool, AggregatorV3Interface} from '../contracts/
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
 
+
 contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
   string private RPC_URL = vm.envString('POLYGON_RPC_URL');
   address constant XSGD_ASSIM = 0xC933a270B922acBd72ef997614Ec46911747b799;
@@ -266,6 +267,40 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
     assertGt(endSupply, initialSupply);
   }
 
+  function testLPTokenPriceComparisonAtDifferentPoolRatio() public {
+    uint256 fiftyFiftyPoolRatioLpPrice = __testLPTokenPriceComparisonAtPoolRatio(50, 50);
+
+    // __testLPTokenPriceComparisonAtPoolRatio(80, 20);
+    // __testLPTokenPriceComparisonAtPoolRatio(20, 80);
+  }
+
+  function __testLPTokenPriceComparisonAtPoolRatio(uint256 _tokenARatio, uint256 _tokenBRatio)
+    private
+    returns (uint256)
+  {
+    _deployReserve();
+
+    address lpOracle = _deployAndSetLPOracle(XSGD_ASSIM, USDC_ASSIM);
+
+    // Get pool ratio prior to looping swaps
+    (uint256 tokenAPercentage, uint256 tokenBPercentage) = _getPoolTokenRatio(IFXPool(LP_XSGD).getPoolId());
+
+    console.log('tokenAPercentage', tokenAPercentage);
+    console.log('tokenBPercentage', tokenBPercentage);
+
+    // TODO: Perform the required swaps to get the pool ratio to become desired tokenA:tokenB ratio
+    _doSwap(me, 130_000 * 1e6, USDC, XSGD);
+    _loopSwaps(6, 10_000, lpOracle, true, me);
+
+    // Get pool ratio after looping swaps if it matches the given tokenA:tokenB ratio
+
+    int256 lpPrice = IOracle(lpOracle).latestAnswer();
+
+    // TODO: Return the price of the LP token at given pool ratio
+
+    return uint256(lpPrice);
+  }
+
   function _viewWithdraw(uint256 tokensToBurn) internal returns (uint256 tA, uint256 tB) {
     uint256[] memory tokensReturned = IFXPool(LP_XSGD).viewWithdraw(tokensToBurn);
     // [0] base, [1] quote
@@ -337,10 +372,7 @@ interface IVault {
     bool toInternalBalance;
   }
 
-  enum SwapKind {
-    GIVEN_IN,
-    GIVEN_OUT
-  }
+  enum SwapKind {GIVEN_IN, GIVEN_OUT}
 
   function batchSwap(
     SwapKind kind,
