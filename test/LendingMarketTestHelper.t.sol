@@ -419,22 +419,16 @@ contract LendingMarketTestHelper is Test {
   }
 
   function _getPoolTokenRatio(bytes32 poolId) internal view returns (uint256 tokenARatio, uint256 tokenBRatio) {
-    // Get the pool tokens and their balances
     (address[] memory tokens, uint256[] memory balances, ) = IVault(BALANCER_VAULT).getPoolTokens(poolId);
 
-    // Assuming tokens[0] is tokenA and tokens[1] is tokenB
-    // This might need adjustment based on the actual pool configuration
     uint256 balanceTokenA = balances[0];
     uint256 balanceTokenB = balances[1];
 
-    // Assuming tokens[0] is tokenA and tokens[1] is tokenB
     uint256 totalBalance = balanceTokenA + balanceTokenB;
 
-    // Calculate the percentage share of each token in the pool
-    uint256 tokenAPercentage = (balanceTokenA * 100) / totalBalance;
-    uint256 tokenBPercentage = (balanceTokenB * 100) / totalBalance;
+    uint256 tokenAPercentage = (balanceTokenA * 10000) / totalBalance;
+    uint256 tokenBPercentage = (balanceTokenB * 10000) / totalBalance;
 
-    // Return the percentages
     return (tokenAPercentage, tokenBPercentage);
   }
 
