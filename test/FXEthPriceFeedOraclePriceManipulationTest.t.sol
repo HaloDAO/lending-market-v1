@@ -55,11 +55,11 @@ contract FXEthPriceFeedOraclePriceManipulationTest is Test, LendingMarketTestHel
     console2.log('indivLiq[0]\t\t\t', indivLiq[0]);
     console2.log('indivLiq[1]\t\t\t', indivLiq[1]);
     console2.log('supply\t\t\t', IFXPool(LP_XSGD).totalSupply());
-    console2.log('liq A * 100 \\ B\t\t', (indivLiq[0] * 100) / indivLiq[1], '%');
-    console2.log('liq B * 100 \\ A\t\t', (indivLiq[1] * 100) / indivLiq[0], '%');
+    console2.log('liq A * 100 \\ totalLiq\t', (indivLiq[0] * 100) / totalLiq, '%');
+    console2.log('liq B * 100 \\ totalLiq\t', (indivLiq[1] * 100) / totalLiq, '%');
 
     // move the ratio into the 90% : 10% range
-    _doSwap(me, 445_000 * 1e6, USDC, XSGD);
+    _doSwap(me, 445_800 * 1e6, USDC, XSGD);
     (uint256 totalLiq2, uint256[] memory indivLiq2) = IFXPool(LP_XSGD).liquidity();
     uint256 priceOracle9010 = uint256(IHLPOracle(lpOracle).latestAnswer());
     uint256 priceOracle9010_2 = uint256(IHLPOracle(lpOracle).latestAnswer2());
@@ -73,8 +73,8 @@ contract FXEthPriceFeedOraclePriceManipulationTest is Test, LendingMarketTestHel
     console2.log('indivLiq2[0]\t\t\t', indivLiq2[0]);
     console2.log('indivLiq2[1]\t\t\t', indivLiq2[1]);
     console2.log('supply\t\t\t', IFXPool(LP_XSGD).totalSupply());
-    console2.log('liq A * 100 \\ B\t\t', (indivLiq2[0] * 100) / indivLiq2[1], '%');
-    console2.log('liq B * 100 \\ A\t\t', (indivLiq2[1] * 100) / indivLiq2[0], '%');
+    console2.log('liq A * 100 \\ totalLiq2\t', (indivLiq2[0] * 100) / totalLiq2, '%');
+    console2.log('liq B * 100 \\ totalLiq2\t', (indivLiq2[1] * 100) / totalLiq2, '%');
     // price difference %
     console2.log(
       'price difference %\t\t',
@@ -88,7 +88,7 @@ contract FXEthPriceFeedOraclePriceManipulationTest is Test, LendingMarketTestHel
     );
 
     // move the ratio into the 50% : 50% range
-    _doSwap(me, 172_000 * 1e6, XSGD, USDC);
+    _doSwap(me, 295_000 * 1e6, XSGD, USDC);
     (uint256 totalLiq3, uint256[] memory indivLiq3) = IFXPool(LP_XSGD).liquidity();
     uint256 priceOracle5050 = uint256(IHLPOracle(lpOracle).latestAnswer());
     uint256 priceOracle5050_2 = uint256(IHLPOracle(lpOracle).latestAnswer2());
@@ -101,8 +101,8 @@ contract FXEthPriceFeedOraclePriceManipulationTest is Test, LendingMarketTestHel
     console2.log('totalLiq3\t\t\t', totalLiq3);
     console2.log('indivLiq3[0]\t\t\t', indivLiq3[0]);
     console2.log('indivLiq3[1]\t\t\t', indivLiq3[1]);
-    console2.log('liq A * 100 \\ B\t\t', (indivLiq3[0] * 100) / indivLiq3[1], '%');
-    console2.log('liq B * 100 \\ A\t\t', (indivLiq3[1] * 100) / indivLiq3[0], '%');
+    console2.log('liq A * 100 \\ totalLiq3\t', (indivLiq3[0] * 100) / totalLiq3, '%');
+    console2.log('liq B * 100 \\ totalLiq3\t', (indivLiq3[1] * 100) / totalLiq3, '%');
     // price difference %
     console2.log('price difference %\t\t', ((priceOracle9010 - priceOracle5050) * 10_000) / priceOracle5050, ' (00%)');
     console2.log(

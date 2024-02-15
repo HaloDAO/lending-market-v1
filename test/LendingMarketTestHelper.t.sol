@@ -363,6 +363,8 @@ contract LendingMarketTestHelper is Test {
     );
 
     vm.startPrank(_user);
+    IERC20(_tA).approve(BALANCER_VAULT, type(uint256).max);
+    IERC20(_tB).approve(BALANCER_VAULT, type(uint256).max);
     IVault(BALANCER_VAULT).joinPool(_poolId, _user, _user, reqJoin);
     vm.stopPrank();
   }
