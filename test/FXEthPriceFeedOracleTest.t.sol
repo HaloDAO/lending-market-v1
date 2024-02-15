@@ -282,8 +282,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
 
     uint256 fiftyFiftyPrice = _getLPOraclePrice(LP_XSGD);
 
-    uint256 fiftyFiftyPoolRatioLpPriceDiffPercentage =
-      ((fiftyFiftyPrice - startLpPrice) * 1e18) / startLpPrice;
+    uint256 fiftyFiftyPoolRatioLpPriceDiffPercentage = ((fiftyFiftyPrice - startLpPrice) * 1e18) / startLpPrice;
 
     console2.log('fiftyFiftyPrice', fiftyFiftyPrice);
     console.log('[From 20:80 to 50:50 LP Price] 1e-3:', fiftyFiftyPoolRatioLpPriceDiffPercentage / 1e11); // 0.0006
@@ -305,7 +304,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
     uint256 twentyEightyPrice = _getLPOraclePrice(LP_XSGD);
 
     uint256 twentyEightyPoolRatioLpPriceDiffPercentage =
-      ((eightyTwentyPrice - twentyEightyPrice) * 1e18) / eightyTwentyPrice; // due to math underflow, we reverse for absolute value 
+      ((eightyTwentyPrice - twentyEightyPrice) * 1e18) / eightyTwentyPrice; // due to math underflow, we reverse for absolute value
 
     console2.log('twentyEightyPrice', twentyEightyPrice);
     console2.log('[From 80:20 to 20:80 LP Price] 1e-3:', twentyEightyPoolRatioLpPriceDiffPercentage / 1e11);
@@ -322,6 +321,10 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
 
     // Get pool ratio prior to looping swaps
     (uint256 tokenAPercentage, uint256 tokenBPercentage) = _getPoolTokenRatio(IFXPool(LP_XSGD).getPoolId());
+    (uint256 totalLiq2, uint256[] memory indivLiq2) = IFXPool(LP_XSGD).liquidity();
+
+    console2.log('liq A * 100 \\ B\t\t', (indivLiq2[0] * 100) / indivLiq2[1], '%');
+    console2.log('liq B * 100 \\ A\t\t', (indivLiq2[1] * 100) / indivLiq2[0], '%');
 
     _doSwap(me, _amountToSwap * 1e6, tokenA, tokenB);
 
@@ -330,6 +333,11 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
 
       console.log('after tokenAPercentage token A ratio', tokenAPercentage);
       console.log('after tokenBPercentage token B ratio', tokenBPercentage);
+
+      (uint256 totalLiq2, uint256[] memory indivLiq2) = IFXPool(LP_XSGD).liquidity();
+
+      console2.log('liq A * 100 \\ B\t\t', (indivLiq2[0] * 100) / indivLiq2[1], '%');
+    console2.log('liq B * 100 \\ A\t\t', (indivLiq2[1] * 100) / indivLiq2[0], '%');
     }
 
     int256 lpPriceAfter = IOracle(lpOracle).latestAnswer();
