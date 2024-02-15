@@ -21,9 +21,7 @@ import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 
@@ -55,8 +53,9 @@ contract LendingMarketTestHelper is Test {
     (AToken at, StableDebtToken sdt, VariableDebtToken vdt) = _deployAaveTokens();
     DefaultReserveInterestRateStrategy dris = _deployDefaultReserveInterestStrategy();
 
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolConfigurator.InitReserveInput[] memory input = new ILendingPoolConfigurator.InitReserveInput[](1);
     input[0] = ILendingPoolConfigurator.InitReserveInput({
@@ -83,15 +82,14 @@ contract LendingMarketTestHelper is Test {
   }
 
   function _deployAndSetLPOracle(address baseAssim, address quoteAssim) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle =
-      new FXEthPriceFeedOracle(
-        FXPool(LP_XSGD),
-        AggregatorV3Interface(ETH_USD_ORACLE),
-        'LPXSGD-USDC/ETH',
-        BALANCER_VAULT,
-        baseAssim,
-        quoteAssim
-      );
+    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
+      FXPool(LP_XSGD),
+      AggregatorV3Interface(ETH_USD_ORACLE),
+      'LPXSGD-USDC/ETH',
+      BALANCER_VAULT,
+      baseAssim,
+      quoteAssim
+    );
 
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
 
@@ -105,8 +103,6 @@ contract LendingMarketTestHelper is Test {
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
 
     uint256 _price = AaveOracle(aaveOracle).getAssetPrice(LP_XSGD);
-
-    console2.log('Aave Oracle price', _price);
 
     return address(lpOracle);
   }
@@ -129,14 +125,7 @@ contract LendingMarketTestHelper is Test {
       );
   }
 
-  function _deployAaveTokens()
-    private
-    returns (
-      AToken,
-      StableDebtToken,
-      VariableDebtToken
-    )
-  {
+  function _deployAaveTokens() private returns (AToken, StableDebtToken, VariableDebtToken) {
     AToken a = new AToken();
     a.initialize(
       LP,
@@ -238,10 +227,10 @@ contract LendingMarketTestHelper is Test {
     } else {
       if (withLogs) {
         console2.log(
-        '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
-        swapLabel,
-        (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire2) / 1e18
-      );
+          '[%s] totalLiquidityInNumeraire SUBTRACTED\t',
+          swapLabel,
+          (totalLiquidityInNumeraire1 - totalLiquidityInNumeraire2) / 1e18
+        );
       }
     }
 
@@ -255,13 +244,7 @@ contract LendingMarketTestHelper is Test {
     console2.log('After swap: lpEthPrice1 - lpEthPrice0', lpEthPrice1 - lpEthPrice0);
   }
 
-  function _loopSwaps(
-    uint256 times,
-    uint256 amount,
-    address lpOracle,
-    bool withLogs,
-    address user
-  ) internal {
+  function _loopSwaps(uint256 times, uint256 amount, address lpOracle, bool withLogs, address user) internal {
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
 
     int256 beforeLoop = IOracle(lpOracle).latestAnswer();
@@ -288,13 +271,7 @@ contract LendingMarketTestHelper is Test {
     return IAssimilator(assimilator).viewNumeraireAmount(amount).mulu(1e18);
   }
 
-  function _loopSwapsExact(
-    uint256 times,
-    uint256 amount,
-    address lpOracle,
-    bool withLogs,
-    address user
-  ) internal {
+  function _loopSwapsExact(uint256 times, uint256 amount, address lpOracle, bool withLogs, address user) internal {
     uint256 initial = IFXPool(LP_XSGD).totalUnclaimedFeesInNumeraire();
 
     uint256 xsgdInRawAmount = _convertToRawAmount(amount, 0xC933a270B922acBd72ef997614Ec46911747b799);
@@ -314,12 +291,7 @@ contract LendingMarketTestHelper is Test {
     }
   }
 
-  function _doSwap(
-    address _senderRecipient,
-    uint256 _swapAmt,
-    address _tokenFrom,
-    address _tokenTo
-  ) internal {
+  function _doSwap(address _senderRecipient, uint256 _swapAmt, address _tokenFrom, address _tokenTo) internal {
     // console2.log('Swapping..');
     int256[] memory assetDeltas = new int256[](2);
 
@@ -338,13 +310,12 @@ contract LendingMarketTestHelper is Test {
     assets[0] = IAsset(_tokenFrom);
     assets[1] = IAsset(_tokenTo);
 
-    IVault.FundManagement memory funds =
-      IVault.FundManagement({
-        sender: _senderRecipient,
-        fromInternalBalance: false,
-        recipient: payable(_senderRecipient),
-        toInternalBalance: false
-      });
+    IVault.FundManagement memory funds = IVault.FundManagement({
+      sender: _senderRecipient,
+      fromInternalBalance: false,
+      recipient: payable(_senderRecipient),
+      toInternalBalance: false
+    });
     int256[] memory limits = new int256[](2);
     limits[0] = type(int256).max;
     limits[1] = type(int256).max;
@@ -352,21 +323,21 @@ contract LendingMarketTestHelper is Test {
     {
       vm.startPrank(_senderRecipient);
       IERC20(_tokenFrom).approve(BALANCER_VAULT, type(uint256).max);
-      int256[] memory _assetDeltas =
-        IVault(BALANCER_VAULT).batchSwap(IVault.SwapKind.GIVEN_IN, swaps, assets, funds, limits, block.timestamp);
+      int256[] memory _assetDeltas = IVault(BALANCER_VAULT).batchSwap(
+        IVault.SwapKind.GIVEN_IN,
+        swaps,
+        assets,
+        funds,
+        limits,
+        block.timestamp
+      );
       vm.stopPrank();
       assetDeltas[0] = _assetDeltas[0];
       assetDeltas[1] = _assetDeltas[1];
     }
   }
 
-  function _addLiquidity(
-    bytes32 _poolId,
-    uint256 _depositNumeraire,
-    address _user,
-    address _tA,
-    address _tB
-  ) internal {
+  function _addLiquidity(bytes32 _poolId, uint256 _depositNumeraire, address _user, address _tA, address _tB) internal {
     address[] memory assets = new address[](2);
     assets[0] = _tA;
     assets[1] = _tB;
@@ -384,8 +355,12 @@ contract LendingMarketTestHelper is Test {
     userAssets[1] = _tB;
     bytes memory userDataJoin = abi.encode(_depositNumeraire, userAssets);
 
-    IVault.JoinPoolRequest memory reqJoin =
-      IVault.JoinPoolRequest(_asIAsset(assets), maxAmountsIn, userDataJoin, false);
+    IVault.JoinPoolRequest memory reqJoin = IVault.JoinPoolRequest(
+      _asIAsset(assets),
+      maxAmountsIn,
+      userDataJoin,
+      false
+    );
 
     vm.startPrank(_user);
     IVault(BALANCER_VAULT).joinPool(_poolId, _user, _user, reqJoin);
@@ -413,13 +388,12 @@ contract LendingMarketTestHelper is Test {
 
     bytes memory userData = abi.encode(lpTokensToBurn, sorted);
 
-    IVault.ExitPoolRequest memory req =
-      IVault.ExitPoolRequest({
-        assets: _asIAsset(sorted),
-        minAmountsOut: _uint256ArrVal(2, 0),
-        userData: userData,
-        toInternalBalance: false
-      });
+    IVault.ExitPoolRequest memory req = IVault.ExitPoolRequest({
+      assets: _asIAsset(sorted),
+      minAmountsOut: _uint256ArrVal(2, 0),
+      userData: userData,
+      toInternalBalance: false
+    });
 
     IVault(BALANCER_VAULT).exitPool(poolId, user, payable(user), req);
     vm.stopPrank();
@@ -479,12 +453,7 @@ interface IFiatToken {
 }
 
 interface IVault {
-  function joinPool(
-    bytes32 poolId,
-    address sender,
-    address recipient,
-    JoinPoolRequest memory request
-  ) external payable;
+  function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request) external payable;
 
   struct JoinPoolRequest {
     IAsset[] assets;
@@ -493,12 +462,7 @@ interface IVault {
     bool fromInternalBalance;
   }
 
-  function exitPool(
-    bytes32 poolId,
-    address sender,
-    address payable recipient,
-    ExitPoolRequest memory request
-  ) external;
+  function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request) external;
 
   struct ExitPoolRequest {
     IAsset[] assets;
@@ -507,7 +471,10 @@ interface IVault {
     bool toInternalBalance;
   }
 
-  enum SwapKind {GIVEN_IN, GIVEN_OUT}
+  enum SwapKind {
+    GIVEN_IN,
+    GIVEN_OUT
+  }
 
   function batchSwap(
     SwapKind kind,
@@ -544,14 +511,9 @@ interface IVault {
     bool toInternalBalance;
   }
 
-  function getPoolTokens(bytes32 poolId)
-    external
-    view
-    returns (
-      address[] memory tokens,
-      uint256[] memory balances,
-      uint256 lastChangeBlock
-    );
+  function getPoolTokens(
+    bytes32 poolId
+  ) external view returns (address[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
 }
 
 interface IAsset {
@@ -566,16 +528,7 @@ interface IFXPool {
 
   function getPoolId() external view returns (bytes32);
 
-  function viewParameters()
-    external
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    );
+  function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
 
   // returns(totalLiquidityInNumeraire, individual liquidity)
   function liquidity() external view returns (uint256, uint256[] memory);
@@ -586,16 +539,7 @@ interface IFXPool {
 }
 
 interface IOracle {
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80,
-      int256,
-      uint256,
-      uint256,
-      uint80
-    );
+  function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80);
 
   function latestAnswer() external view returns (int256);
 }
