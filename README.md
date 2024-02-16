@@ -246,3 +246,13 @@ note 2: check the addresses especially when running localhost node
 ## Disable borrowing asset
 
 Run `yarn hardhat external:disable-borrow-reserve --symbol {symbol of the asset} --lp {if it's an lp token}`
+
+## Foundry Script deployments and testing
+
+```sh
+# start a fork of AVAX with anvil
+yarn run anvil:avax
+
+# in another terminal run the deployment script in watch more, pointing at the local anvil node
+yarn run watch:script-local
+```
