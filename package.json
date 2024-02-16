@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "run-env": "npm i && tail -f /dev/null",
+    "anvil:polygon-fork": "anvil --fork-url https://polygon-mainnet.g.alchemy.com/v2/AS3ZTitISrBgwO3os6YF0MoxbGRAga1p@52764552",
     "hardhat": "hardhat",
     "hardhat:kovan": "hardhat --network kovan",
     "hardhat:tenderly-main": "hardhat --network tenderlyMain",
