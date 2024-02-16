@@ -25,7 +25,7 @@ import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingp
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 
-import {FXEthPriceFeedOracle, FXPool, AggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXEthPriceFeedOracle, IFXPool} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
 import '../contracts/xave-oracles/libraries/ABDKMath64x64.sol';
 
 contract LendingMarketTestHelper is Test {
@@ -83,8 +83,8 @@ contract LendingMarketTestHelper is Test {
 
   function _deployAndSetLPOracle(address baseAssim, address quoteAssim) internal returns (address) {
     FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
-      FXPool(LP_XSGD),
-      AggregatorV3Interface(ETH_USD_ORACLE),
+      LP_XSGD,
+      ETH_USD_ORACLE,
       'LPXSGD-USDC/ETH',
       BALANCER_VAULT,
       baseAssim,
@@ -520,24 +520,6 @@ interface IVault {
 
 interface IAsset {
   // solhint-disable-previous-line no-empty-blocks
-}
-
-interface IFXPool {
-  struct Assimilator {
-    address addr;
-    uint8 ix;
-  }
-
-  function getPoolId() external view returns (bytes32);
-
-  function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
-
-  // returns(totalLiquidityInNumeraire, individual liquidity)
-  function liquidity() external view returns (uint256, uint256[] memory);
-
-  function totalSupply() external view returns (uint256);
-
-  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
 }
 
 interface IOracle {

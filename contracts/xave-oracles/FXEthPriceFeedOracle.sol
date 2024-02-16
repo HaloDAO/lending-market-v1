@@ -6,8 +6,6 @@ import './libraries/SafeCast.sol';
 
 import './libraries/ABDKMath64x64.sol';
 import './libraries/Math.sol';
-// @TODO remove
-import 'forge-std/console2.sol';
 
 // @TODO move all arithmetic operations to SafeMath
 // @TODO add latestRoundData, make this contract compatible with Chainlink
@@ -22,34 +20,6 @@ import 'forge-std/console2.sol';
 // @TODO add a test that compares the price of the LP token with different XSGD price movements
 //       - +5%,  10%,  15%
 //       - -5%, -10%, -15%
-interface AggregatorV3Interface {
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-
-  function decimals() external view returns (uint8);
-}
-
-interface FXPool {
-  function liquidity() external view returns (uint256, uint256[] memory);
-
-  function totalSupply() external view returns (uint256);
-
-  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
-
-  function protocolPercentFee() external view returns (uint256);
-
-  function viewDeposit(uint256) external view returns (uint256);
-
-  function getPoolId() external view returns (bytes32);
-}
 
 contract FXEthPriceFeedOracle {
   using SafeCast for uint256;
@@ -58,47 +28,46 @@ contract FXEthPriceFeedOracle {
   using ABDKMath64x64 for int256;
   using ABDKMath64x64 for uint256;
 
-  string public priceFeed;
-
-  // @TODO change all vars to be address rather than contract / interface
-  FXPool public immutable baseContract;
-  AggregatorV3Interface public quotePriceFeed;
-  address public vault;
-  uint8 public constant decimals = 18;
-  bytes32 public poolId;
+  uint8 constant decimals = 18;
   uint256 constant WEIGHT = 5e17;
-  address immutable baseAssimilator;
-  address immutable quoteAssimilator;
+  string public priceFeed;
+  address public immutable fxp;
+  address public immutable quotePriceFeed;
+  uint8 public immutable quoteDecimals;
+  address public immutable vault;
+  bytes32 public immutable poolId;
+  address public immutable baseAssimilator;
+  address public immutable quoteAssimilator;
 
   constructor(
-    FXPool _baseContract,
-    AggregatorV3Interface _quotePriceFeed,
+    address _fxp, // FXPool address
+    address _quotePriceFeed, // eg. ETH / USD
     string memory _priceFeed,
-    address _vault,
+    address _vault, // Balance Vault
     address _baseAssimilator,
     address _quoteAssimilator
   ) public {
-    baseContract = _baseContract;
+    fxp = _fxp;
     quotePriceFeed = _quotePriceFeed;
+    quoteDecimals = IAggregatorV3Interface(_quotePriceFeed).decimals();
     priceFeed = _priceFeed;
     vault = _vault;
-    poolId = FXPool(_baseContract).getPoolId();
+    poolId = IFXPool(_fxp).getPoolId();
     baseAssimilator = _baseAssimilator;
     quoteAssimilator = _quoteAssimilator;
   }
 
   // @TODO remove / rename
   function latestAnswer3() external view returns (int256) {
-    // console2.log('SQRT(Math.bmul(13e18, 7e18))', Math.bsqrt(Math.bmul(13e18, 7e18), true));
     uint256 _decimals = uint256(10**uint256(decimals));
-    (uint256 totalLiq, uint256[] memory indvLiq) = baseContract.liquidity();
-    uint256 unclaimedFees = FXPool(baseContract).totalUnclaimedFeesInNumeraire();
+    (uint256 totalLiq, uint256[] memory indvLiq) = IFXPool(fxp).liquidity();
+    uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
 
     int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
     int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
-    uint256 totalSupply = baseContract.totalSupply();
+    uint256 totalSupply = IFXPool(fxp).totalSupply();
 
     int128 oGLiq = balTokenQuote + balTokenBase;
 
@@ -106,9 +75,7 @@ contract FXEthPriceFeedOracle {
     uint256 totalSupplyWithUnclaimedFees = totalSupply +
       (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
 
-    (, int256 quotePrice, , , ) = quotePriceFeed.latestRoundData();
-    // @TODO move `quotePriceFeed.decimals` to immutable var
-    uint8 quoteDecimals = quotePriceFeed.decimals();
+    (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
     quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
 
     // SQRT(liq0 * liq1)
@@ -122,14 +89,12 @@ contract FXEthPriceFeedOracle {
   // @TODO remove / rename
   function latestAnswer2() external view returns (int256) {
     uint256 _decimals = uint256(10**uint256(decimals));
-    (uint256 liquidity, ) = baseContract.liquidity();
-    uint256 unclaimedFees = FXPool(baseContract).totalUnclaimedFeesInNumeraire();
+    (uint256 liquidity, ) = IFXPool(fxp).liquidity();
+    uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
 
-    uint256 hlp_usd = ((liquidity - unclaimedFees) * _decimals) / baseContract.totalSupply();
+    uint256 hlp_usd = ((liquidity - unclaimedFees) * _decimals) / IFXPool(fxp).totalSupply();
 
-    (, int256 quotePrice, , , ) = quotePriceFeed.latestRoundData();
-    // @TODO move `quotePriceFeed.decimals` to immutable var
-    uint8 quoteDecimals = quotePriceFeed.decimals();
+    (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
     quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
 
     return ((hlp_usd.toInt256()) * ((uint256(10**18)).toInt256())) / (quotePrice);
@@ -137,14 +102,14 @@ contract FXEthPriceFeedOracle {
 
   function latestAnswer() external view returns (int256) {
     uint256 _decimals = uint256(10**uint256(decimals));
-    (uint256 liquidity, ) = baseContract.liquidity();
-    uint256 unclaimedFees = FXPool(baseContract).totalUnclaimedFeesInNumeraire();
+    (uint256 liquidity, ) = IFXPool(fxp).liquidity();
+    uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
 
     int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
     int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
-    uint256 totalSupply = baseContract.totalSupply();
+    uint256 totalSupply = IFXPool(fxp).totalSupply();
 
     int128 oGLiq = balTokenQuote + balTokenBase;
 
@@ -154,8 +119,7 @@ contract FXEthPriceFeedOracle {
 
     uint256 hlp_usd = (liquidity * (_decimals)) / (totalSupplyWithUnclaimedFees);
 
-    (, int256 quotePrice, , , ) = quotePriceFeed.latestRoundData();
-    uint8 quoteDecimals = quotePriceFeed.decimals();
+    (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
     quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
 
     return ((hlp_usd.toInt256()) * ((uint256(10**18)).toInt256())) / (quotePrice);
@@ -182,4 +146,33 @@ interface IAssimilator {
     address,
     bytes32
   ) external view returns (int128);
+}
+
+interface IAggregatorV3Interface {
+  function latestRoundData()
+    external
+    view
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    );
+
+  function decimals() external view returns (uint8);
+}
+
+interface IFXPool {
+  function liquidity() external view returns (uint256, uint256[] memory);
+
+  function totalSupply() external view returns (uint256);
+
+  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
+
+  function protocolPercentFee() external view returns (uint256);
+
+  function viewDeposit(uint256) external view returns (uint256);
+
+  function getPoolId() external view returns (bytes32);
 }

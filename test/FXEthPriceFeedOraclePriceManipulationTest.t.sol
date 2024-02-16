@@ -6,7 +6,7 @@ import 'forge-std/console2.sol';
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
 import {LendingMarketTestHelper, IOracle, IAssimilator} from './LendingMarketTestHelper.t.sol';
-import {FXEthPriceFeedOracle, FXPool, AggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXEthPriceFeedOracle, IFXPool, IAggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
 
@@ -31,7 +31,7 @@ contract FXEthPriceFeedOraclePriceManipulationTest is Test, LendingMarketTestHel
   }
 
   function _numerairePrice(uint256 _ethAmount) internal view returns (uint256) {
-    (, int256 priceFeedVal, , , ) = AggregatorV3Interface(ETH_USD_ORACLE).latestRoundData();
+    (, int256 priceFeedVal, , , ) = IAggregatorV3Interface(ETH_USD_ORACLE).latestRoundData();
     return (uint256(priceFeedVal) * _ethAmount) / 1e8;
   }
 
@@ -197,30 +197,6 @@ interface IVault {
 
 interface IAsset {
   // solhint-disable-previous-line no-empty-blocks
-}
-
-interface IFXPool {
-  struct Assimilator {
-    address addr;
-    uint8 ix;
-  }
-
-  function getPoolId() external view returns (bytes32);
-
-  function protocolPercentFee() external view returns (uint256);
-
-  function viewParameters() external view returns (uint256, uint256, uint256, uint256, uint256);
-
-  // returns(totalLiquidityInNumeraire, individual liquidity)
-  function liquidity() external view returns (uint256, uint256[] memory);
-
-  function totalSupply() external view returns (uint256);
-
-  function balanceOf(address) external view returns (uint256);
-
-  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
-
-  function viewWithdraw(uint256) external view returns (uint256[] memory);
 }
 
 interface IERC20Detailed {

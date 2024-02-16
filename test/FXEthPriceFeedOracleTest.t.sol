@@ -6,7 +6,7 @@ import 'forge-std/console2.sol';
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
 import {LendingMarketTestHelper, IOracle, IAssimilator} from './LendingMarketTestHelper.t.sol';
-import {FXEthPriceFeedOracle, FXPool, AggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXEthPriceFeedOracle, IFXPool, IAggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
 
@@ -63,7 +63,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
     // fees will be zero after deposit
 
-    uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
+    uint256 initialLPBalance = IERC20(LP_XSGD).balanceOf(me);
     uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
     uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
     int256 initialPriceAfterDeposit = IHLPOracle(lpOracle).latestAnswer();
@@ -106,7 +106,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
     // fees will be zero after deposit
 
-    uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
+    uint256 initialLPBalance = IERC20(LP_XSGD).balanceOf(me);
     uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
     uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
     int256 initialPriceAfterDeposit = IHLPOracle(lpOracle).latestAnswer();
@@ -148,7 +148,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
   //     // can be flashloaned
   //     _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 100_000 * 1e18, me, USDC, XSGD);
 
-  //     uint256 initialLPBalance = IFXPool(LP_XSGD).balanceOf(me);
+  //     uint256 initialLPBalance = IERC20(LP_XSGD).balanceOf(me);
   //     // uint256 usdcAfterDeposit = IERC20(USDC).balanceOf(me);
   //     // uint256 xsgdAfterDeposit = IERC20(XSGD).balanceOf(me);
 
@@ -277,8 +277,10 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
 
     uint256 startLpPrice = _getLPOraclePrice(LP_XSGD);
 
-    (uint256 fiftyFiftyPoolRatioLpPriceBefore, uint256 fiftyFiftyPoolRatioLpPriceAfter) =
-      __testLPTokenPriceComparisonAtPoolRatio(170_120, USDC, XSGD);
+    (
+      uint256 fiftyFiftyPoolRatioLpPriceBefore,
+      uint256 fiftyFiftyPoolRatioLpPriceAfter
+    ) = __testLPTokenPriceComparisonAtPoolRatio(170_120, USDC, XSGD);
 
     uint256 fiftyFiftyPrice = _getLPOraclePrice(LP_XSGD);
 
@@ -287,24 +289,28 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
     console2.log('fiftyFiftyPrice', fiftyFiftyPrice);
     console.log('[From 20:80 to 50:50 LP Price] 1e-3:', fiftyFiftyPoolRatioLpPriceDiffPercentage / 1e11); // 0.0006
 
-    (uint256 eightyTwentyPoolRatioLpPriceBefore, uint256 eightyTwentyPoolRatioLpPriceAfter) =
-      __testLPTokenPriceComparisonAtPoolRatio(152_000, USDC, XSGD);
+    (
+      uint256 eightyTwentyPoolRatioLpPriceBefore,
+      uint256 eightyTwentyPoolRatioLpPriceAfter
+    ) = __testLPTokenPriceComparisonAtPoolRatio(152_000, USDC, XSGD);
 
     uint256 eightyTwentyPrice = _getLPOraclePrice(LP_XSGD);
 
-    uint256 eightyTwentyPoolRatioLpPriceDiffPercentage =
-      ((eightyTwentyPrice - fiftyFiftyPrice) * 1e18) / fiftyFiftyPrice;
+    uint256 eightyTwentyPoolRatioLpPriceDiffPercentage = ((eightyTwentyPrice - fiftyFiftyPrice) * 1e18) /
+      fiftyFiftyPrice;
 
     console2.log('eightyTwentyPrice', eightyTwentyPrice);
     console2.log('[From 50:50 to 80:20 LP Price] 1e-3:', eightyTwentyPoolRatioLpPriceDiffPercentage / 1e11);
 
-    (uint256 twentyEightyPoolRatioLpPriceBefore, uint256 twentyEightyPoolRatioLpPriceAfter) =
-      __testLPTokenPriceComparisonAtPoolRatio(434_200, XSGD, USDC);
+    (
+      uint256 twentyEightyPoolRatioLpPriceBefore,
+      uint256 twentyEightyPoolRatioLpPriceAfter
+    ) = __testLPTokenPriceComparisonAtPoolRatio(434_200, XSGD, USDC);
 
     uint256 twentyEightyPrice = _getLPOraclePrice(LP_XSGD);
 
-    uint256 twentyEightyPoolRatioLpPriceDiffPercentage =
-      ((eightyTwentyPrice - twentyEightyPrice) * 1e18) / eightyTwentyPrice; // due to math underflow, we reverse for absolute value
+    uint256 twentyEightyPoolRatioLpPriceDiffPercentage = ((eightyTwentyPrice - twentyEightyPrice) * 1e18) /
+      eightyTwentyPrice; // due to math underflow, we reverse for absolute value
 
     console2.log('twentyEightyPrice', twentyEightyPrice);
     console2.log('[From 80:20 to 20:80 LP Price] 1e-3:', twentyEightyPoolRatioLpPriceDiffPercentage / 1e11);
@@ -337,7 +343,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
       (uint256 totalLiq2, uint256[] memory indivLiq2) = IFXPool(LP_XSGD).liquidity();
 
       console2.log('liq A * 100 \\ B\t\t', (indivLiq2[0] * 100) / indivLiq2[1], '%');
-    console2.log('liq B * 100 \\ A\t\t', (indivLiq2[1] * 100) / indivLiq2[0], '%');
+      console2.log('liq B * 100 \\ A\t\t', (indivLiq2[1] * 100) / indivLiq2[0], '%');
     }
 
     int256 lpPriceAfter = IOracle(lpOracle).latestAnswer();
@@ -346,7 +352,7 @@ contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
   }
 
   function _viewWithdraw(uint256 tokensToBurn) internal returns (uint256 tA, uint256 tB) {
-    uint256[] memory tokensReturned = IFXPool(LP_XSGD).viewWithdraw(tokensToBurn);
+    uint256[] memory tokensReturned = IFXPoolExtra(LP_XSGD).viewWithdraw(tokensToBurn);
     // [0] base, [1] quote
     tA = tokensReturned[0]; // base
     tB = tokensReturned[1]; // quote
@@ -388,12 +394,7 @@ interface IFiatToken {
 }
 
 interface IVault {
-  function joinPool(
-    bytes32 poolId,
-    address sender,
-    address recipient,
-    JoinPoolRequest memory request
-  ) external payable;
+  function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request) external payable;
 
   struct JoinPoolRequest {
     IAsset[] assets;
@@ -402,12 +403,7 @@ interface IVault {
     bool fromInternalBalance;
   }
 
-  function exitPool(
-    bytes32 poolId,
-    address sender,
-    address payable recipient,
-    ExitPoolRequest memory request
-  ) external;
+  function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request) external;
 
   struct ExitPoolRequest {
     IAsset[] assets;
@@ -416,7 +412,10 @@ interface IVault {
     bool toInternalBalance;
   }
 
-  enum SwapKind {GIVEN_IN, GIVEN_OUT}
+  enum SwapKind {
+    GIVEN_IN,
+    GIVEN_OUT
+  }
 
   function batchSwap(
     SwapKind kind,
@@ -458,36 +457,7 @@ interface IAsset {
   // solhint-disable-previous-line no-empty-blocks
 }
 
-interface IFXPool {
-  struct Assimilator {
-    address addr;
-    uint8 ix;
-  }
-
-  function getPoolId() external view returns (bytes32);
-
-  function protocolPercentFee() external view returns (uint256);
-
-  function viewParameters()
-    external
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    );
-
-  // returns(totalLiquidityInNumeraire, individual liquidity)
-  function liquidity() external view returns (uint256, uint256[] memory);
-
-  function totalSupply() external view returns (uint256);
-
-  function balanceOf(address) external view returns (uint256);
-
-  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
-
+interface IFXPoolExtra {
   function viewWithdraw(uint256) external view returns (uint256[] memory);
 }
 
