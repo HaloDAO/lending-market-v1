@@ -1,0 +1,14 @@
+{
+  "assetsAggregators": [
+    {
+      "addr": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "aggregator": "0x2eB4157CeFeb13C6E38035A11244E19BC396e97C",
+      "name": "USDC_TEST"
+    },
+    {
+      "addr": "0x228a48df6819CCc2eCa01e2192ebAFfFdAD56c19",
+      "aggregator": "0x2eB4157CeFeb13C6E38035A11244E19BC396e97C",
+      "name": "VCHF"
+    }
+  ]
+}

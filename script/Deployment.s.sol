@@ -2,6 +2,7 @@
 
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.12;
+pragma experimental ABIEncoderV2;
 
 import 'forge-std/Script.sol';
 import 'forge-std/StdJson.sol';
@@ -40,14 +41,23 @@ contract Deployment is Script {
   address constant WETH = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
 
   struct AssetAggregator {
-    string name;
     address addr;
     address aggregator;
+    string name;
   }
 
   function run() external {
     uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
+
+    AssetAggregator[] memory config = _readConfig();
+    console2.log(config[0].name);
+
     vm.startBroadcast(deployerPrivateKey);
+
+    // bytes memory parsedConfig = vm.parseJsonKeys(json, '.assetsAggregators');
+    // string memory asset0Name = vm.parseJsonString(json, '.assetsAggregators[0].name');
+
+    // console2.log(assets[0].name);
 
     // @TODO call all the setters on the LendingPoolAddressesProvider
     // see https://polygonscan.com/address/0x68aeB9C8775Cfc9b99753A1323D532556675c555#readContract
@@ -192,6 +202,16 @@ contract Deployment is Script {
     );
 
     return (a, sdt, vdt);
+  }
+
+  function _readConfig() private returns (AssetAggregator[] memory) {
+    string memory root = vm.projectRoot();
+    string memory path = _stringContact(root, '/script/config.avax.json');
+    string memory json = vm.readFile(path);
+    bytes memory data = vm.parseJson(json, '.assetsAggregators');
+    AssetAggregator[] memory assets;
+    assets = abi.decode(data, (AssetAggregator[]));
+    return assets;
   }
 
   function _stringContact(string memory a, string memory b) internal pure returns (string memory) {
