@@ -54,11 +54,6 @@ contract Deployment is Script {
 
     vm.startBroadcast(deployerPrivateKey);
 
-    // bytes memory parsedConfig = vm.parseJsonKeys(json, '.assetsAggregators');
-    // string memory asset0Name = vm.parseJsonString(json, '.assetsAggregators[0].name');
-
-    // console2.log(assets[0].name);
-
     // @TODO call all the setters on the LendingPoolAddressesProvider
     // see https://polygonscan.com/address/0x68aeB9C8775Cfc9b99753A1323D532556675c555#readContract
     LendingPoolAddressesProvider provider = new LendingPoolAddressesProvider('Xave AVAX Market');
