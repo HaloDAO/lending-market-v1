@@ -5,6 +5,14 @@ libs = ['node_modules', 'lib']
 test = 'test'
 cache_path  = 'cache_forge'
 
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+fuji = "${FUJI_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
+fuji = { key = "${ETHERSCAN_API_KEY}" }
+
 [profile.nowarnings]
 
 # ignore solc warnings for missing license and exceeded contract size
