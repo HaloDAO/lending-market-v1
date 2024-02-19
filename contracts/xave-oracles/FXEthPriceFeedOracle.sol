@@ -57,38 +57,8 @@ contract FXEthPriceFeedOracle {
     quoteAssimilator = _quoteAssimilator;
   }
 
-  // @TODO remove / rename
-  function latestAnswer3() external view returns (int256) {
-    uint256 _decimals = uint256(10**uint256(decimals));
-    (uint256 totalLiq, uint256[] memory indvLiq) = IFXPool(fxp).liquidity();
-    uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
-
-    int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
-
-    int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
-
-    uint256 totalSupply = IFXPool(fxp).totalSupply();
-
-    int128 oGLiq = balTokenQuote + balTokenBase;
-
-    // assimilator implementation
-    uint256 totalSupplyWithUnclaimedFees = totalSupply +
-      (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
-
-    (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
-    quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
-
-    // SQRT(liq0 * liq1)
-    uint256 square = Math.bsqrt(Math.bmul(indvLiq[0], indvLiq[1]), true);
-    // 2e18 * sqrt(...) / totalSupply
-    uint256 hlp_usd = Math.bdiv(Math.bmul(Math.TWO_BONES, square), totalSupplyWithUnclaimedFees);
-
-    return ((hlp_usd.toInt256()) * ((uint256(10**18)).toInt256())) / (quotePrice);
-  }
-
-  // @TODO remove / rename
-  function latestAnswer2() external view returns (int256) {
-    uint256 _decimals = uint256(10**uint256(decimals));
+  function latestAnswer() external view returns (int256) {
+    uint256 _decimals = uint256(10 ** uint256(decimals));
     (uint256 liquidity, ) = IFXPool(fxp).liquidity();
     uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
 
@@ -97,68 +67,53 @@ contract FXEthPriceFeedOracle {
     (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
     quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
 
-    return ((hlp_usd.toInt256()) * ((uint256(10**18)).toInt256())) / (quotePrice);
+    return ((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice);
   }
 
-  function latestAnswer() external view returns (int256) {
-    uint256 _decimals = uint256(10**uint256(decimals));
-    (uint256 liquidity, ) = IFXPool(fxp).liquidity();
-    uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
+  // function latestAnswer() external view returns (int256) {
+  //   uint256 _decimals = uint256(10 ** uint256(decimals));
+  //   (uint256 liquidity, ) = IFXPool(fxp).liquidity();
+  //   uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
 
-    int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
+  //   int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
-    int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
+  //   int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
 
-    uint256 totalSupply = IFXPool(fxp).totalSupply();
+  //   uint256 totalSupply = IFXPool(fxp).totalSupply();
 
-    int128 oGLiq = balTokenQuote + balTokenBase;
+  //   int128 oGLiq = balTokenQuote + balTokenBase;
 
-    // assimilator implementation
-    uint256 totalSupplyWithUnclaimedFees = totalSupply +
-      (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
+  //   // assimilator implementation
+  //   uint256 totalSupplyWithUnclaimedFees = totalSupply +
+  //     (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
 
-    uint256 hlp_usd = (liquidity * (_decimals)) / (totalSupplyWithUnclaimedFees);
+  //   uint256 hlp_usd = (liquidity * (_decimals)) / (totalSupplyWithUnclaimedFees);
 
-    (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
-    quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
+  //   (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
+  //   quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
 
-    return ((hlp_usd.toInt256()) * ((uint256(10**18)).toInt256())) / (quotePrice);
-  }
+  //   return ((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice);
+  // }
 
-  function _scaleprice(
-    int256 _price,
-    uint8 _priceDecimals,
-    uint8 _decimals
-  ) internal pure returns (int256) {
+  function _scaleprice(int256 _price, uint8 _priceDecimals, uint8 _decimals) internal pure returns (int256) {
     if (_priceDecimals < _decimals) {
-      return _price * ((10**(uint256(_decimals - _priceDecimals))).toInt256());
+      return _price * ((10 ** (uint256(_decimals - _priceDecimals))).toInt256());
     } else if (_priceDecimals > _decimals) {
-      return _price / ((10**(uint256(_priceDecimals - _decimals))).toInt256());
+      return _price / ((10 ** (uint256(_priceDecimals - _decimals))).toInt256());
     }
     return _price;
   }
 }
 
 interface IAssimilator {
-  function viewNumeraireBalanceLPRatio(
-    uint256,
-    uint256,
-    address,
-    bytes32
-  ) external view returns (int128);
+  function viewNumeraireBalanceLPRatio(uint256, uint256, address, bytes32) external view returns (int128);
 }
 
 interface IAggregatorV3Interface {
   function latestRoundData()
     external
     view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
+    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 
   function decimals() external view returns (uint8);
 }
