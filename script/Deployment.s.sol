@@ -4,6 +4,9 @@
 pragma solidity ^0.6.12;
 
 import 'forge-std/Script.sol';
+import 'forge-std/StdJson.sol';
+import 'forge-std/console2.sol';
+
 import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
 import {LendingPoolAddressesProviderRegistry} from '../contracts/protocol/configuration/LendingPoolAddressesProviderRegistry.sol';
 import {LendingPoolAddressesProvider} from '../contracts/protocol/configuration/LendingPoolAddressesProvider.sol';
@@ -20,8 +23,12 @@ import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebt
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
 import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
+import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
+import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
 
 contract Deployment is Script {
+  using stdJson for string;
+
   address constant LP_TOKEN = 0x0099111Ed107BDF0B05162356aEe433514AaC440; // VCHF/USDC LP
   address constant ETH_USD_ORACLE = 0x976B3D034E162d8bD72D6b9C989d545b839003b0;
   address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
@@ -29,6 +36,14 @@ contract Deployment is Script {
   address constant USDC_ASSIM = 0x21720736Ada52d8887aFAC20B05f02005fD6f272;
   // @TODO confirm correct
   address constant XAVE_TREASURY = 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd;
+  // @TODO WETH.e address, there's also a WETH address
+  address constant WETH = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
+
+  struct AssetAggregator {
+    string name;
+    address addr;
+    address aggregator;
+  }
 
   function run() external {
     uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
@@ -70,7 +85,14 @@ contract Deployment is Script {
     // @TODO DelegationAwareAToken only on strategyUNI ?
     _deployAaveTokens(lendingPoolProxy, LP_TOKEN);
 
-    // stuff
+    _deployOracles(stableVarHelper);
+
+    vm.stopBroadcast();
+  }
+
+  // deploy Aave Oracle with assets, sources, fallbackOracle, baseCurrency, baseCurrencyUnit
+  function _deployOracles(StableAndVariableTokensHelper _stableVarHelper) private returns (AaveOracle) {
+    // @TODO get params from config
     FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
       LP_TOKEN,
       ETH_USD_ORACLE,
@@ -80,7 +102,33 @@ contract Deployment is Script {
       USDC_ASSIM
     );
 
-    vm.stopBroadcast();
+    // @TODO parameterize arguments
+    address[] memory assets = new address[](1);
+    assets[0] = LP_TOKEN;
+    address[] memory sources = new address[](1);
+    sources[0] = address(lpOracle);
+    AaveOracle oracle = new AaveOracle(
+      assets,
+      sources,
+      address(0), // fallbackOracle
+      WETH, // baseCurrency
+      1e18 // baseCurrencyUnit
+    );
+
+    // reserveAssets on Matic
+    // DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+    // USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+    // LendingRateOracleRatesCommon: {
+    //   WETH: {
+    //     borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    //   },
+
+    LendingRateOracle lendingRateOracle = new LendingRateOracle();
+    // transfer ownership to StableAndVariableTokensHelper
+    lendingRateOracle.transferOwnership(address(_stableVarHelper));
+    // _stableVarHelper.setOracleBorrowRates(assets, rates, oracle);
+
+    return oracle;
   }
 
   function _deployDefaultReserveInterestStrategy(
@@ -144,6 +192,10 @@ contract Deployment is Script {
     );
 
     return (a, sdt, vdt);
+  }
+
+  function _stringContact(string memory a, string memory b) internal pure returns (string memory) {
+    return string(abi.encodePacked(a, b));
   }
 }
 
