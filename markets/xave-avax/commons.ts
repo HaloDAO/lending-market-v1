@@ -39,15 +39,18 @@ export const CommonsConfig: ICommonConfiguration = {
     USDC: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
-    USDT: {
-      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
-    },
-    XSGD: {
-      borrowRate: oneRay.multipliedBy(0.039).toFixed(),
-    },
     VCHF: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
+    EUROC: {
+      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
+    },
+    VEUR: {
+      borrowRate: oneRay.multipliedBy(0.035).toFixed(),
+    },
+    LP_EUROC_USDC: { borrowRate: oneRay.multipliedBy(0).toFixed() },
+    LP_VEUR_USDC: { borrowRate: oneRay.multipliedBy(0).toFixed() },
+    LP_VCHF_USDC: { borrowRate: oneRay.multipliedBy(0).toFixed() },
   },
   // ----------------
   // COMMON PROTOCOL ADDRESSES ACROSS POOLS

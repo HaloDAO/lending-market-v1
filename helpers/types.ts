@@ -284,6 +284,11 @@ export interface iAssetBase<T> {
   LP_EURS_USDC?: T;
   TAGPHP?: T;
   VCHF?: T;
+  EUROC?: T;
+  VEUR?: T;
+  LP_EUROC_USDC?: T;
+  LP_VEUR_USDC?: T;
+  LP_VCHF_USDC?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -341,8 +346,12 @@ export type iHaloMaticPoolAssets<T> = Pick<
   'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP' | 'BPT_XSGD_USDC'
 >;
 
-// @todo for avalanche deployment
-export type iXaveAvalanchePoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'USDC' | 'XSGD'>;
+// for avalanche deployment
+// iAssetsWithoutUSD<T> - common asset references
+export type iXaveAvalanchePoolAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  'USDC' | 'EUROC' | 'VCHF' | 'VEUR' | 'LP_EUROC_USDC' | 'LP_VEUR_USDC' | 'LP_VCHF_USDC'
+>;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -390,6 +399,9 @@ export enum XaveTokenContractId {
   USDT = 'USDT',
   XSGD = 'XSGD',
   VCHF = 'VCHF',
+  LP_EUROC_USD = 'LP_EUROC_USDC',
+  LP_VEUR_USDC = 'LP_VEUR_USDC',
+  LP_VCHF_USDC = 'LP_VCHF_USDC',
 }
 
 export enum HaloTokenContractId {
