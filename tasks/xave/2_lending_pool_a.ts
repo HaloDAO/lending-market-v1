@@ -16,7 +16,7 @@ import {
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
-task('halo:matic-lendingpool-2-a_', 'Deploy lending pool for prod enviroment')
+task('xave:avax-lendingpool-2-a', 'Deploy lending pool for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -24,7 +24,7 @@ task('halo:matic-lendingpool-2-a_', 'Deploy lending pool for prod enviroment')
     const addressesProvider = await getLendingPoolAddressesProvider();
     const lendingPoolImpl = await deployLendingPool(verify);
     console.log('deploying lending pool implementation');
-    const poolConfig = loadPoolConfig(ConfigNames.HaloMatic);
+    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalache);
 
     // Set lending pool impl to Address Provider
     console.log('setting lending pool implementation');

@@ -283,6 +283,7 @@ export interface iAssetBase<T> {
   LP_FXPHP_USDC?: T;
   LP_EURS_USDC?: T;
   TAGPHP?: T;
+  VCHF?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -340,6 +341,9 @@ export type iHaloMaticPoolAssets<T> = Pick<
   'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'AAVE' | 'XSGD' | 'FXPHP' | 'TAGPHP' | 'BPT_XSGD_USDC'
 >;
 
+// @todo for avalanche deployment
+export type iXaveAvalanchePoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'USDC' | 'XSGD'>;
+
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
   | 'DAI'
@@ -379,6 +383,14 @@ export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
 export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
 
 export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
+
+export enum XaveTokenContractId {
+  WETH = 'WETH',
+  USDC = 'USDC',
+  USDT = 'USDT',
+  XSGD = 'XSGD',
+  VCHF = 'VCHF',
+}
 
 export enum HaloTokenContractId {
   DAI = 'DAI',
@@ -625,6 +637,10 @@ export interface IHaloConfiguration extends ICommonConfiguration {
 
 export interface IHaloMaticConfiguration extends ICommonConfiguration {
   ReservesConfig: iHaloMaticPoolAssets<IReserveParams>;
+}
+
+export interface IXaveAvalancheConfiguration extends ICommonConfiguration {
+  ReservesConfig: iXaveAvalanchePoolAssets<IReserveParams>;
 }
 
 export interface IAmmConfiguration extends ICommonConfiguration {

@@ -1,4 +1,3 @@
-require('@nomicfoundation/hardhat-foundry');
 import path from 'path';
 import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
@@ -58,6 +57,7 @@ if (!SKIP_LOAD) {
     'helpers/halo-helpers',
     'halo-new-asset',
     'halo-matic',
+    'xave',
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)

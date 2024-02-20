@@ -6,14 +6,15 @@ import { DRE, waitForTx } from '../../helpers/misc-utils';
 import { ConfigNames, loadPoolConfig, getQuoteCurrency, getLendingRateOracles } from '../../helpers/configuration';
 import { getLendingPoolAddressesProvider, getPairsTokenAggregator } from '../../helpers/contracts-getters';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
-import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo-matic/constants';
+import { ZERO_ADDRESS } from '../../helpers/constants';
+// import { HALO_CONTRACT_ADDRESSES } from '../../markets/halo-matic/constants';
 
-task('halo:matic-oracles-3_', 'Deploy oracles for prod enviroment')
+task('xave:avax-oracles-3', 'Deploy oracles for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>DRE.network.name;
-    const poolConfig = loadPoolConfig(ConfigNames.HaloMatic);
+    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalache);
     const {
       ProtocolGlobalParams: { UsdAddress },
       ReserveAssets,
@@ -27,7 +28,7 @@ task('halo:matic-oracles-3_', 'Deploy oracles for prod enviroment')
 
     const tokensToWatch: SymbolMap<string> = {
       ...reserveAssets,
-      USD: UsdAddress,
+      USD: UsdAddress, //@todo check
     };
 
     const chainlinkAggregators = await getParamPerNetwork(ChainlinkAggregator, network);
@@ -42,7 +43,7 @@ task('halo:matic-oracles-3_', 'Deploy oracles for prod enviroment')
       [
         tokens,
         aggregators,
-        HALO_CONTRACT_ADDRESSES[network].fallbackPriceOracle,
+        ZERO_ADDRESS, // fallback oracle
         await getQuoteCurrency(poolConfig),
         poolConfig.OracleQuoteUnit,
       ],
