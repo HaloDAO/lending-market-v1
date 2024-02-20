@@ -37,7 +37,6 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
   await localBRE.run('set-DRE');
 
   const tokens: string[] = ['USDC', 'EUROC', 'VCHF', 'VEUR', 'LP_EUROC_USDC', 'LP_VEUR_USDC', 'LP_VCHF_USDC'];
-  await getXaveDeploymentDb().set(`marketId`, XaveAvalancheConfig.MarketId).write();
 
   let reserveValue: ReserveValue[] = [];
   let rateStrategy: RateStrategy[] = [];
@@ -73,8 +72,8 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
 
     borrowRates.push(XaveAvalancheConfig.LendingRateOracleRatesCommon[`${token}`].borrowRate);
   }
-
-  await getXaveDeploymentDb().set('reserveConfigs', reserveValue).write();
-  await getXaveDeploymentDb().set('rateStrategy', rateStrategy).write();
   await getXaveDeploymentDb().set('borrowRates', borrowRates).write();
+  await getXaveDeploymentDb().set(`marketId`, XaveAvalancheConfig.MarketId).write();
+  await getXaveDeploymentDb().set('rateStrategy', rateStrategy).write();
+  await getXaveDeploymentDb().set('reserveConfigs', reserveValue).write();
 });
