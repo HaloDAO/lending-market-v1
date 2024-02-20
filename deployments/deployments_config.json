@@ -1,5 +1,5 @@
 {
-  "MarketId": "Xave Avalanche Market",
+  "marketId": "Xave Avalanche Market",
   "reserveConfigs": [
     {
       "aTokenImpl": "AToken",
@@ -53,6 +53,5 @@
   "borrowRates": [
     "39000000000000000000000000",
     "39000000000000000000000000"
-  ],
-  "marketId": "Xave Avalanche Market"
+  ]
 }
