@@ -36,11 +36,9 @@ type RateStrategy = {
 task('xave:avax-deployment-config', 'Export used config').setAction(async ({ verify }, localBRE) => {
   await localBRE.run('set-DRE');
 
-  const tokens: string[] = ['USDC', 'XSGD'];
-
+  const tokens: string[] = ['USDC', 'EUROC', 'VCHF', 'VEUR', 'LP_EUROC_USDC', 'LP_VEUR_USDC', 'LP_VCHF_USDC'];
   await getXaveDeploymentDb().set(`marketId`, XaveAvalancheConfig.MarketId).write();
 
-  // @todo borrow rates
   let reserveValue: ReserveValue[] = [];
   let rateStrategy: RateStrategy[] = [];
   let borrowRates: any[] = [];
@@ -63,8 +61,8 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
 
     rateStrategy.push({
       baseVariableBorrowRate: XaveAvalancheConfig.ReservesConfig[`${token}`].strategy.baseVariableBorrowRate,
-      optimalUtilizationRate: XaveAvalancheConfig.ReservesConfig[`${token}`].strategy.optimalUtilizationRate,
       name: XaveAvalancheConfig.ReservesConfig[`${token}`].strategy.name,
+      optimalUtilizationRate: XaveAvalancheConfig.ReservesConfig[`${token}`].strategy.optimalUtilizationRate,
       stableRateSlope1: XaveAvalancheConfig.ReservesConfig[`${token}`].strategy.stableRateSlope1,
       stableRateSlope2: XaveAvalancheConfig.ReservesConfig[`${token}`].strategy.stableRateSlope2,
       tokenAddress: XaveAvalancheConfig.ReserveAssets[eAvalancheNetwork.avalanche][`${token}`],
