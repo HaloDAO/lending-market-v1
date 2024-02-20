@@ -10,8 +10,8 @@
       "stableBorrowRateEnabled": false,
       "reserveDecimals": "6",
       "reserveFactor": "1000",
-      "tokenReserve": "USDC",
-      "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+      "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "tokenReserve": "USDC"
     },
     {
       "aTokenImpl": "AToken",
@@ -22,8 +22,8 @@
       "stableBorrowRateEnabled": false,
       "reserveDecimals": "6",
       "reserveFactor": "1000",
-      "tokenReserve": "XSGD",
-      "tokenAddress": "0xDC3326e71D45186F113a2F448984CA0e8D201995"
+      "tokenAddress": "0xDC3326e71D45186F113a2F448984CA0e8D201995",
+      "tokenReserve": "XSGD"
     }
   ],
   "rateStrategy": [
