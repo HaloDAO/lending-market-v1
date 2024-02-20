@@ -1,0 +1,57 @@
+{
+  "MarketId": "Xave Avalanche Market",
+  "reserveConfigs": [
+    {
+      "aTokenImpl": "AToken",
+      "baseLTVAsCollateral": "8000",
+      "borrowingEnabled": true,
+      "liquidationBonus": "10500",
+      "liquidationThreshold": "9000",
+      "stableBorrowRateEnabled": false,
+      "reserveDecimals": "6",
+      "reserveFactor": "1000",
+      "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "tokenReserve": "USDC"
+    },
+    {
+      "aTokenImpl": "AToken",
+      "baseLTVAsCollateral": "8000",
+      "borrowingEnabled": true,
+      "liquidationBonus": "10500",
+      "liquidationThreshold": "9000",
+      "stableBorrowRateEnabled": false,
+      "reserveDecimals": "6",
+      "reserveFactor": "1000",
+      "tokenAddress": "0xDC3326e71D45186F113a2F448984CA0e8D201995",
+      "tokenReserve": "XSGD"
+    }
+  ],
+  "rateStrategy": [
+    {
+      "baseVariableBorrowRate": "0",
+      "optimalUtilizationRate": "900000000000000000000000000",
+      "name": "rateStrategyStableThree",
+      "stableRateSlope1": "0",
+      "stableRateSlope2": "0",
+      "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "tokenReserve": "USDC",
+      "variableRateSlope1": "40000000000000000000000000",
+      "variableRateSlope2": "600000000000000000000000000"
+    },
+    {
+      "baseVariableBorrowRate": "0",
+      "optimalUtilizationRate": "900000000000000000000000000",
+      "name": "rateStrategyStableThree",
+      "stableRateSlope1": "0",
+      "stableRateSlope2": "0",
+      "tokenAddress": "0xDC3326e71D45186F113a2F448984CA0e8D201995",
+      "tokenReserve": "XSGD",
+      "variableRateSlope1": "40000000000000000000000000",
+      "variableRateSlope2": "600000000000000000000000000"
+    }
+  ],
+  "borrowRates": [
+    "39000000000000000000000000",
+    "39000000000000000000000000"
+  ]
+}

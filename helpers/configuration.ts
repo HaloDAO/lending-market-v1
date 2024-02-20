@@ -23,6 +23,7 @@ export enum ConfigNames {
   Halo = 'Halo',
   HaloMatic = 'HaloMatic',
   HaloArb = 'HaloArb',
+  XaveAvalache = 'XaveAvalache',
 }
 
 export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
