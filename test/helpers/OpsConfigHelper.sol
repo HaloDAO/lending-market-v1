@@ -6,10 +6,22 @@ import {CommonBase} from 'forge-std/Base.sol';
 interface IOpsTestData {
   struct Root {
     LendingPoolValues lendingPool;
+    ReservesValues reserves;
   }
 
   struct LendingPoolValues {
     address admin;
+    address poolAddress;
+    address poolConfigurator;
+    address collateralManager;
+    address emergencyAdmin;
+    address priceOracle;
+    address lendingRateOracle;
+    address oracleOwner;
+  }
+
+  struct ReservesValues {
+    address USDC;
   }
 }
 
