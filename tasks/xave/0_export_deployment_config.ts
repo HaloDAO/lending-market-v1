@@ -38,7 +38,7 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
 
   const tokens: string[] = ['USDC', 'XSGD'];
 
-  await getXaveDeploymentDb().set(`MarketId`, XaveAvalancheConfig.MarketId).write();
+  await getXaveDeploymentDb().set(`marketId`, XaveAvalancheConfig.MarketId).write();
 
   // @todo borrow rates
   let reserveValue: ReserveValue[] = [];
