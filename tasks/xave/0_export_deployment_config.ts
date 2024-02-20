@@ -54,9 +54,9 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
       borrowingEnabled: XaveAvalancheConfig.ReservesConfig[`${token}`].borrowingEnabled,
       liquidationBonus: XaveAvalancheConfig.ReservesConfig[`${token}`].liquidationBonus,
       liquidationThreshold: XaveAvalancheConfig.ReservesConfig[`${token}`].liquidationThreshold,
-      stableBorrowRateEnabled: XaveAvalancheConfig.ReservesConfig[`${token}`].stableBorrowRateEnabled,
       reserveDecimals: XaveAvalancheConfig.ReservesConfig[`${token}`].reserveDecimals,
       reserveFactor: XaveAvalancheConfig.ReservesConfig[`${token}`].reserveFactor,
+      stableBorrowRateEnabled: XaveAvalancheConfig.ReservesConfig[`${token}`].stableBorrowRateEnabled,
       tokenAddress: XaveAvalancheConfig.ReserveAssets[eAvalancheNetwork.avalanche][`${token}`],
       tokenReserve: token,
     });
