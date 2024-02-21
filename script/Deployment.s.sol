@@ -1,4 +1,4 @@
-// deploy FXEthPriceFeedOracle.sol
+// deploy FXLPEthPriceFeedOracle.sol
 
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.12;
@@ -8,7 +8,7 @@ import 'forge-std/Script.sol';
 import 'forge-std/StdJson.sol';
 import 'forge-std/console2.sol';
 
-import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXLPEthPriceFeedOracle} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
 import {LendingPoolAddressesProviderRegistry} from '../contracts/protocol/configuration/LendingPoolAddressesProviderRegistry.sol';
 import {LendingPoolAddressesProvider} from '../contracts/protocol/configuration/LendingPoolAddressesProvider.sol';
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
