@@ -44,7 +44,10 @@ contract Deployment is Script, DeploymentConfigHelper {
   address constant WETH = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
 
   function run() external {
-    IDeploymentConfig.Root memory c = _readDeploymentConfig(string(abi.encodePacked('deployments_config.json')));
+    IDeploymentConfig.Root memory c = _readDeploymentConfig(
+      string(abi.encodePacked('deployments_config_sepolia.json'))
+    );
+    // IDeploymentConfig.Root memory c = _readDeploymentConfig(string(abi.encodePacked('deployments_config.json')));
 
     uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
     address deployerAddress = vm.addr(deployerPrivateKey);
@@ -71,8 +74,6 @@ contract Deployment is Script, DeploymentConfigHelper {
     LendingPoolConfigurator configurator = new LendingPoolConfigurator();
     addressProvider.setLendingPoolConfiguratorImpl(address(configurator));
     address configuratorProxy = addressProvider.getLendingPoolConfigurator();
-    console2.log('LendingPoolConfigurator', address(configurator));
-    console2.log('LendingPoolConfiguratorProxy', configuratorProxy);
 
     // @TODO is this needed? how is it used?
     // stableAndVariableTokensHelper = await deployStableAndVariableTokensHelper(
@@ -89,9 +90,11 @@ contract Deployment is Script, DeploymentConfigHelper {
     );
 
     // await deployATokenImplementations(ConfigNames.Halo, poolConfig.ReservesConfig, verify);
-
+    console2.log('deploying oracles');
     _deployOracles(stableVarHelper, c);
+    console2.log('deploying data provider');
     _deployDataProvider(addressProvider);
+    console2.log('init reserves by helper');
     _initReservesByHelper(addressProvider, c);
     _configureReservesByHelper(addressProvider, c, aTokensHelper, deployerAddress);
 
@@ -103,16 +106,6 @@ contract Deployment is Script, DeploymentConfigHelper {
     StableAndVariableTokensHelper _stableVarHelper,
     IDeploymentConfig.Root memory _c
   ) private returns (AaveOracle) {
-    // @TODO this should be in a separate deployment file
-    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
-      LP_TOKEN,
-      ETH_USD_ORACLE,
-      'LPVCHF-USDC/ETH',
-      BALANCER_VAULT,
-      VCHF_ASSIM,
-      USDC_ASSIM
-    );
-
     uint256 len = _c.borrowRates.length;
     address[] memory reserveAssets = new address[](len);
     uint256[] memory rates = new uint256[](len);
@@ -125,6 +118,9 @@ contract Deployment is Script, DeploymentConfigHelper {
       aggregators[i] = _c.chainlinkAggregators[i].aggregator;
       rates[i] = _c.borrowRates[i];
     }
+    console2.log('treasury', _c.protocolGlobalParams.treasury);
+    console2.log('USD', _c.protocolGlobalParams.usdAddress);
+    console2.log('USD Aggregator', _c.protocolGlobalParams.usdAggregator);
     tokensToWatch[len] = _c.protocolGlobalParams.usdAddress;
     aggregators[len] = _c.protocolGlobalParams.usdAggregator;
 
@@ -174,22 +170,24 @@ contract Deployment is Script, DeploymentConfigHelper {
     // @TODO do we need DelegationAwareAToken?
     // @see helpers/contracts-deployments.ts
     // cannot cache the length because of stack too deep error
-    aTokens = new AToken[](_c.aTokens.length);
-    sdTokens = new StableDebtToken[](_c.aTokens.length);
-    vdTokens = new VariableDebtToken[](_c.aTokens.length);
+    aTokens = new AToken[](_c.rateStrategy.length);
+    sdTokens = new StableDebtToken[](_c.rateStrategy.length);
+    vdTokens = new VariableDebtToken[](_c.rateStrategy.length);
 
-    for (uint256 i = 0; i < _c.aTokens.length; i++) {
+    for (uint256 i = 0; i < _c.rateStrategy.length; i++) {
+      console2.log('deploying aToken', i, _c.rateStrategy[i].tokenReserve);
+      console2.log('deploying aToken', i, _c.rateStrategy[i].tokenAddress);
       AToken a = new AToken();
       a.initialize(
         ILendingPool(_ledingPoolProxy),
         _c.protocolGlobalParams.treasury,
-        _c.aTokens[i].tokenAddress,
+        _c.rateStrategy[i].tokenAddress,
         // @TODO do we need an incentives controller?
         // can it be updated after?
         IAaveIncentivesController(address(0)),
-        IERC20Detailed(_c.aTokens[i].tokenAddress).decimals(),
-        string(abi.encodePacked('a', _c.aTokens[i].tokenName)),
-        string(abi.encodePacked('a', _c.aTokens[i].tokenName)),
+        IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
+        string(abi.encodePacked('a', _c.rateStrategy[i].tokenReserve)),
+        string(abi.encodePacked('a', _c.rateStrategy[i].tokenReserve)),
         bytes('')
       );
       aTokens[i] = a;
@@ -197,13 +195,13 @@ contract Deployment is Script, DeploymentConfigHelper {
       StableDebtToken sdt = new StableDebtToken();
       sdt.initialize(
         ILendingPool(_ledingPoolProxy),
-        _c.aTokens[i].tokenAddress,
+        _c.rateStrategy[i].tokenAddress,
         // @TODO do we need an incentives controller?
         // can it be updated after?
         IAaveIncentivesController(address(0)),
-        IERC20Detailed(_c.aTokens[i].tokenAddress).decimals(),
-        string(abi.encodePacked('sbt', _c.aTokens[i].tokenName)),
-        string(abi.encodePacked('sbt', _c.aTokens[i].tokenName)),
+        IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
+        string(abi.encodePacked('sbt', _c.rateStrategy[i].tokenReserve)),
+        string(abi.encodePacked('sbt', _c.rateStrategy[i].tokenReserve)),
         bytes('')
       );
       sdTokens[i] = sdt;
@@ -211,11 +209,11 @@ contract Deployment is Script, DeploymentConfigHelper {
       VariableDebtToken vdt = new VariableDebtToken();
       vdt.initialize(
         ILendingPool(_ledingPoolProxy),
-        _c.aTokens[i].tokenAddress,
+        _c.rateStrategy[i].tokenAddress,
         IAaveIncentivesController(address(0)),
-        IERC20Detailed(_c.aTokens[i].tokenAddress).decimals(),
-        string(abi.encodePacked('vdt', _c.aTokens[i].tokenName)),
-        string(abi.encodePacked('vdt', _c.aTokens[i].tokenName)),
+        IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
+        string(abi.encodePacked('vdt', _c.rateStrategy[i].tokenReserve)),
+        string(abi.encodePacked('vdt', _c.rateStrategy[i].tokenReserve)),
         bytes('')
       );
       vdTokens[i] = vdt;
@@ -283,6 +281,10 @@ contract Deployment is Script, DeploymentConfigHelper {
     ATokensAndRatesHelper.ConfigureReserveInput[]
       memory inputParams = new ATokensAndRatesHelper.ConfigureReserveInput[](l);
     for (uint256 i = 0; i < l; i++) {
+      console2.log('_c.reserveConfigs[i].aTokenImpl', i, _c.reserveConfigs[i].aTokenImpl);
+      console2.log('_c.reserveConfigs[i].baseLTVAsCollateral', i, _c.reserveConfigs[i].baseLTVAsCollateral);
+      console2.log('_c.reserveConfigs[i].liquidationThreshold', i, _c.reserveConfigs[i].liquidationThreshold);
+      console2.log('_c.reserveConfigs[i].liquidationBonus', i, _c.reserveConfigs[i].liquidationBonus);
       inputParams[i] = ATokensAndRatesHelper.ConfigureReserveInput({
         asset: _c.reserveConfigs[i].tokenAddress,
         baseLTV: _c.reserveConfigs[i].baseLTVAsCollateral,

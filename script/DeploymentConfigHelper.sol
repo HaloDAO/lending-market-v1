@@ -4,7 +4,6 @@ import {CommonBase} from 'forge-std/Base.sol';
 
 interface IDeploymentConfig {
   struct Root {
-    ATokens[] aTokens;
     uint256[] borrowRates;
     // @TODO need to deploy in advance and update the JSON config file
     ChainlinkAggregator[] chainlinkAggregators;
@@ -13,11 +12,6 @@ interface IDeploymentConfig {
     ProtocolGlobalParams protocolGlobalParams;
     RateStrategy[] rateStrategy;
     ReserveConfig[] reserveConfigs;
-  }
-
-  struct ATokens {
-    address tokenAddress;
-    string tokenName;
   }
 
   struct ChainlinkAggregator {
@@ -75,7 +69,6 @@ contract DeploymentConfigHelper is CommonBase {
       'borrowRates.length != chainlinkAggregators.length'
     );
     require(root.borrowRates.length == root.reserveConfigs.length, 'borrowRates.length != reserveConfigs.length');
-    require(root.borrowRates.length == root.aTokens.length, 'borrowRates.length != aTokens.length');
 
     return root;
   }

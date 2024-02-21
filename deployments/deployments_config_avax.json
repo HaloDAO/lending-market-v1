@@ -1,34 +1,4 @@
 {
-  "aTokens": [
-    {
-      "tokenAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-      "tokenName": "USDC"
-    },
-    {
-      "tokenAddress": "0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD",
-      "tokenName": "EUROC"
-    },
-    {
-      "tokenAddress": "0x228a48df6819CCc2eCa01e2192ebAFfFdAD56c19",
-      "tokenName": "VCHF"
-    },
-    {
-      "tokenAddress": "0x7678e162f38ec9ef2Bfd1d0aAF9fd93355E5Fa0b",
-      "tokenName": "VEUR"
-    },
-    {
-      "tokenAddress": "0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2",
-      "tokenName": "LP_EUROC_USDC"
-    },
-    {
-      "tokenAddress": "0x28F3a9e42667519c83cB090b5c4f6bd34e9F5569",
-      "tokenName": "LP_VEUR_USDC"
-    },
-    {
-      "tokenAddress": "0x0099111Ed107BDF0B05162356aEe433514AaC440",
-      "tokenName": "LP_VCHF_USDC"
-    }
-  ],
   "borrowRates": [
     "39000000000000000000000000",
     "35000000000000000000000000",

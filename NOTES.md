@@ -19,6 +19,9 @@
     - base: CHF / USD; quote: ETH / USD
   - USDC:
     - base: USDC / USD; quote: ETH / USD
+- Sepolia:
+  - deploy Mock ETH / USD oracle
+  - deploy LP Oracle
 
 ---
 
