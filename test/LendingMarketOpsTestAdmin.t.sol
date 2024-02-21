@@ -4,6 +4,8 @@ pragma experimental ABIEncoderV2;
 import 'forge-std/Test.sol';
 import 'forge-std/console2.sol';
 
+import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
+
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {ILendingPool} from '../contracts/interfaces/ILendingPool.sol';
@@ -16,15 +18,21 @@ import {IAToken} from '../contracts/interfaces/IAToken.sol';
 import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
-import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+import {
+  DefaultReserveInterestRateStrategy
+} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
-
 
 import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
 
 import {OpsConfigHelper, IOpsTestData} from './helpers/OpsConfigHelper.sol';
 
+import '../contracts/xave-oracles/libraries/ABDKMath64x64.sol';
+
 contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
+  using ABDKMath64x64 for int128;
+  using ABDKMath64x64 for int256;
+  using ABDKMath64x64 for uint256;
   //// network dependent config
   //// only the following lines are needed to be changed for different networks
   string private NETWORK = 'polygon';
@@ -32,6 +40,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   uint256 constant FORK_BLOCK = 52764552;
   address constant LENDINPOOL_PROXY_ADDRESS = 0x78a5B2B028Fa6Fb0862b0961EB5131C95273763B;
   address constant LENDINGPOOL_ADDRESS_PROVIDER = 0x68aeB9C8775Cfc9b99753A1323D532556675c555;
+  address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
   //// network dependent config end
 
@@ -73,20 +82,27 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   TODO:
    - Admin operations
    - Replace oracle
+   - Deploy new oracle and set LP to use new oracle
    */
 
   function testAddNewReserve() public {
     IOpsTestData.Root memory root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
+    // Put this in JSON
     address LP_XSGD = 0xE6D8FcD23eD4e417d7e9D1195eDf2cA634684e0E;
 
     // Deploy reserve
     _deployReserve();
 
-    // Set Oracle for asset
-    address baseAssimilator = 0xC933a270B922acBd72ef997614Ec46911747b799; // XSGD
-    address quoteAssimilator = 0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a; // USDC
-    address lpOracle = _deployOracle(LP_XSGD, baseAssimilator, quoteAssimilator);
+    // TODO: Query this from FX Pool value so value is dynamic when we use this test in different network
 
+    (IERC20[] memory tokens, , ) =
+      IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8).getPoolTokens(IFXPool(LP_XSGD).getPoolId());
+
+    address baseAssimilator = IFXPool(LP_XSGD).assimilator(address(tokens[0]));
+    address quoteAssimilator = IFXPool(LP_XSGD).assimilator(address(tokens[1]));
+
+    // Set Oracle for asset
+    address lpOracle = _deployOracle(LP_XSGD, baseAssimilator, quoteAssimilator);
 
     // Set oracle source for asset
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
@@ -96,7 +112,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     address[] memory sources = new address[](1);
     sources[0] = address(lpOracle);
 
-    vm.expectRevert(bytes("Ownable: caller is not the owner"));
+    vm.expectRevert(bytes('Ownable: caller is not the owner'));
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
 
     address oracleOwner = AaveOracle(aaveOracle).owner();
@@ -106,20 +122,20 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
 
     uint256 _price = AaveOracle(aaveOracle).getAssetPrice(LP_XSGD);
-  
-    // testConfigureReserveAsCollateral
-    address lendingPoolConfigurator = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER)
-      .getLendingPoolConfigurator();
 
-    uint256 ltv = 8000;
-    uint256 liquidationThreshold = 8500;
-    uint256 LIQUIDATION_BONUS = 10500;
+    // testConfigureReserveAsCollateral
+    address lendingPoolConfigurator =
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator();
+
+    // uint256 ltv = 8000;
+    // uint256 liquidationThreshold = 8500;
+    // uint256 LIQUIDATION_BONUS = 10500;
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     LendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(
       LP_XSGD,
-      ltv,
-      liquidationThreshold,
-      LIQUIDATION_BONUS
+      8000,
+      8500,
+      10500
     );
 
     address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
@@ -128,9 +144,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     LendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(
       LP_XSGD,
-      ltv,
-      liquidationThreshold,
-      LIQUIDATION_BONUS
+      8000,
+      8500,
+      10500
     );
     vm.stopPrank();
   }
@@ -152,7 +168,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lendingPool.setPause(false);
     assertEq(lendingPool.paused(), false, 'reserve unpaused');
     vm.stopPrank();
-
   }
 
   function testEnableAndDisableReserveBorrowing() public {
@@ -165,7 +180,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
-    console.log('root.reserves.USDC:', root.reserves.USDC);
+    console.log('root.reserves.usdc:', root.reserves.usdc);
 
     // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
@@ -208,7 +223,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
-    console.log('root.reserves.USDC:', root.reserves.USDC);
+    console.log('root.reserves.usdc:', root.reserves.usdc);
 
     // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
@@ -253,7 +268,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
-    console.log('root.reserves.USDC:', root.reserves.USDC);
+    console.log('root.reserves.usdc:', root.reserves.usdc);
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.freezeReserve(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C);
@@ -389,7 +404,8 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     );
 
     // Deploy default reserve interest strategy
-    DefaultReserveInterestRateStrategy dris = new DefaultReserveInterestRateStrategy(
+    DefaultReserveInterestRateStrategy dris =
+      new DefaultReserveInterestRateStrategy(
         ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER),
         0.9 * 1e27, // optimal utilization rate
         0 * 1e27, // baseVariableBorrowRate
@@ -427,23 +443,93 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lpc.batchInitReserve(input);
   }
 
-  function _deployOracle(address asset, address baseAssim, address quoteAssim) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
-      asset,
-      0xF9680D99D6C9589e2a93a78A04A279e509205945, // ETH USD Oracle
-      'LPXSGD-USDC/ETH',
-      0xBA12222222228d8Ba445958a75a0704d566BF2C8, // Balancer Vault
-      baseAssim,
-      quoteAssim
-    );
+  function _deployOracle(
+    address asset,
+    address baseAssim,
+    address quoteAssim
+  ) internal returns (address) {
+    FXEthPriceFeedOracle lpOracle =
+      new FXEthPriceFeedOracle(
+        asset,
+        0xF9680D99D6C9589e2a93a78A04A279e509205945, // ETH USD Oracle
+        'LPXSGD-USDC/ETH',
+        0xBA12222222228d8Ba445958a75a0704d566BF2C8, // Balancer Vault
+        baseAssim,
+        quoteAssim
+      );
 
     return address(lpOracle);
   }
 
   function testAdminOracleOperations() public {
-    // - Deploy new oracle and set LP to use new oracle
-    // Change oracle
     // AaveOracle(aaveOracle).setAssetSources(assets, sources);
+  }
+
+  function testLPUserOperations() public {
+    address XSGD = 0xDC3326e71D45186F113a2F448984CA0e8D201995;
+    address USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+    address LP_XSGD = 0xE6D8FcD23eD4e417d7e9D1195eDf2cA634684e0E;
+
+    address lp = 0x1B736B89cd70Cf355d71f55E626Dc53E8D56Bc2E;
+
+    vm.startPrank(0xf89d7b9c864f589bbF53a82105107622B35EaA40); // USDC_HOLDER
+    IERC20(USDC).transfer(lp, 10_000 * 1e6);
+    vm.stopPrank();
+
+    vm.startPrank(0x728C6f69B4EaB57A9f2dE0Cf8Fd170eE5f22Eb21); // XSGD_HOLDER
+    IERC20(XSGD).transfer(lp, 10_000 * 1e6);
+    vm.stopPrank();
+
+    _addLiquidity(IFXPool(LP_XSGD).getPoolId(), 1_000 * 1e18, lp, USDC, XSGD);
+    // TODO: Determine ETH amount using chainlink oracle price feed (check _loopSwapsExact)
+    // uint256 depositAmountInEth = _convertToRawAmount(1_000 * 1e18, "Pass assim");
+
+    ILendingPool LP = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
+    testAddNewReserve();
+
+    (
+      uint256 totalCollateralETHBefore,
+      ,
+      ,
+      ,
+      ,
+      uint256 healthFactorBefore
+    ) = LP.getUserAccountData(lp);
+
+    console.log('totalCollateralETHBefore:', totalCollateralETHBefore);
+    console.log('healthFactorBefore:', healthFactorBefore);
+
+    vm.startPrank(lp);
+    /** *Medium priority*
+    // TODO: Add deposit tests
+    1. User deposits LP Token and use as collateral
+    - check user balance, borrow health factor,
+    - check lending pool balance
+   */
+    IERC20(LP_XSGD).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
+    LP.deposit(
+      LP_XSGD,
+      1000 * 1e18,
+      lp,
+      0 // referral code
+    );
+
+    (
+      uint256 totalCollateralETHAfter,
+      ,
+      ,
+      ,
+      ,
+      uint256 healthFactorAfter
+    ) = LP.getUserAccountData(lp);
+
+    console.log('totalCollateralETHAfter:', totalCollateralETHAfter);
+    console.log('healthFactorAfter:', healthFactorAfter);
+
+    // Assert totalCollateralETHAfter is increased by 1000 * 1e18
+    assertEq(totalCollateralETHAfter, totalCollateralETHBefore + 1000 * 1e18, 'totalCollateralETHAfter increased');
+
+    vm.stopPrank();
   }
 
   /** *High Priority*
@@ -456,13 +542,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     - Assert reserves configurations if matching JSON for network file
     TODO: Check owners of deployed contracts
     */
-
-  /** *Medium priority*
-    // TODO: Add deposit tests
-    1. User deposits LP Token and use as collateral
-    - check user balance, borrow health factor,
-    - check lending pool balance
-   */
 
   /** *Medium priority*
     // TODO: Add borrowing tests against stablecoin (USDC) using deposited LP Token as collateral
@@ -481,8 +560,100 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   /**
    In future, Test incentive emission?
     */
+
+  function _addLiquidity(
+    bytes32 _poolId,
+    uint256 _depositNumeraire,
+    address _user,
+    address _tA,
+    address _tB
+  ) private {
+    address BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
+
+    address[] memory assets = new address[](2);
+    assets[0] = _tA;
+    assets[1] = _tB;
+
+    uint256[] memory maxAmountsIn = new uint256[](2);
+    maxAmountsIn[0] = type(uint256).max;
+    maxAmountsIn[1] = type(uint256).max;
+
+    uint256[] memory minAmountsOut = new uint256[](2);
+    minAmountsOut[0] = 0;
+    minAmountsOut[1] = 0;
+
+    address[] memory userAssets = new address[](2);
+    userAssets[0] = _tA;
+    userAssets[1] = _tB;
+    bytes memory userDataJoin = abi.encode(_depositNumeraire, userAssets);
+
+    IVault.JoinPoolRequest memory reqJoin =
+      IVault.JoinPoolRequest(_asIAsset(assets), maxAmountsIn, userDataJoin, false);
+
+    vm.startPrank(_user);
+    IERC20(_tA).approve(BALANCER_VAULT, type(uint256).max);
+    IERC20(_tB).approve(BALANCER_VAULT, type(uint256).max);
+    IVault(BALANCER_VAULT).joinPool(_poolId, _user, _user, reqJoin);
+    vm.stopPrank();
+  }
+
+  function _asIAsset(address[] memory addresses) private pure returns (IAsset[] memory assets) {
+    // solhint-disable-next-line no-inline-assembly
+    assembly {
+      assets := addresses
+    }
+  }
+
+  // function _convertToRawAmount(uint256 amount, address assimilator) private returns (uint256) {
+  //   return IAssimilator(assimilator).viewRawAmount(ABDKMath64x64.fromUInt(amount));
+  // }
 }
 
 interface IERC20Detailed {
   function decimals() external view returns (uint8);
+}
+
+interface IVault {
+  function joinPool(
+    bytes32 poolId,
+    address sender,
+    address recipient,
+    JoinPoolRequest memory request
+  ) external payable;
+
+  struct JoinPoolRequest {
+    IAsset[] assets;
+    uint256[] maxAmountsIn;
+    bytes userData;
+    bool fromInternalBalance;
+  }
+
+  function getPoolTokens(bytes32 poolId)
+    external
+    view
+    returns (
+      IERC20[] memory tokens,
+      uint256[] memory balances,
+      uint256 lastChangeBlock
+    );
+}
+
+interface IAsset {
+  // solhint-disable-previous-line no-empty-blocks
+}
+
+interface IFXPool {
+  function liquidity() external view returns (uint256, uint256[] memory);
+
+  function totalSupply() external view returns (uint256);
+
+  function totalUnclaimedFeesInNumeraire() external view returns (uint256);
+
+  function protocolPercentFee() external view returns (uint256);
+
+  function viewDeposit(uint256) external view returns (uint256);
+
+  function getPoolId() external view returns (bytes32);
+
+  function assimilator(address _derivative) external view returns (address);
 }

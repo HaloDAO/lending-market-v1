@@ -1,15 +1,23 @@
 {
+  "chainlink": {
+    "usdEth": "",
+    "usdUsdc": ""
+  },
+  "fxPool": {
+    "vault": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+    "xsgdUsdcFxp": ""
+  },
   "lendingPool": {
     "admin": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
-    "poolAddress": "",
-    "poolConfigurator": "0x0228bda708F5BA3b188D9CC8588B7dA4E254D492",
     "collateralManager": "",
     "emergencyAdmin": "",
-    "priceOracle": "",
     "lendingRateOracle": "",
-    "oracleOwner": ""
+    "oracleOwner": "0x01e198818a895f01562E0A087595E5b1C7bb8d5c",
+    "poolAddress": "",
+    "poolConfigurator": "0x0228bda708F5BA3b188D9CC8588B7dA4E254D492",
+    "priceOracle": ""
   },
   "reserves": {
-    "USDC": "0x2eB4157CeFeb13C6E38035A11244E19BC396e97C"
+    "usdc": "0x2eB4157CeFeb13C6E38035A11244E19BC396e97C"
   }
 }

@@ -5,23 +5,35 @@ import {CommonBase} from 'forge-std/Base.sol';
 
 interface IOpsTestData {
   struct Root {
+    ChainlinkValues chainlink;
+    FXPoolValues fxPool;
     LendingPoolValues lendingPool;
     ReservesValues reserves;
   }
 
+  struct ChainlinkValues {
+    address usdEth;
+    address usdUsdc;
+  }
+
+  struct FXPoolValues {
+    address vault;
+    address xsgdUsdcFxp;
+  }
+
   struct LendingPoolValues {
     address admin;
-    address poolAddress;
-    address poolConfigurator;
     address collateralManager;
     address emergencyAdmin;
-    address priceOracle;
     address lendingRateOracle;
     address oracleOwner;
+    address poolAddress;
+    address poolConfigurator;
+    address priceOracle;
   }
 
   struct ReservesValues {
-    address USDC;
+    address usdc;
   }
 }
 
