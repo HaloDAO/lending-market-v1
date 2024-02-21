@@ -5,7 +5,7 @@ import {
   deployLendingPool,
   deployLendingPoolConfigurator,
   deployStableAndVariableTokensHelper,
-} from '../../helpers/contracts-deployments';
+} from '../../helpers/contracts-deployments-ledger';
 import { eContractid } from '../../helpers/types';
 import { waitForTx } from '../../helpers/misc-utils';
 import {
@@ -16,7 +16,7 @@ import {
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
-task('xave:avax-lendingpool-2-a', 'Deploy lending pool for prod enviroment')
+task('xave:sepolia-lendingpool-2-a', 'Deploy lending pool for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -24,7 +24,7 @@ task('xave:avax-lendingpool-2-a', 'Deploy lending pool for prod enviroment')
     const addressesProvider = await getLendingPoolAddressesProvider();
     const lendingPoolImpl = await deployLendingPool(verify);
     console.log('deploying lending pool implementation');
-    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalache);
+    const poolConfig = loadPoolConfig(ConfigNames.XaveSepolia);
 
     // Set lending pool impl to Address Provider
     console.log('setting lending pool implementation');

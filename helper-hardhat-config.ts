@@ -57,6 +57,7 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
   [eAvalancheNetwork.fuji]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [eArbitrumNetwork.arbitrum]: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`,
   [eArbitrumNetwork.arbitrumRinkeby]: `https://arbitrum-rinkeby.infura.io/v3/${INFURA_KEY}`,
+  [eEthereumNetwork.sepolia]: 'https://eth-sepolia.g.alchemy.com/v2/Qe-DPG2Ezrlc4opOXzKP6swK57aHMv1e',
 };
 
 export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {

@@ -1,5 +1,5 @@
 import { task } from 'hardhat/config';
-import { deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments';
+import { deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments-ledger';
 import { setInitialMarketRatesInRatesOracleByHelper } from '../../helpers/oracles-helpers';
 import { eNetwork, ICommonConfiguration, SymbolMap } from '../../helpers/types';
 import { DRE, waitForTx } from '../../helpers/misc-utils';
@@ -14,7 +14,7 @@ task('xave:avax-oracles-3', 'Deploy oracles for prod enviroment')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>DRE.network.name;
-    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalache);
+    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalanche);
     const {
       ProtocolGlobalParams: { UsdAddress },
       ReserveAssets,
