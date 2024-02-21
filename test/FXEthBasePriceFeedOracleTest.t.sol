@@ -15,6 +15,7 @@ contract FXEthBasePriceFeedOracleTest is Test {
     FXEthBasePriceFeedOracle oracle = new FXEthBasePriceFeedOracle(
       address(baseAgg),
       address(quoteAgg),
+      18,
       'SGD / ETH (sgd-usd / eth-usd)'
     );
 

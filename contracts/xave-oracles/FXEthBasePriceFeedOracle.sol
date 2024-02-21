@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.12;
 
-import '@openzeppelin/contracts/utils/SafeCast.sol';
+import '@openzeppelin/contracts/math/SafeMath.sol';
 
 interface IAggregatorV3 {
   function decimals() external view returns (uint8);
@@ -15,7 +15,7 @@ interface IAggregatorV3 {
 }
 
 contract FXEthBasePriceFeedOracle is IAggregatorV3 {
-  using SafeCast for uint;
+  using SafeMath for uint256;
 
   string public description;
 
@@ -24,11 +24,11 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3 {
 
   uint8 private immutable feedDecimals;
 
-  constructor(address _basePriceFeed, address _quotePriceFeed, string memory _description) public {
+  constructor(address _basePriceFeed, address _quotePriceFeed, uint8 _decimals, string memory _description) public {
     basePriceFeed = _basePriceFeed;
     quotePriceFeed = _quotePriceFeed;
     description = _description;
-    feedDecimals = 18;
+    feedDecimals = _decimals;
   }
 
   function decimals() external view override returns (uint8) {
@@ -53,7 +53,7 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3 {
   }
 
   function _price() internal view returns (int256) {
-    int256 _decimals = (10 ** (uint256(feedDecimals))).toInt256();
+    int256 _decimals = int256(10 ** (uint256(feedDecimals)));
 
     (, int256 basePrice, uint256 startedAtBase, , ) = IAggregatorV3(basePriceFeed).latestRoundData();
 
@@ -75,14 +75,15 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3 {
     // overrides quotePrice
     quotePrice = _scaleprice(quotePrice, quoteDecimals, feedDecimals);
 
-    return (basePrice * _decimals) / quotePrice;
+    // already required base and quote price to be > 0
+    return int256(uint256(basePrice).mul(uint256(_decimals)).div(uint256(quotePrice)));
   }
 
   function _scaleprice(int256 _price, uint8 _priceDecimals, uint8 _decimals) internal pure returns (int256) {
     if (_priceDecimals < _decimals) {
-      return _price * ((10 ** (uint256(_decimals - _priceDecimals))).toInt256());
+      return int256(uint256(_price).mul(uint256((10 ** (uint256(_decimals - _priceDecimals))))));
     } else if (_priceDecimals > _decimals) {
-      return _price / ((10 ** (uint256(_priceDecimals - _decimals))).toInt256());
+      return int256(uint256(_price).mul(uint256((10 ** (uint256(_priceDecimals - _decimals))))));
     }
     return _price;
   }
