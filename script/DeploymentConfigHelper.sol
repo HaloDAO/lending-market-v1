@@ -8,6 +8,7 @@ interface IDeploymentConfig {
     uint256[] borrowRates;
     // @TODO need to deploy in advance and update the JSON config file
     ChainlinkAggregator[] chainlinkAggregators;
+    DeploymentParams deploymentParams;
     string marketId;
     ProtocolGlobalParams protocolGlobalParams;
     RateStrategy[] rateStrategy;
@@ -22,6 +23,11 @@ interface IDeploymentConfig {
   struct ChainlinkAggregator {
     address aggregator;
     string tokenReserve;
+  }
+
+  struct DeploymentParams {
+    address poolAdmin;
+    address poolEmergencyAdmin;
   }
 
   struct ProtocolGlobalParams {

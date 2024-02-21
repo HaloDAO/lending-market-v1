@@ -47,36 +47,43 @@ contract Deployment is Script, DeploymentConfigHelper {
     IDeploymentConfig.Root memory c = _readDeploymentConfig(string(abi.encodePacked('deployments_config.json')));
 
     uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
+    address deployerAddress = vm.addr(deployerPrivateKey);
+
     vm.startBroadcast(deployerPrivateKey);
 
     // @TODO call all the setters on the LendingPoolAddressesProvider
     // see https://polygonscan.com/address/0x68aeB9C8775Cfc9b99753A1323D532556675c555#readContract
     LendingPoolAddressesProvider addressProvider = new LendingPoolAddressesProvider('Xave AVAX Market');
-    // @TODO set correct admin and emergency admin
-    // addressProvider.setPoolAdmin(ADMIN);
-    // addressProvider.setEmergencyAdmin(EMERGENCY_ADMIN);
+    // @TODO fix this, should be the wallet deploying the contracts or
+    // some other wallet?
+    // @TODO after deployment is done, the owner should be c.deploymentParams.poolAdmin and poolEmergecyAdmin
+    addressProvider.setPoolAdmin(deployerAddress);
+    addressProvider.setEmergencyAdmin(deployerAddress);
+
     LendingPoolAddressesProviderRegistry registry = new LendingPoolAddressesProviderRegistry();
     registry.registerAddressesProvider(address(addressProvider), 1);
 
     // deploy the LendingPool
     LendingPool lendingPool = new LendingPool();
     addressProvider.setLendingPoolImpl(address(lendingPool));
-    address payable lendingPoolProxy = payable(addressProvider.getLendingPool());
+    address lendingPoolProxy = addressProvider.getLendingPool();
     // deploy the LendingPoolConfigurator
     LendingPoolConfigurator configurator = new LendingPoolConfigurator();
     addressProvider.setLendingPoolConfiguratorImpl(address(configurator));
     address configuratorProxy = addressProvider.getLendingPoolConfigurator();
+    console2.log('LendingPoolConfigurator', address(configurator));
+    console2.log('LendingPoolConfiguratorProxy', configuratorProxy);
 
     // @TODO is this needed? how is it used?
     // stableAndVariableTokensHelper = await deployStableAndVariableTokensHelper(
     // [lendingPoolProxy.address, addressesProvider.address],
     StableAndVariableTokensHelper stableVarHelper = new StableAndVariableTokensHelper(
-      lendingPoolProxy,
+      payable(lendingPoolProxy),
       address(addressProvider)
     );
     // const aTokensAndRatesHelper = await deployATokensAndRatesHelper
     ATokensAndRatesHelper aTokensHelper = new ATokensAndRatesHelper(
-      lendingPoolProxy,
+      payable(lendingPoolProxy),
       address(addressProvider),
       configuratorProxy
     );
@@ -84,7 +91,9 @@ contract Deployment is Script, DeploymentConfigHelper {
     // await deployATokenImplementations(ConfigNames.Halo, poolConfig.ReservesConfig, verify);
 
     _deployOracles(stableVarHelper, c);
+    _deployDataProvider(addressProvider);
     _initReservesByHelper(addressProvider, c);
+    _configureReservesByHelper(addressProvider, c, aTokensHelper, deployerAddress);
 
     vm.stopBroadcast();
   }
@@ -137,6 +146,10 @@ contract Deployment is Script, DeploymentConfigHelper {
     _stableVarHelper.setOracleOwnership(address(lendingRateOracle), address(this));
 
     return oracle;
+  }
+
+  function _deployDataProvider(LendingPoolAddressesProvider _addressProvider) private {
+    new AaveProtocolDataProvider(ILendingPoolAddressesProvider(_addressProvider));
   }
 
   function _deployDefaultReserveInterestStrategy(
@@ -223,7 +236,7 @@ contract Deployment is Script, DeploymentConfigHelper {
     LendingPoolConfigurator cfg = LendingPoolConfigurator(_addressProvider.getLendingPoolConfigurator());
 
     uint256 l = _c.rateStrategy.length;
-    ILendingPoolConfigurator.InitReserveInput[] memory cfgInput = new ILendingPoolConfigurator.InitReserveInput[](l);
+
     for (uint256 i = 0; i < l; i++) {
       DefaultReserveInterestRateStrategy strategy = new DefaultReserveInterestRateStrategy(
         _addressProvider,
@@ -234,8 +247,8 @@ contract Deployment is Script, DeploymentConfigHelper {
         _c.rateStrategy[i].stableRateSlope1,
         _c.rateStrategy[i].stableRateSlope2
       );
-
-      cfgInput[i] = ILendingPoolConfigurator.InitReserveInput({
+      ILendingPoolConfigurator.InitReserveInput[] memory cfgInput = new ILendingPoolConfigurator.InitReserveInput[](1);
+      cfgInput[0] = ILendingPoolConfigurator.InitReserveInput({
         aTokenImpl: address(aTokens[i]),
         stableDebtTokenImpl: address(sdTokens[i]),
         variableDebtTokenImpl: address(vdTokens[i]),
@@ -253,8 +266,37 @@ contract Deployment is Script, DeploymentConfigHelper {
         stableDebtTokenSymbol: sdTokens[i].symbol(),
         params: bytes('')
       });
+      // hardhat deployment scripts set a chunk size of 1 here
+      cfg.batchInitReserve(cfgInput);
     }
-    // cfg.batchInitReserve(cfgInput);
+  }
+
+  function _configureReservesByHelper(
+    LendingPoolAddressesProvider _addressProvider,
+    IDeploymentConfig.Root memory _c,
+    ATokensAndRatesHelper _aTokensHelper,
+    address _deployer
+  ) private {
+    _addressProvider.setPoolAdmin(address(_aTokensHelper));
+
+    uint256 l = _c.reserveConfigs.length;
+    ATokensAndRatesHelper.ConfigureReserveInput[]
+      memory inputParams = new ATokensAndRatesHelper.ConfigureReserveInput[](l);
+    for (uint256 i = 0; i < l; i++) {
+      inputParams[i] = ATokensAndRatesHelper.ConfigureReserveInput({
+        asset: _c.reserveConfigs[i].tokenAddress,
+        baseLTV: _c.reserveConfigs[i].baseLTVAsCollateral,
+        liquidationThreshold: _c.reserveConfigs[i].liquidationThreshold,
+        liquidationBonus: _c.reserveConfigs[i].liquidationBonus,
+        reserveFactor: _c.reserveConfigs[i].reserveFactor,
+        stableBorrowingEnabled: _c.reserveConfigs[i].stableBorrowRateEnabled,
+        borrowingEnabled: _c.reserveConfigs[i].borrowingEnabled
+      });
+    }
+
+    _aTokensHelper.configureReserves(inputParams);
+
+    _addressProvider.setPoolAdmin(_deployer);
   }
 }
 
