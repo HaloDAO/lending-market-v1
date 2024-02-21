@@ -2,12 +2,12 @@ import { task } from 'hardhat/config';
 import {
   deployLendingPoolAddressesProvider,
   deployLendingPoolAddressesProviderRegistry,
-} from '../../helpers/contracts-deployments';
+} from '../../helpers/contracts-deployments-ledger';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { waitForTx } from '../../helpers/misc-utils';
-import { XaveAvalancheConfig } from '../../markets/xave-avax';
+import { XaveSepoliaConfig } from '../../markets/xave-sepolia';
 
-task('xave:avax-addressproviders-1', 'Deploy address provider, registry and fee provider for prod enviroment')
+task('xave:sepolia-addressproviders-1', 'Deploy address provider, registry and fee provider for prod enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
@@ -20,7 +20,7 @@ task('xave:avax-addressproviders-1', 'Deploy address provider, registry and fee 
      * - Acting also as factory of proxies and admin of those, so with right to change its implementations
      * - Owned by the Halo Governance
      */
-    const addressesProvider = await deployLendingPoolAddressesProvider(XaveAvalancheConfig.MarketId, verify);
+    const addressesProvider = await deployLendingPoolAddressesProvider(XaveSepoliaConfig.MarketId, verify);
     await waitForTx(await addressesProvider.setPoolAdmin(admin));
     await waitForTx(await addressesProvider.setEmergencyAdmin(admin));
 

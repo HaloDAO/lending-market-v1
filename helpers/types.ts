@@ -14,6 +14,7 @@ export enum eEthereumNetwork {
   coverage = 'coverage',
   hardhat = 'hardhat',
   tenderly = 'tenderly',
+  sepolia = 'sepolia',
 }
 
 export enum ePolygonNetwork {
@@ -289,6 +290,7 @@ export interface iAssetBase<T> {
   LP_EUROC_USDC?: T;
   LP_VEUR_USDC?: T;
   LP_VCHF_USDC?: T;
+  LP_XSGD_USDC?: T;
 }
 
 export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
@@ -352,6 +354,8 @@ export type iXaveAvalanchePoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
   'USDC' | 'EUROC' | 'VCHF' | 'VEUR' | 'LP_EUROC_USDC' | 'LP_VEUR_USDC' | 'LP_VCHF_USDC'
 >;
+
+export type iXaveSepoliaPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'USDC' | 'XSGD' | 'LP_XSGD_USDC'>;
 
 export type iLpPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -532,6 +536,7 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.main]: T;
   [eEthereumNetwork.hardhat]: T;
   [eEthereumNetwork.tenderly]: T;
+  [eEthereumNetwork.sepolia]: T;
 }
 
 export interface iPolygonParamsPerNetwork<T> {
@@ -653,6 +658,10 @@ export interface IHaloMaticConfiguration extends ICommonConfiguration {
 
 export interface IXaveAvalancheConfiguration extends ICommonConfiguration {
   ReservesConfig: iXaveAvalanchePoolAssets<IReserveParams>;
+}
+
+export interface IXaveSepoliaConfiguration extends ICommonConfiguration {
+  ReservesConfig: iXaveSepoliaPoolAssets<IReserveParams>;
 }
 
 export interface IAmmConfiguration extends ICommonConfiguration {

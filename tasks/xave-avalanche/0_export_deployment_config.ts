@@ -1,9 +1,5 @@
 import { task } from 'hardhat/config';
-import {
-  deployLendingPoolAddressesProvider,
-  deployLendingPoolAddressesProviderRegistry,
-} from '../../helpers/contracts-deployments';
-import { getEthersSigners } from '../../helpers/contracts-helpers';
+
 import { getXaveDeploymentDb, waitForTx } from '../../helpers/misc-utils';
 import { XaveAvalancheConfig } from '../../markets/xave-avax';
 import { eAvalancheNetwork } from '../../helpers/types';
@@ -72,8 +68,8 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
 
     borrowRates.push(XaveAvalancheConfig.LendingRateOracleRatesCommon[`${token}`].borrowRate);
   }
-  await getXaveDeploymentDb().set('borrowRates', borrowRates).write();
-  await getXaveDeploymentDb().set(`marketId`, XaveAvalancheConfig.MarketId).write();
-  await getXaveDeploymentDb().set('rateStrategy', rateStrategy).write();
-  await getXaveDeploymentDb().set('reserveConfigs', reserveValue).write();
+  await getXaveDeploymentDb('avalanche').set('borrowRates', borrowRates).write();
+  await getXaveDeploymentDb('avalanche').set(`marketId`, XaveAvalancheConfig.MarketId).write();
+  await getXaveDeploymentDb('avalanche').set('rateStrategy', rateStrategy).write();
+  await getXaveDeploymentDb('avalanche').set('reserveConfigs', reserveValue).write();
 });

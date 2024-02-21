@@ -57,7 +57,8 @@ if (!SKIP_LOAD) {
     'helpers/halo-helpers',
     'halo-new-asset',
     'halo-matic',
-    'xave',
+    'xave-avalanche',
+    'xave-sepolia',
   ].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)

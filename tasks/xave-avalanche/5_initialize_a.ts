@@ -7,7 +7,7 @@ import {
   authorizeWETHGateway,
   // deployTreasury,
   deployRnbwIncentivesContoller,
-} from '../../helpers/contracts-deployments';
+} from '../../helpers/contracts-deployments-ledger';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';

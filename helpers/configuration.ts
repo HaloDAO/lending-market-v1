@@ -13,6 +13,8 @@ import { tEthereumAddress } from './types';
 import { getParamPerNetwork } from './contracts-helpers';
 import { deployWETHMocked } from './contracts-deployments';
 import HaloMaticConfig from '../markets/halo-matic';
+import XaveSepoliaConfig from '../markets/xave-sepolia';
+import XaveAvalancheConfig from '../markets/xave-avax';
 
 export enum ConfigNames {
   Commons = 'Commons',
@@ -23,7 +25,8 @@ export enum ConfigNames {
   Halo = 'Halo',
   HaloMatic = 'HaloMatic',
   HaloArb = 'HaloArb',
-  XaveAvalache = 'XaveAvalache',
+  XaveAvalanche = 'XaveAvalanche',
+  XaveSepolia = 'XaveSepolia',
 }
 
 export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
@@ -42,6 +45,10 @@ export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
       return AmmConfig;
     case ConfigNames.Avalanche:
       return AvalancheConfig;
+    case ConfigNames.XaveSepolia:
+      return XaveSepoliaConfig;
+    case ConfigNames.XaveAvalanche:
+      return XaveAvalancheConfig;
     case ConfigNames.Commons:
       return CommonsConfig;
     default:

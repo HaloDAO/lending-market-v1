@@ -4,7 +4,7 @@ import {
   // deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
   authorizeWETHGateway,
-} from '../../helpers/contracts-deployments';
+} from '../../helpers/contracts-deployments-ledger';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
@@ -27,7 +27,7 @@ task('xave:avax-initialize-5-b', 'Initialize lending pool configuration.')
     await localBRE.run('set-DRE');
     const network = <eNetwork>localBRE.network.name;
 
-    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalache);
+    const poolConfig = loadPoolConfig(ConfigNames.XaveAvalanche);
     const {
       ATokenNamePrefix,
       StableDebtTokenNamePrefix,
