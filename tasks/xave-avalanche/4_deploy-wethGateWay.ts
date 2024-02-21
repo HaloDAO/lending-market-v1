@@ -9,6 +9,7 @@ task(`xave:avax-wethgateway-4`, `Deploys the ${CONTRACT_NAME} contract`)
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const poolConfig = loadPoolConfig(ConfigNames.XaveAvalanche);
+    // careful as it might deploy the mock version of the code
     const Weth = await getWrappedNativeTokenAddress(poolConfig);
 
     const wethGateWay = await deployWETHGateway([Weth], verify);

@@ -75,6 +75,7 @@ export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
   [eAvalancheNetwork.fuji]: 85 * GWEI,
   [eArbitrumNetwork.arbitrum]: 10 * GWEI,
   [eArbitrumNetwork.arbitrumRinkeby]: 65 * GWEI,
+  [eEthereumNetwork.sepolia]: 3 * GWEI,
 };
 
 export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
@@ -90,11 +91,13 @@ export const NETWORK_DEFAULT_PRIORITYFEE: iParamsPerNetwork<number> = {
   [eXDaiNetwork.xdai]: 1 * GWEI,
   [eAvalancheNetwork.avalanche]: 1 * GWEI,
   [eAvalancheNetwork.fuji]: 1 * GWEI,
+  [eEthereumNetwork.sepolia]: 1 * GWEI,
 };
 
 export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
   [eEthereumNetwork.main]: 12406069,
   [eEthereumNetwork.kovan]: undefined,
+  [eEthereumNetwork.sepolia]: undefined,
   [eEthereumNetwork.ropsten]: undefined,
   [eEthereumNetwork.coverage]: undefined,
   [eEthereumNetwork.hardhat]: undefined,

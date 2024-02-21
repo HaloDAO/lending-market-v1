@@ -3,7 +3,7 @@ import {
   deployLendingPoolAddressesProvider,
   deployLendingPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-deployments-ledger';
-import { getEthersSigners } from '../../helpers/contracts-helpers';
+import { getEthersSigners, getLedgerSigner } from '../../helpers/contracts-helpers';
 import { waitForTx } from '../../helpers/misc-utils';
 import { XaveSepoliaConfig } from '../../markets/xave-sepolia';
 
@@ -12,7 +12,7 @@ task('xave:sepolia-addressproviders-1', 'Deploy address provider, registry and f
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
 
-    const admin = await (await getEthersSigners())[0].getAddress();
+    const admin = await (await getLedgerSigner()).getAddress();
     console.log(`Admin is ${admin}`);
 
     /**
