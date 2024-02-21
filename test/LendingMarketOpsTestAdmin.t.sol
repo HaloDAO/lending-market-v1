@@ -18,9 +18,7 @@ import {IAToken} from '../contracts/interfaces/IAToken.sol';
 import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 
 import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
@@ -52,11 +50,14 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
     IOpsTestData.Root memory root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
+
     // assertEq(root.lendingPool.admin, lpAddrProvider.getPoolAdmin(), 'correct pool admin set');
 
     // assertEq(root.lendingPool.poolAddress, lpAddrProvider.getLendingPool(), 'correct lending pool set');
     console.log('lpAddrProvider.getLendingPoolConfigurator():', lpAddrProvider.getLendingPoolConfigurator());
     console.log('root.lendingPool.poolConfigurator:', root.lendingPool.poolConfigurator);
+    console.log('root.lendingPool.admin:', root.lendingPool.admin);
+    console.log('root.reserves.usdc:', root.reserves.usdc);
     // assertEq(
     //   lpAddrProvider.getLendingPoolConfigurator(),
     //   root.lendingPool.poolConfigurator,
@@ -85,7 +86,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
    - Deploy new oracle and set LP to use new oracle
    */
 
-  function testAddNewReserve() public {
+  function _addNewReserve() private {
     IOpsTestData.Root memory root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
     // Put this in JSON
     address LP_XSGD = 0xE6D8FcD23eD4e417d7e9D1195eDf2cA634684e0E;
@@ -95,8 +96,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     // TODO: Query this from FX Pool value so value is dynamic when we use this test in different network
 
-    (IERC20[] memory tokens, , ) =
-      IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8).getPoolTokens(IFXPool(LP_XSGD).getPoolId());
+    (IERC20[] memory tokens, , ) = IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8).getPoolTokens(
+      IFXPool(LP_XSGD).getPoolId()
+    );
 
     address baseAssimilator = IFXPool(LP_XSGD).assimilator(address(tokens[0]));
     address quoteAssimilator = IFXPool(LP_XSGD).assimilator(address(tokens[1]));
@@ -124,30 +126,20 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     uint256 _price = AaveOracle(aaveOracle).getAssetPrice(LP_XSGD);
 
     // testConfigureReserveAsCollateral
-    address lendingPoolConfigurator =
-      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator();
+    address lendingPoolConfigurator = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER)
+      .getLendingPoolConfigurator();
 
     // uint256 ltv = 8000;
     // uint256 liquidationThreshold = 8500;
     // uint256 LIQUIDATION_BONUS = 10500;
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    LendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(
-      LP_XSGD,
-      8000,
-      8500,
-      10500
-    );
+    LendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(LP_XSGD, 8000, 8500, 10500);
 
     address poolAdmin = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPoolAdmin();
 
     vm.startPrank(poolAdmin);
 
-    LendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(
-      LP_XSGD,
-      8000,
-      8500,
-      10500
-    );
+    LendingPoolConfigurator(lendingPoolConfigurator).configureReserveAsCollateral(LP_XSGD, 8000, 8500, 10500);
     vm.stopPrank();
   }
 
@@ -175,8 +167,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
 
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
@@ -190,8 +183,8 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lpc.enableBorrowingOnReserve(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C, true);
     vm.stopPrank();
 
-    bool usdcBorrowIsEnabled =
-      ((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data & (1 << 58)) != 0;
+    bool usdcBorrowIsEnabled = ((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data &
+      (1 << 58)) != 0;
     assertEq(usdcBorrowIsEnabled, true, 'USDC borrowing enabled');
 
     // Expect to fail if msg.sender is not poolAdmin
@@ -203,8 +196,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // vm.expectEmit();
     vm.stopPrank();
 
-    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-      lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C);
+    DataTypes.ReserveConfigurationMap memory usdcConfiguration = lendingPool.getConfiguration(
+      0x2eB4157CeFeb13C6E38035A11244E19BC396e97C
+    );
 
     assertEq(
       (((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data & (1 << 58)) != 0), // bit 58: borrowing is enabled
@@ -218,8 +212,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
 
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
@@ -233,8 +228,8 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lpc.activateReserve(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C);
     vm.stopPrank();
 
-    bool usdcReserveActive =
-      ((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data & (1 << 56)) != 0;
+    bool usdcReserveActive = ((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data &
+      (1 << 56)) != 0;
     assertEq(usdcReserveActive, true, 'USDC borrowing enabled');
 
     // Expect to fail if msg.sender is not poolAdmin
@@ -263,8 +258,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
 
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
@@ -290,8 +286,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // vm.expectEmit();
     vm.stopPrank();
 
-    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-      lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C);
+    DataTypes.ReserveConfigurationMap memory usdcConfiguration = lendingPool.getConfiguration(
+      0x2eB4157CeFeb13C6E38035A11244E19BC396e97C
+    );
 
     assertEq(
       (((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data & (1 << 57)) != 0), // bit 57: reserve is frozen
@@ -305,8 +302,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
 
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
@@ -330,8 +328,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // vm.expectEmit();
     vm.stopPrank();
 
-    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-      lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C);
+    DataTypes.ReserveConfigurationMap memory usdcConfiguration = lendingPool.getConfiguration(
+      0x2eB4157CeFeb13C6E38035A11244E19BC396e97C
+    );
 
     assertEq(
       (((lendingPool.getConfiguration(0x2eB4157CeFeb13C6E38035A11244E19BC396e97C)).data & (1 << 59)) != 0), // bit 59: stable rate borrowing enabled
@@ -345,8 +344,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
 
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
@@ -404,20 +404,20 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     );
 
     // Deploy default reserve interest strategy
-    DefaultReserveInterestRateStrategy dris =
-      new DefaultReserveInterestRateStrategy(
-        ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER),
-        0.9 * 1e27, // optimal utilization rate
-        0 * 1e27, // baseVariableBorrowRate
-        0.04 * 1e27, // variableRateSlope1
-        0.60 * 1e27, // variableRateSlope2
-        0.02 * 1e27, // stableRateSlope1
-        0.60 * 1e27 // stableRateSlope2
-      );
+    DefaultReserveInterestRateStrategy dris = new DefaultReserveInterestRateStrategy(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER),
+      0.9 * 1e27, // optimal utilization rate
+      0 * 1e27, // baseVariableBorrowRate
+      0.04 * 1e27, // variableRateSlope1
+      0.60 * 1e27, // variableRateSlope2
+      0.02 * 1e27, // stableRateSlope1
+      0.60 * 1e27 // stableRateSlope2
+    );
 
     // Deploy Reserve
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator()
+    );
 
     ILendingPoolConfigurator.InitReserveInput[] memory input = new ILendingPoolConfigurator.InitReserveInput[](1);
     input[0] = ILendingPoolConfigurator.InitReserveInput({
@@ -443,20 +443,15 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lpc.batchInitReserve(input);
   }
 
-  function _deployOracle(
-    address asset,
-    address baseAssim,
-    address quoteAssim
-  ) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle =
-      new FXEthPriceFeedOracle(
-        asset,
-        0xF9680D99D6C9589e2a93a78A04A279e509205945, // ETH USD Oracle
-        'LPXSGD-USDC/ETH',
-        0xBA12222222228d8Ba445958a75a0704d566BF2C8, // Balancer Vault
-        baseAssim,
-        quoteAssim
-      );
+  function _deployOracle(address asset, address baseAssim, address quoteAssim) internal returns (address) {
+    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
+      asset,
+      0xF9680D99D6C9589e2a93a78A04A279e509205945, // ETH USD Oracle
+      'LPXSGD-USDC/ETH',
+      0xBA12222222228d8Ba445958a75a0704d566BF2C8, // Balancer Vault
+      baseAssim,
+      quoteAssim
+    );
 
     return address(lpOracle);
   }
@@ -485,16 +480,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // uint256 depositAmountInEth = _convertToRawAmount(1_000 * 1e18, "Pass assim");
 
     ILendingPool LP = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
-    testAddNewReserve();
+    _addNewReserve();
 
-    (
-      uint256 totalCollateralETHBefore,
-      ,
-      ,
-      ,
-      ,
-      uint256 healthFactorBefore
-    ) = LP.getUserAccountData(lp);
+    (uint256 totalCollateralETHBefore, , , , , uint256 healthFactorBefore) = LP.getUserAccountData(lp);
 
     console.log('totalCollateralETHBefore:', totalCollateralETHBefore);
     console.log('healthFactorBefore:', healthFactorBefore);
@@ -514,14 +502,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       0 // referral code
     );
 
-    (
-      uint256 totalCollateralETHAfter,
-      ,
-      ,
-      ,
-      ,
-      uint256 healthFactorAfter
-    ) = LP.getUserAccountData(lp);
+    (uint256 totalCollateralETHAfter, , , , , uint256 healthFactorAfter) = LP.getUserAccountData(lp);
 
     console.log('totalCollateralETHAfter:', totalCollateralETHAfter);
     console.log('healthFactorAfter:', healthFactorAfter);
@@ -554,20 +535,14 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   TODO: Add repay test if it improve health factor
   - User pov
   - Lending pool pov
-  
+
    */
 
   /**
    In future, Test incentive emission?
     */
 
-  function _addLiquidity(
-    bytes32 _poolId,
-    uint256 _depositNumeraire,
-    address _user,
-    address _tA,
-    address _tB
-  ) private {
+  function _addLiquidity(bytes32 _poolId, uint256 _depositNumeraire, address _user, address _tA, address _tB) private {
     address BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
     address[] memory assets = new address[](2);
@@ -587,8 +562,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     userAssets[1] = _tB;
     bytes memory userDataJoin = abi.encode(_depositNumeraire, userAssets);
 
-    IVault.JoinPoolRequest memory reqJoin =
-      IVault.JoinPoolRequest(_asIAsset(assets), maxAmountsIn, userDataJoin, false);
+    IVault.JoinPoolRequest memory reqJoin = IVault.JoinPoolRequest(
+      _asIAsset(assets),
+      maxAmountsIn,
+      userDataJoin,
+      false
+    );
 
     vm.startPrank(_user);
     IERC20(_tA).approve(BALANCER_VAULT, type(uint256).max);
@@ -614,12 +593,7 @@ interface IERC20Detailed {
 }
 
 interface IVault {
-  function joinPool(
-    bytes32 poolId,
-    address sender,
-    address recipient,
-    JoinPoolRequest memory request
-  ) external payable;
+  function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request) external payable;
 
   struct JoinPoolRequest {
     IAsset[] assets;
@@ -628,14 +602,9 @@ interface IVault {
     bool fromInternalBalance;
   }
 
-  function getPoolTokens(bytes32 poolId)
-    external
-    view
-    returns (
-      IERC20[] memory tokens,
-      uint256[] memory balances,
-      uint256 lastChangeBlock
-    );
+  function getPoolTokens(
+    bytes32 poolId
+  ) external view returns (IERC20[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
 }
 
 interface IAsset {
