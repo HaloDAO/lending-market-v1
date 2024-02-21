@@ -26,8 +26,11 @@ import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingp
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
+import {DeploymentConfigHelper, IDeploymentConfig} from './DeploymentConfigHelper.sol';
+import {AaveProtocolDataProvider} from '../contracts/misc/AaveProtocolDataProvider.sol';
+import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 
-contract Deployment is Script {
+contract Deployment is Script, DeploymentConfigHelper {
   using stdJson for string;
 
   address constant LP_TOKEN = 0x0099111Ed107BDF0B05162356aEe433514AaC440; // VCHF/USDC LP
@@ -40,64 +43,58 @@ contract Deployment is Script {
   // @TODO WETH.e address, there's also a WETH address
   address constant WETH = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
 
-  struct AssetAggregator {
-    address addr;
-    address aggregator;
-    string name;
-  }
-
   function run() external {
+    IDeploymentConfig.Root memory c = _readDeploymentConfig(string(abi.encodePacked('deployments_config.json')));
+
     uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
-
-    AssetAggregator[] memory config = _readConfig();
-    console2.log(config[0].name);
-
     vm.startBroadcast(deployerPrivateKey);
 
     // @TODO call all the setters on the LendingPoolAddressesProvider
     // see https://polygonscan.com/address/0x68aeB9C8775Cfc9b99753A1323D532556675c555#readContract
-    LendingPoolAddressesProvider provider = new LendingPoolAddressesProvider('Xave AVAX Market');
+    LendingPoolAddressesProvider addressProvider = new LendingPoolAddressesProvider('Xave AVAX Market');
     // @TODO set correct admin and emergency admin
-    // provider.setPoolAdmin(ADMIN);
-    // provider.setEmergencyAdmin(EMERGENCY_ADMIN);
+    // addressProvider.setPoolAdmin(ADMIN);
+    // addressProvider.setEmergencyAdmin(EMERGENCY_ADMIN);
     LendingPoolAddressesProviderRegistry registry = new LendingPoolAddressesProviderRegistry();
-    registry.registerAddressesProvider(address(provider), 1);
+    registry.registerAddressesProvider(address(addressProvider), 1);
 
     // deploy the LendingPool
     LendingPool lendingPool = new LendingPool();
-    provider.setLendingPoolImpl(address(lendingPool));
-    address payable lendingPoolProxy = payable(provider.getLendingPool());
+    addressProvider.setLendingPoolImpl(address(lendingPool));
+    address payable lendingPoolProxy = payable(addressProvider.getLendingPool());
     // deploy the LendingPoolConfigurator
     LendingPoolConfigurator configurator = new LendingPoolConfigurator();
-    provider.setLendingPoolConfiguratorImpl(address(configurator));
-    address configuratorProxy = provider.getLendingPoolConfigurator();
+    addressProvider.setLendingPoolConfiguratorImpl(address(configurator));
+    address configuratorProxy = addressProvider.getLendingPoolConfigurator();
 
     // @TODO is this needed? how is it used?
     // stableAndVariableTokensHelper = await deployStableAndVariableTokensHelper(
     // [lendingPoolProxy.address, addressesProvider.address],
     StableAndVariableTokensHelper stableVarHelper = new StableAndVariableTokensHelper(
       lendingPoolProxy,
-      address(provider)
+      address(addressProvider)
     );
     // const aTokensAndRatesHelper = await deployATokensAndRatesHelper
     ATokensAndRatesHelper aTokensHelper = new ATokensAndRatesHelper(
       lendingPoolProxy,
-      address(provider),
+      address(addressProvider),
       configuratorProxy
     );
 
     // await deployATokenImplementations(ConfigNames.Halo, poolConfig.ReservesConfig, verify);
-    // @TODO DelegationAwareAToken only on strategyUNI ?
-    _deployAaveTokens(lendingPoolProxy, LP_TOKEN);
 
-    _deployOracles(stableVarHelper);
+    _deployOracles(stableVarHelper, c);
+    _initReservesByHelper(addressProvider, c);
 
     vm.stopBroadcast();
   }
 
   // deploy Aave Oracle with assets, sources, fallbackOracle, baseCurrency, baseCurrencyUnit
-  function _deployOracles(StableAndVariableTokensHelper _stableVarHelper) private returns (AaveOracle) {
-    // @TODO get params from config
+  function _deployOracles(
+    StableAndVariableTokensHelper _stableVarHelper,
+    IDeploymentConfig.Root memory _c
+  ) private returns (AaveOracle) {
+    // @TODO this should be in a separate deployment file
     FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
       LP_TOKEN,
       ETH_USD_ORACLE,
@@ -107,31 +104,37 @@ contract Deployment is Script {
       USDC_ASSIM
     );
 
-    // @TODO parameterize arguments
-    address[] memory assets = new address[](1);
-    assets[0] = LP_TOKEN;
-    address[] memory sources = new address[](1);
-    sources[0] = address(lpOracle);
+    uint256 len = _c.borrowRates.length;
+    address[] memory reserveAssets = new address[](len);
+    uint256[] memory rates = new uint256[](len);
+    address[] memory aggregators = new address[](len + 1);
+    // tokensToWatch is reserveAssets + USD
+    address[] memory tokensToWatch = new address[](len + 1);
+    for (uint256 i = 0; i < len; i++) {
+      reserveAssets[i] = _c.rateStrategy[i].tokenAddress;
+      tokensToWatch[i] = _c.rateStrategy[i].tokenAddress;
+      aggregators[i] = _c.chainlinkAggregators[i].aggregator;
+      rates[i] = _c.borrowRates[i];
+    }
+    tokensToWatch[len] = _c.protocolGlobalParams.usdAddress;
+    aggregators[len] = _c.protocolGlobalParams.usdAggregator;
+
+    // AaveOracle calls _setAssetSources which also checks assets.length == sources.length
     AaveOracle oracle = new AaveOracle(
-      assets,
-      sources,
+      tokensToWatch,
+      aggregators,
       address(0), // fallbackOracle
       WETH, // baseCurrency
       1e18 // baseCurrencyUnit
     );
 
-    // reserveAssets on Matic
-    // DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
-    // USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-    // LendingRateOracleRatesCommon: {
-    //   WETH: {
-    //     borrowRate: oneRay.multipliedBy(0.03).toFixed(),
-    //   },
-
     LendingRateOracle lendingRateOracle = new LendingRateOracle();
     // transfer ownership to StableAndVariableTokensHelper
     lendingRateOracle.transferOwnership(address(_stableVarHelper));
-    // _stableVarHelper.setOracleBorrowRates(assets, rates, oracle);
+    _stableVarHelper.setOracleBorrowRates(reserveAssets, rates, address(lendingRateOracle));
+    // transfer back ownership
+    // @TODO to where?
+    _stableVarHelper.setOracleOwnership(address(lendingRateOracle), address(this));
 
     return oracle;
   }
@@ -152,65 +155,106 @@ contract Deployment is Script {
   }
 
   function _deployAaveTokens(
-    address _ledingPoolProxy,
-    address _underlyingAsset
-  ) private returns (AToken, StableDebtToken, VariableDebtToken) {
+    IDeploymentConfig.Root memory _c,
+    address _ledingPoolProxy
+  ) private returns (AToken[] memory aTokens, StableDebtToken[] memory sdTokens, VariableDebtToken[] memory vdTokens) {
     // @TODO do we need DelegationAwareAToken?
     // @see helpers/contracts-deployments.ts
-    AToken a = new AToken();
-    // @TODO parameterize arguments
-    a.initialize(
-      ILendingPool(_ledingPoolProxy),
-      XAVE_TREASURY,
-      _underlyingAsset,
-      // @TODO do we need an incentives controller?
-      // can it be updated after?
-      IAaveIncentivesController(address(0)),
-      IERC20Detailed(_underlyingAsset).decimals(),
-      'aVCHF-USDC',
-      'aVCHF-USDC',
-      bytes('')
-    );
+    // cannot cache the length because of stack too deep error
+    aTokens = new AToken[](_c.aTokens.length);
+    sdTokens = new StableDebtToken[](_c.aTokens.length);
+    vdTokens = new VariableDebtToken[](_c.aTokens.length);
 
-    StableDebtToken sdt = new StableDebtToken();
-    sdt.initialize(
-      ILendingPool(_ledingPoolProxy),
-      _underlyingAsset,
-      // @TODO do we need an incentives controller?
-      // can it be updated after?
-      IAaveIncentivesController(address(0)),
-      IERC20Detailed(_underlyingAsset).decimals(),
-      '__sbtVCHF-USDC',
-      'sbtVCHF-USDC',
-      bytes('')
-    );
-    VariableDebtToken vdt = new VariableDebtToken();
+    for (uint256 i = 0; i < _c.aTokens.length; i++) {
+      AToken a = new AToken();
+      a.initialize(
+        ILendingPool(_ledingPoolProxy),
+        _c.protocolGlobalParams.treasury,
+        _c.aTokens[i].tokenAddress,
+        // @TODO do we need an incentives controller?
+        // can it be updated after?
+        IAaveIncentivesController(address(0)),
+        IERC20Detailed(_c.aTokens[i].tokenAddress).decimals(),
+        string(abi.encodePacked('a', _c.aTokens[i].tokenName)),
+        string(abi.encodePacked('a', _c.aTokens[i].tokenName)),
+        bytes('')
+      );
+      aTokens[i] = a;
 
-    vdt.initialize(
-      ILendingPool(_ledingPoolProxy),
-      _underlyingAsset,
-      IAaveIncentivesController(address(0)),
-      IERC20Detailed(_underlyingAsset).decimals(),
-      'vdtVCHF-USDC',
-      'vdtVCHF-USDC',
-      bytes('')
-    );
+      StableDebtToken sdt = new StableDebtToken();
+      sdt.initialize(
+        ILendingPool(_ledingPoolProxy),
+        _c.aTokens[i].tokenAddress,
+        // @TODO do we need an incentives controller?
+        // can it be updated after?
+        IAaveIncentivesController(address(0)),
+        IERC20Detailed(_c.aTokens[i].tokenAddress).decimals(),
+        string(abi.encodePacked('sbt', _c.aTokens[i].tokenName)),
+        string(abi.encodePacked('sbt', _c.aTokens[i].tokenName)),
+        bytes('')
+      );
+      sdTokens[i] = sdt;
 
-    return (a, sdt, vdt);
+      VariableDebtToken vdt = new VariableDebtToken();
+      vdt.initialize(
+        ILendingPool(_ledingPoolProxy),
+        _c.aTokens[i].tokenAddress,
+        IAaveIncentivesController(address(0)),
+        IERC20Detailed(_c.aTokens[i].tokenAddress).decimals(),
+        string(abi.encodePacked('vdt', _c.aTokens[i].tokenName)),
+        string(abi.encodePacked('vdt', _c.aTokens[i].tokenName)),
+        bytes('')
+      );
+      vdTokens[i] = vdt;
+    }
+
+    return (aTokens, sdTokens, vdTokens);
   }
 
-  function _readConfig() private returns (AssetAggregator[] memory) {
-    string memory root = vm.projectRoot();
-    string memory path = _stringContact(root, '/script/config.avax.json');
-    string memory json = vm.readFile(path);
-    bytes memory data = vm.parseJson(json, '.assetsAggregators');
-    AssetAggregator[] memory assets;
-    assets = abi.decode(data, (AssetAggregator[]));
-    return assets;
-  }
+  function _initReservesByHelper(
+    LendingPoolAddressesProvider _addressProvider,
+    IDeploymentConfig.Root memory _c
+  ) private {
+    (
+      AToken[] memory aTokens,
+      StableDebtToken[] memory sdTokens,
+      VariableDebtToken[] memory vdTokens
+    ) = _deployAaveTokens(_c, _addressProvider.getLendingPool());
+    LendingPoolConfigurator cfg = LendingPoolConfigurator(_addressProvider.getLendingPoolConfigurator());
 
-  function _stringContact(string memory a, string memory b) internal pure returns (string memory) {
-    return string(abi.encodePacked(a, b));
+    uint256 l = _c.rateStrategy.length;
+    ILendingPoolConfigurator.InitReserveInput[] memory cfgInput = new ILendingPoolConfigurator.InitReserveInput[](l);
+    for (uint256 i = 0; i < l; i++) {
+      DefaultReserveInterestRateStrategy strategy = new DefaultReserveInterestRateStrategy(
+        _addressProvider,
+        _c.rateStrategy[i].optimalUtilizationRate,
+        _c.rateStrategy[i].baseVariableBorrowRate,
+        _c.rateStrategy[i].variableRateSlope1,
+        _c.rateStrategy[i].variableRateSlope2,
+        _c.rateStrategy[i].stableRateSlope1,
+        _c.rateStrategy[i].stableRateSlope2
+      );
+
+      cfgInput[i] = ILendingPoolConfigurator.InitReserveInput({
+        aTokenImpl: address(aTokens[i]),
+        stableDebtTokenImpl: address(sdTokens[i]),
+        variableDebtTokenImpl: address(vdTokens[i]),
+        underlyingAssetDecimals: IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
+        interestRateStrategyAddress: address(strategy),
+        underlyingAsset: _c.rateStrategy[i].tokenAddress,
+        treasury: _c.protocolGlobalParams.treasury,
+        incentivesController: address(0),
+        underlyingAssetName: _c.rateStrategy[i].tokenReserve,
+        aTokenName: aTokens[i].name(),
+        aTokenSymbol: aTokens[i].symbol(),
+        variableDebtTokenName: vdTokens[i].name(),
+        variableDebtTokenSymbol: vdTokens[i].symbol(),
+        stableDebtTokenName: sdTokens[i].name(),
+        stableDebtTokenSymbol: sdTokens[i].symbol(),
+        params: bytes('')
+      });
+    }
+    // cfg.batchInitReserve(cfgInput);
   }
 }
 
