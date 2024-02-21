@@ -129,6 +129,7 @@ const buidlerConfig: HardhatUserConfig = {
     fuji: getCommonNetworkConfig(eAvalancheNetwork.fuji, 43113),
     arbitrum: getCommonNetworkConfig(eArbitrumNetwork.arbitrum, 42161),
     arbitrumRinkeby: getCommonNetworkConfig(eArbitrumNetwork.arbitrumRinkeby, 421611),
+    sepolia: getCommonNetworkConfig(eEthereumNetwork.sepolia, 11155111),
     /*
     hardhat: {
       hardfork: 'berlin',

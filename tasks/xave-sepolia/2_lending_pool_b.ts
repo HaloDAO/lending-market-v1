@@ -5,7 +5,7 @@ import {
   deployLendingPool,
   deployLendingPoolConfigurator,
   deployStableAndVariableTokensHelper,
-} from '../../helpers/contracts-deployments-ledger-ledger';
+} from '../../helpers/contracts-deployments-ledger';
 import { eContractid } from '../../helpers/types';
 import { waitForTx } from '../../helpers/misc-utils';
 import {

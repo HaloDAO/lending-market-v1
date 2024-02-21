@@ -84,9 +84,11 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
 
 export const getLedgerSigner = async (): Promise<Signer> => {
   const framerRPC = 'http://127.0.0.1:1248';
-
+  console.log('framer rpc  problem');
   const ledgerProvider = await new DRE.ethers.providers.JsonRpcProvider(framerRPC);
+  console.log('framer rpc not problem');
   const signer = await ledgerProvider.getSigner(0);
+  console.log('signer initialize');
 
   return signer;
 };
@@ -168,7 +170,7 @@ export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: an
 };
 
 export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
-  const { main, ropsten, kovan, coverage, buidlerevm, tenderly } = param as iEthereumParamsPerNetwork<T>;
+  const { main, ropsten, kovan, coverage, buidlerevm, tenderly, sepolia } = param as iEthereumParamsPerNetwork<T>;
   const { matic, mumbai } = param as iPolygonParamsPerNetwork<T>;
   const { xdai } = param as iXDaiParamsPerNetwork<T>;
   const { avalanche, fuji } = param as iAvalancheParamsPerNetwork<T>;
@@ -206,6 +208,8 @@ export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNet
       return arbitrum;
     case eArbitrumNetwork.arbitrumRinkeby:
       return arbitrumRinkeby;
+    case eEthereumNetwork.sepolia:
+      return sepolia;
   }
 };
 
