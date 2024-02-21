@@ -6,11 +6,11 @@ import 'forge-std/console2.sol';
 import {IERC20} from '../contracts/incentives/interfaces/IERC20.sol';
 
 import {LendingMarketTestHelper, IOracle, IAssimilator} from './LendingMarketTestHelper.t.sol';
-import {FXEthPriceFeedOracle, IFXPool, IAggregatorV3Interface} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXLPEthPriceFeedOracle, IFXPool, IAggregatorV3Interface} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
 import {IAaveOracle} from '../contracts/misc/interfaces/IAaveOracle.sol';
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
 
-contract FXEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
+contract FXLPEthPriceFeedOracleTest is Test, LendingMarketTestHelper {
   string private RPC_URL = vm.envString('POLYGON_RPC_URL');
   address constant XSGD_ASSIM = 0xC933a270B922acBd72ef997614Ec46911747b799;
   address constant USDC_ASSIM = 0xfbdc1B9E50F8607E6649d92542B8c48B2fc49a1a;

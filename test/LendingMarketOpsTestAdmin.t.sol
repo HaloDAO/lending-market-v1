@@ -21,7 +21,7 @@ import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToke
 import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 
-import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXLPEthPriceFeedOracle} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
 
 import {OpsConfigHelper, IOpsTestData} from './helpers/OpsConfigHelper.sol';
 
@@ -444,13 +444,11 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function _deployOracle(address asset, address baseAssim, address quoteAssim) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
+    FXLPEthPriceFeedOracle lpOracle = new FXLPEthPriceFeedOracle(
       asset,
       0xF9680D99D6C9589e2a93a78A04A279e509205945, // ETH USD Oracle
       'LPXSGD-USDC/ETH',
-      0xBA12222222228d8Ba445958a75a0704d566BF2C8, // Balancer Vault
-      baseAssim,
-      quoteAssim
+      0xBA12222222228d8Ba445958a75a0704d566BF2C8 // Balancer Vault
     );
 
     return address(lpOracle);

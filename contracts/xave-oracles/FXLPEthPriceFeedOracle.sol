@@ -21,7 +21,7 @@ import './libraries/Math.sol';
 //       - +5%,  10%,  15%
 //       - -5%, -10%, -15%
 
-contract FXEthPriceFeedOracle {
+contract FXLPEthPriceFeedOracle {
   using SafeCast for uint256;
 
   using ABDKMath64x64 for int128;
@@ -36,16 +36,12 @@ contract FXEthPriceFeedOracle {
   uint8 public immutable quoteDecimals;
   address public immutable vault;
   bytes32 public immutable poolId;
-  address public immutable baseAssimilator;
-  address public immutable quoteAssimilator;
 
   constructor(
     address _fxp, // FXPool address
     address _quotePriceFeed, // eg. ETH / USD
     string memory _priceFeed,
-    address _vault, // Balance Vault
-    address _baseAssimilator,
-    address _quoteAssimilator
+    address _vault // Balance Vault
   ) public {
     fxp = _fxp;
     quotePriceFeed = _quotePriceFeed;
@@ -53,8 +49,6 @@ contract FXEthPriceFeedOracle {
     priceFeed = _priceFeed;
     vault = _vault;
     poolId = IFXPool(_fxp).getPoolId();
-    baseAssimilator = _baseAssimilator;
-    quoteAssimilator = _quoteAssimilator;
   }
 
   function latestAnswer() external view returns (int256) {

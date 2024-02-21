@@ -1,0 +1,8 @@
+@ensdomains/=node_modules/@ensdomains/
+@nomiclabs/=node_modules/@nomiclabs/
+@openzeppelin/=node_modules/@openzeppelin/
+@solidity-parser/=node_modules/@nomiclabs/buidler/node_modules/@solidity-parser/
+ds-test/=lib/forge-std/lib/ds-test/src/
+eth-gas-reporter/=node_modules/eth-gas-reporter/
+forge-std/=lib/forge-std/src/
+hardhat/=node_modules/hardhat/

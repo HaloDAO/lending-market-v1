@@ -25,7 +25,7 @@ import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingp
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 
-import {FXEthPriceFeedOracle, IFXPool} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXLPEthPriceFeedOracle, IFXPool} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
 import '../contracts/xave-oracles/libraries/ABDKMath64x64.sol';
 
 contract LendingMarketTestHelper is Test {
@@ -82,13 +82,11 @@ contract LendingMarketTestHelper is Test {
   }
 
   function _deployAndSetLPOracle(address baseAssim, address quoteAssim) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle = new FXEthPriceFeedOracle(
+    FXLPEthPriceFeedOracle lpOracle = new FXLPEthPriceFeedOracle(
       LP_XSGD,
       ETH_USD_ORACLE,
       'LPXSGD-USDC/ETH',
-      BALANCER_VAULT,
-      baseAssim,
-      quoteAssim
+      BALANCER_VAULT
     );
 
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
