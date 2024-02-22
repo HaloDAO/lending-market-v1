@@ -6,18 +6,28 @@ import {CommonBase} from 'forge-std/Base.sol';
 interface IOpsTestData {
   struct Root {
     ChainlinkValues chainlink;
+    FaucetValues faucets;
     FXPoolValues fxPool;
     LendingPoolValues lendingPool;
+    ReserveConfigsValues reserveConfigs;
     ReservesValues reserves;
+    TokenValues tokens;
   }
 
   struct ChainlinkValues {
-    address usdEth;
-    address usdUsdc;
+    address ethUsd;
+    address usdcUsd;
+  }
+
+  struct FaucetValues {
+    address usdcWhale;
+    address xsgdWhale;
   }
 
   struct FXPoolValues {
+    address usdcAssimilator;
     address vault;
+    address xsgdAssimilator;
     address xsgdUsdcFxp;
   }
 
@@ -32,8 +42,26 @@ interface IOpsTestData {
     address priceOracle;
   }
 
+  struct ReserveConfigsValues {
+    ReserveConfig lpXsgdUsdc;
+  }
+
+  struct ReserveConfig {
+    uint256 baseLtv;
+    uint256 liquidationThreshold;
+    uint256 liquidationBonus;
+    uint256 reserveDecimals;
+    uint256 reserveFactor;
+  }
+
   struct ReservesValues {
     address usdc;
+    address xsgd;
+  }
+
+  struct TokenValues {
+    address usdc;
+    address xsgd;
   }
 }
 
