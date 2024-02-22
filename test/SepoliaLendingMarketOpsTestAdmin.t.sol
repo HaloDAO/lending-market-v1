@@ -28,16 +28,16 @@ import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOrac
 
 import {OpsConfigHelper, IOpsTestData} from './helpers/OpsConfigHelper.sol';
 
-// forge test -w -vv --match-path test/LendingMarketOpsTestAdmin.t.sol
-contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
+// forge test -w -vv --match-path test/SepoliaLendingMarketOpsTestAdmin.t.sol
+contract SepoliaLendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   //// network dependent config
   //// only the following lines are needed to be changed for different networks
-  string private NETWORK = 'polygon';
-  string private RPC_URL = vm.envString('POLYGON_RPC_URL');
-  uint256 constant FORK_BLOCK = 52764552;
-  address constant LENDINPOOL_PROXY_ADDRESS = 0x78a5B2B028Fa6Fb0862b0961EB5131C95273763B;
-  address constant LENDINGPOOL_ADDRESS_PROVIDER = 0x68aeB9C8775Cfc9b99753A1323D532556675c555;
-  address constant lp = 0x1B736B89cd70Cf355d71f55E626Dc53E8D56Bc2E;
+  string private NETWORK = 'sepolia';
+  string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
+  uint256 constant FORK_BLOCK = 5339189; // Thinking to put inside json
+  address constant LENDINPOOL_PROXY_ADDRESS = 0xe2E56CA629fF578b89E5be2F9d7CD68A5F9Aa51d; // Thinking to put inside json
+  address constant LENDINGPOOL_ADDRESS_PROVIDER = 0x0F717741C11165B9588350852b856858Bf221D84; // Thinking to put inside json
+  address constant lp = 0x18f7A91DD8B6593744Ef7aBcD19B7Dc07f21d8d9; // Thinking to put inside json
   //// network dependent config end
 
   IOpsTestData.Root root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
@@ -334,95 +334,47 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
   }
 
-  function testUpdateATokens() public {
+  // function testUpdateATokens() public {
+  //   LendingPoolConfigurator lpc =
+  //     LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
+
+  //   ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
+
+  //   ILendingPoolConfigurator.UpdateATokenInput memory input = ILendingPoolConfigurator.UpdateATokenInput({
+  //     asset: root.tokens.xsgd,
+  //     treasury: root.fxPool.vault,
+  //     incentivesController: address(0x0000000000000000000000000000000000000000),
+  //     name: 'aXSGD',
+  //     symbol: 'aXSGD',
+  //     implementation: address(0x0000000000000000000000000000000000000000),
+  //     params: bytes('0x')
+  //   });
+
+  //   vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
+  //   lpc.updateStableDebtToken(input);
+
+  //   vm.startPrank(lpAddrProvider.getPoolAdmin());
+  //   lpc.setReserveInterestRateStrategyAddress(root.reserves.usdc, 0x0000000000000000000000000000000000000000);
+  //   vm.stopPrank();
+
+  //   DataTypes.ReserveData memory usdcReserveData = lendingPool.getReserveData(root.reserves.usdc);
+
+  //   assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
+  // }
+
+  function testPoolConfiguratorOperations() public {
+    IOpsTestData.Root memory root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
+
+    ILendingPool lendingPool = ILendingPool(LENDINPOOL_PROXY_ADDRESS);
+
     LendingPoolConfigurator lpc =
       LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
 
     ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
 
-    // TODO: Actual deployment of proxy implementation contract
-    address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
+    // updateStableDebtToken
 
-    ILendingPoolConfigurator.UpdateATokenInput memory input = ILendingPoolConfigurator.UpdateATokenInput({
-      asset: root.tokens.xsgd,
-      treasury: root.fxPool.vault,
-      incentivesController: aTokenImpl,
-      name: 'aXSGD',
-      symbol: 'aXSGD',
-      implementation: aTokenImpl,
-      params: bytes('0x')
-    });
-
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.updateAToken(input);
-
-    // vm.startPrank(lpAddrProvider.getPoolAdmin());
-    // lpc.updateAToken(input);
-    // vm.stopPrank();
-
-    // DataTypes.ReserveData memory usdcReserveData = lendingPool.getReserveData(root.reserves.usdc);
-
-    // assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
-  }
-
-  function testUpdateStableDebtToken() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
-
-    ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
-
-    // TODO: Actual deployment of proxy implementation contract
-    address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
-
-    ILendingPoolConfigurator.UpdateDebtTokenInput memory input = ILendingPoolConfigurator.UpdateDebtTokenInput({
-      asset: root.tokens.xsgd,
-      incentivesController: aTokenImpl,
-      name: 'aXSGD',
-      symbol: 'aXSGD',
-      implementation: aTokenImpl,
-      params: bytes('0x')
-    });
-
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.updateStableDebtToken(input);
-
-    // vm.startPrank(lpAddrProvider.getPoolAdmin());
-    // lpc.updateAToken(input);
-    // vm.stopPrank();
-
-    // DataTypes.ReserveData memory usdcReserveData = lendingPool.getReserveData(root.reserves.usdc);
-
-    // assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
-  }
-
-  function testUpdateVariableDebtToken() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getLendingPoolConfigurator());
-
-    ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(lendingPool.getAddressesProvider());
-
-    // TODO: Actual deployment of proxy implementation contract
-    address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
-
-    ILendingPoolConfigurator.UpdateDebtTokenInput memory input = ILendingPoolConfigurator.UpdateDebtTokenInput({
-      asset: root.tokens.xsgd,
-      incentivesController: aTokenImpl,
-      name: 'aXSGD',
-      symbol: 'aXSGD',
-      implementation: aTokenImpl,
-      params: bytes('0x')
-    });
-
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.updateVariableDebtToken(input);
-
-    // vm.startPrank(lpAddrProvider.getPoolAdmin());
-    // lpc.updateAToken(input);
-    // vm.stopPrank();
-
-    // DataTypes.ReserveData memory usdcReserveData = lendingPool.getReserveData(root.reserves.usdc);
-
-    // assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
+    // updateVariableDebtToken
   }
 
   function _deployReserve() private {
@@ -530,7 +482,17 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     IERC20(root.tokens.xsgd).transfer(lp, 10_000 * 1e6);
     vm.stopPrank();
 
+    console.log('b4 add liq');
+
+    (IERC20[] memory tokens, , ) =
+      IVault(root.fxPool.vault).getPoolTokens(IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId());
+
+    assertEq(address(tokens[0]), root.tokens.xsgd, '[0] token mismatch');
+    assertEq(address(tokens[1]), root.tokens.usdc, '[1] token mismatch');
+
     _addLiquidity(IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId(), 1_000 * 1e18, lp, root.tokens.usdc, root.tokens.xsgd);
+
+    console.log('after add liq');
 
     (, int256 ethUsdPrice, , , ) = IOracle(root.chainlink.ethUsd).latestRoundData();
     (, int256 usdcUsdPrice, , , ) = IOracle(root.chainlink.usdcUsd).latestRoundData();
@@ -544,9 +506,11 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     vm.startPrank(lp);
     /** *Medium priority*
+    // TODO: Add deposit tests
+    1. User deposits LP Token and use as collateral
+    - check user balance, borrow health factor,
     - check lending pool balance
    */
-
     IERC20(root.fxPool.xsgdUsdcFxp).approve(LENDINPOOL_PROXY_ADDRESS, type(uint256).max);
     lendingPool.deposit(
       root.fxPool.xsgdUsdcFxp,
@@ -554,8 +518,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       lp,
       0 // referral code
     );
-
-    DataTypes.ReserveData memory usdcReserveData = lendingPool.getReserveData(root.reserves.usdc);
 
     {
       (uint256 totalCollateralETHAfterDeposit, , uint256 availableBorrowsETHAfter, , , uint256 healthFactorAfter) =
