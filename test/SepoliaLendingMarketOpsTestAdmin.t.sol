@@ -595,13 +595,9 @@ contract SepoliaLendingMarketOpsTestAdmin is Test, OpsConfigHelper {
    In future, Test incentive emission?
     */
 
-  function _addLiquidity(
-    bytes32 _poolId,
-    uint256 _depositNumeraire,
-    address _user,
-    address _tA,
-    address _tB
-  ) private {
+  function _addLiquidity(bytes32 _poolId, uint256 _depositNumeraire, address _user, address _tA, address _tB) private {
+    (_tA, _tB) = _tA < _tB ? (_tA, _tB) : (_tB, _tA);
+
     address[] memory assets = new address[](2);
     assets[0] = _tA;
     assets[1] = _tB;
