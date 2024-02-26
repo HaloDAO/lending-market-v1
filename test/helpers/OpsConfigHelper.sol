@@ -5,6 +5,7 @@ import {CommonBase} from 'forge-std/Base.sol';
 
 interface IOpsTestData {
   struct Root {
+    BlockchainValues blockchain;
     ChainlinkValues chainlink;
     FaucetValues faucets;
     FXPoolValues fxPool;
@@ -12,6 +13,11 @@ interface IOpsTestData {
     ReserveConfigsValues reserveConfigs;
     ReservesValues reserves;
     TokenValues tokens;
+  }
+
+  struct BlockchainValues {
+    address eoaWallet;
+    uint256 forkBlock;
   }
 
   struct ChainlinkValues {
@@ -34,12 +40,16 @@ interface IOpsTestData {
   struct LendingPoolValues {
     address admin;
     address collateralManager;
+    address donor;
     address emergencyAdmin;
+    address lendingAddressProvider;
+    address lendingPoolProxy;
     address lendingRateOracle;
     address oracleOwner;
     address poolAddress;
     address poolConfigurator;
     address priceOracle;
+    address treasury;
   }
 
   struct ReserveConfigsValues {

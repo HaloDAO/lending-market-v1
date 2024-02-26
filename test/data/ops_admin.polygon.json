@@ -1,4 +1,8 @@
 {
+  "blockchain": {
+    "eoaWallet": "0x1B736B89cd70Cf355d71f55E626Dc53E8D56Bc2E",
+    "forkBlock": 52764552
+  },
   "chainlink": {
     "ethUsd": "0xF9680D99D6C9589e2a93a78A04A279e509205945",
     "usdcUsd": "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7"
@@ -16,12 +20,16 @@
   "lendingPool": {
     "admin": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
     "collateralManager": "0xDF512Eb2468D4938D81fA1F15d91567c5EdEe6a8",
+    "donor": "0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245",
     "emergencyAdmin": "0x01e198818a895f01562E0A087595E5b1C7bb8d5c",
+    "lendingAddressProvider": "0x68aeB9C8775Cfc9b99753A1323D532556675c555",
+    "lendingPoolProxy": "0x78a5B2B028Fa6Fb0862b0961EB5131C95273763B",
     "lendingRateOracle": "0x25290edB1633c6b60a24C5FB3a321b91a67Cafe7",
     "oracleOwner": "0x01e198818a895f01562E0A087595E5b1C7bb8d5c",
     "poolAddress": "0x78a5B2B028Fa6Fb0862b0961EB5131C95273763B",
     "poolConfigurator": "0x0228bda708F5BA3b188D9CC8588B7dA4E254D492",
-    "priceOracle": "0x0200889C2733bB78641126DF27A0103230452b62"
+    "priceOracle": "0x0200889C2733bB78641126DF27A0103230452b62",
+    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd"
   },
   "reserveConfigs": {
     "lpXsgdUsdc": {
