@@ -1,12 +1,9 @@
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
-import {CommonBase} from 'forge-std/Base.sol';
-import 'forge-std/console2.sol';
 
 interface IDeploymentConfig {
   struct Root {
     DeploymentParams deploymentParams;
-    string marketId;
     ProtocolGlobalParams protocolGlobalParams;
     Token[] tokens;
   }
@@ -16,9 +13,14 @@ interface IDeploymentConfig {
   }
 
   struct ProtocolGlobalParams {
+    address ethUsdAggregator;
+    string marketId;
+    // for each chain, this address represents the native token aggregator
+    // eg. for avax it would be the avax-usd aggregator since the native token is avax
+    // eg. for arbitrum it would be the eth-usd aggregator since the native token is eth
+    address nativeTokenUsdChainLinkAggregator;
     address treasury;
     address usdAddress;
-    address usdAggregator;
     address wethAddress;
   }
 
@@ -55,19 +57,5 @@ interface IDeploymentConfig {
     uint256 reserveFactor;
     bool stableBorrowRateEnabled;
     string tokenReserve;
-  }
-}
-
-contract DeploymentConfigHelper is CommonBase {
-  function _readDeploymentConfig(string memory jsonFileName) internal returns (IDeploymentConfig.Root memory) {
-    string memory path = string(abi.encodePacked(vm.projectRoot(), '/deployments/', jsonFileName));
-    string memory json = vm.readFile(path);
-    bytes memory data = vm.parseJson(json);
-    IDeploymentConfig.Root memory root = abi.decode(data, (IDeploymentConfig.Root));
-
-    console2.log('tokens[1].rateStrategy.tokenReserve', root.tokens[1].rateStrategy.tokenReserve);
-    console2.log('tokens[1].reserveConfig.tokenReserve', root.tokens[1].reserveConfig.tokenReserve);
-
-    return root;
   }
 }

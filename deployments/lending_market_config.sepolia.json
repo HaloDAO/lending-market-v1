@@ -3,11 +3,12 @@
     "poolAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
     "poolEmergencyAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A"
   },
-  "marketId": "Xave Sepolia Market",
   "protocolGlobalParams": {
+    "ethUsdAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    "marketId": "Xave Sepolia Market",
+    "nativeTokenUsdChainLinkAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
     "treasury": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
     "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
-    "usdAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
     "wethAddress": "0x35da2a468dc7b2c20965235d4a60e2a2a9dace8f"
   },
   "tokens": [

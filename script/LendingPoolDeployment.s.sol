@@ -26,16 +26,24 @@ import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingp
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
-import {DeploymentConfigHelper, IDeploymentConfig} from './DeploymentConfigHelper.sol';
+import {IDeploymentConfig} from './interfaces/IDeploymentConfig.sol';
+
+import {DeploymentConfigHelper} from './helpers/DeploymentConfigHelper.sol';
 import {AaveProtocolDataProvider} from '../contracts/misc/AaveProtocolDataProvider.sol';
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 
-contract Deployment is Script, DeploymentConfigHelper {
+import {LendingPoolCollateralManager} from '../contracts/protocol/lendingpool/LendingPoolCollateralManager.sol';
+import {UiHaloPoolDataProvider} from '../contracts/misc/UiHaloPoolDataProvider.sol';
+import {UiIncentiveDataProvider} from '../contracts/misc/UiIncentiveDataProvider.sol';
+
+import {IChainlinkAggregator} from '../contracts/interfaces/IChainlinkAggregator.sol';
+
+contract LendingPoolDeployment is Script, DeploymentConfigHelper {
   using stdJson for string;
 
   function run() external {
     IDeploymentConfig.Root memory c = _readDeploymentConfig(
-      string(abi.encodePacked('deployments_config_sepolia.json'))
+      string(abi.encodePacked('lending_market_config.sepolia.json'))
     );
     // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
     // address deployerAddress = vm.addr(deployerPrivateKey);
@@ -50,6 +58,7 @@ contract Deployment is Script, DeploymentConfigHelper {
     // set the pool admin as the wallet deploying the contracts
     // later on we will transfer ownership to final desired owner
     addressProvider.setPoolAdmin(deployerAddress);
+    addressProvider.setMarketId(c.protocolGlobalParams.marketId);
 
     LendingPoolAddressesProviderRegistry registry = new LendingPoolAddressesProviderRegistry();
     registry.registerAddressesProvider(address(addressProvider), 1);
@@ -83,6 +92,11 @@ contract Deployment is Script, DeploymentConfigHelper {
     _initReservesByHelper(addressProvider, c);
     _configureReservesByHelper(addressProvider, c, aTokensHelper, deployerAddress);
 
+    (UiHaloPoolDataProvider uiDataProvider, UiIncentiveDataProvider uiIncentiveDataProvider) = _deployAncillaries(
+      addressProvider,
+      c
+    );
+
     // set final ownership
     registry.transferOwnership(c.deploymentParams.poolAdmin);
     addressProvider.setPoolAdmin(c.deploymentParams.poolAdmin);
@@ -94,9 +108,14 @@ contract Deployment is Script, DeploymentConfigHelper {
     vm.stopBroadcast();
 
     console2.log('~~~~~~~~~ POST DEPLOYMENT INFO ~~~~~~~~~');
-    console2.log('LendingPool\t', addressProvider.getLendingPool());
+    console2.log('MarketId\t\t\t', addressProvider.getMarketId());
+    console2.log('LendingPool\t\t\t', addressProvider.getLendingPool());
     console2.log('LendingPoolCollateralManager\t', addressProvider.getLendingPoolCollateralManager());
     console2.log('LendingPoolConfigurator\t', addressProvider.getLendingPoolConfigurator());
+    console2.log('PriceOracle\t\t\t', addressProvider.getPriceOracle());
+    console2.log('LendingRateOracle\t\t', addressProvider.getLendingRateOracle());
+    console2.log('uiDataProvider\t\t', address(uiDataProvider));
+    console2.log('uiIncentiveDataProvider\t', address(uiIncentiveDataProvider));
     console2.log('~~~~~~~~~~~~ OWNERSHIP INFO ~~~~~~~~~~~~');
 
     console2.log('addressProvider owner\t', addressProvider.owner());
@@ -125,11 +144,8 @@ contract Deployment is Script, DeploymentConfigHelper {
       aggregators[i] = _c.tokens[i].chainlinkAggregator.aggregator;
       rates[i] = _c.tokens[i].borrowRate;
     }
-    console2.log('treasury', _c.protocolGlobalParams.treasury);
-    console2.log('USD', _c.protocolGlobalParams.usdAddress);
-    console2.log('USD Aggregator', _c.protocolGlobalParams.usdAggregator);
     tokensToWatch[len] = _c.protocolGlobalParams.usdAddress;
-    aggregators[len] = _c.protocolGlobalParams.usdAggregator;
+    aggregators[len] = _c.protocolGlobalParams.ethUsdAggregator;
 
     // AaveOracle calls _setAssetSources which also checks assets.length == sources.length
     AaveOracle oracle = new AaveOracle(
@@ -283,6 +299,25 @@ contract Deployment is Script, DeploymentConfigHelper {
     }
 
     _aTokensHelper.configureReserves(inputParams);
+  }
+
+  function _deployAncillaries(
+    LendingPoolAddressesProvider _addressProvider,
+    IDeploymentConfig.Root memory _c
+  ) private returns (UiHaloPoolDataProvider, UiIncentiveDataProvider) {
+    LendingPoolCollateralManager manager = new LendingPoolCollateralManager();
+    _addressProvider.setLendingPoolCollateralManager(address(manager));
+
+    UiHaloPoolDataProvider dataProvider = new UiHaloPoolDataProvider(
+      IChainlinkAggregator(_c.protocolGlobalParams.nativeTokenUsdChainLinkAggregator),
+      IChainlinkAggregator(_c.protocolGlobalParams.ethUsdAggregator)
+    );
+
+    UiIncentiveDataProvider incentiveDataProvider = new UiIncentiveDataProvider();
+    // not needed by Aave directly so skip for now
+    // WalletBalanceProvider balanceProvider = new WalletBalanceProvider();
+
+    return (dataProvider, incentiveDataProvider);
   }
 }
 
