@@ -32,11 +32,11 @@ import {OpsConfigHelper, IOpsTestData} from './helpers/OpsConfigHelper.sol';
 contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   //// network dependent config
   //// only the following lines are needed to be changed for different networks
-  string private NETWORK = 'sepolia';
-  string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
+  // string private NETWORK = 'sepolia';
+  // string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
 
-  // string private NETWORK = 'polygon';
-  // string private RPC_URL = vm.envString('POLYGON_RPC_URL');
+  string private NETWORK = 'polygon';
+  string private RPC_URL = vm.envString('POLYGON_RPC_URL');
 
   //// network dependent config end
 
@@ -547,14 +547,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     address baseAssim,
     address quoteAssim
   ) internal returns (address) {
-    FXEthPriceFeedOracle lpOracle =
-      new FXEthPriceFeedOracle(
+    FXLPEthPriceFeedOracle lpOracle =
+      new FXLPEthPriceFeedOracle(
         asset,
         root.chainlink.ethUsd, // ETH USD Oracle
         'LPXSGD-USDC/ETH',
-        root.fxPool.vault, // Balancer Vault
-        baseAssim,
-        quoteAssim
+        root.fxPool.vault // Balancer Vault
       );
 
     return address(lpOracle);
