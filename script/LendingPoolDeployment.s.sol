@@ -45,13 +45,12 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     IDeploymentConfig.Root memory c = _readDeploymentConfig(
       string(abi.encodePacked('lending_market_config.sepolia.json'))
     );
+    // for local development uncomment the following lines
     // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
     // address deployerAddress = vm.addr(deployerPrivateKey);
     // vm.startBroadcast(deployerPrivateKey);
     vm.startBroadcast();
 
-    // @TODO call all the setters on the LendingPoolAddressesProvider
-    // see https://polygonscan.com/address/0x68aeB9C8775Cfc9b99753A1323D532556675c555#readContract
     LendingPoolAddressesProvider addressProvider = new LendingPoolAddressesProvider('Xave AVAX Market');
     // hacky: get the actual sender wallet address from the ownable contract
     address deployerAddress = addressProvider.owner();
@@ -308,8 +307,11 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     LendingPoolCollateralManager manager = new LendingPoolCollateralManager();
     _addressProvider.setLendingPoolCollateralManager(address(manager));
 
+    console2.log('ethUsdAggregator', _c.protocolGlobalParams.ethUsdAggregator);
+    console2.log('nativeTokenUsdAggregator', _c.protocolGlobalParams.nativeTokenUsdAggregator);
+
     UiHaloPoolDataProvider dataProvider = new UiHaloPoolDataProvider(
-      IChainlinkAggregator(_c.protocolGlobalParams.nativeTokenUsdChainLinkAggregator),
+      IChainlinkAggregator(_c.protocolGlobalParams.nativeTokenUsdAggregator),
       IChainlinkAggregator(_c.protocolGlobalParams.ethUsdAggregator)
     );
 

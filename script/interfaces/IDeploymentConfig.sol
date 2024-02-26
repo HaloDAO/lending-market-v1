@@ -13,12 +13,13 @@ interface IDeploymentConfig {
   }
 
   struct ProtocolGlobalParams {
+    // the ETH/USD Chainlink (compatible) aggregator address
     address ethUsdAggregator;
     string marketId;
-    // for each chain, this address represents the native token aggregator
-    // eg. for avax it would be the avax-usd aggregator since the native token is avax
-    // eg. for arbitrum it would be the eth-usd aggregator since the native token is eth
-    address nativeTokenUsdChainLinkAggregator;
+    // the [NATIVE_TOKEN]/USD Chainlink (compatible) aggregator address
+    // eg. for avax it would be the AVAX/USD aggregator since the native token is avax
+    // eg. for ethereum & arbitrum, it would be the ETH/USD aggregator since the native token is ETH
+    address nativeTokenUsdAggregator;
     address treasury;
     address usdAddress;
     address wethAddress;
