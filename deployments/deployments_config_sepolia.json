@@ -1,10 +1,33 @@
 {
   "borrowRates": [
-    "39000000000000000000000000",
-    "35000000000000000000000000",
-    "0"
+    39000000000000000000000000,
+    35000000000000000000000000,
+    0
   ],
+  "chainLinkAggregator": [
+    {
+      "aggregator": "0x0000000000000000000000000000000000000000",
+      "tokenReserve": "USDC"
+    },
+    {
+      "aggregator": "0x0000000000000000000000000000000000000000",
+      "tokenReserve": "XSGD"
+    },
+    {
+      "aggregator": "0x0000000000000000000000000000000000000000",
+      "tokenReserve": "LP_XSGD_USDC"
+    }
+  ],
+  "deploymentParams": {
+    "poolAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
+    "poolEmergencyAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A"
+  },
   "marketId": "Xave Sepolia Market",
+  "protocolGlobalParams": {
+    "treasury": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
+    "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
+    "usdAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306"
+  },
   "rateStrategy": [
     {
       "baseVariableBorrowRate": "0",
@@ -43,36 +66,36 @@
   "reserveConfigs": [
     {
       "aTokenImpl": "AToken",
-      "baseLTVAsCollateral": "8000",
+      "baseLTVAsCollateral": 8000,
       "borrowingEnabled": true,
-      "liquidationBonus": "10500",
-      "liquidationThreshold": "9000",
-      "reserveDecimals": "6",
-      "reserveFactor": "1000",
+      "liquidationBonus": 10500,
+      "liquidationThreshold": 9000,
+      "reserveDecimals": 6,
+      "reserveFactor": 1000,
       "stableBorrowRateEnabled": false,
       "tokenAddress": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",
       "tokenReserve": "USDC"
     },
     {
       "aTokenImpl": "AToken",
-      "baseLTVAsCollateral": "8000",
+      "baseLTVAsCollateral": 8000,
       "borrowingEnabled": true,
-      "liquidationBonus": "10500",
-      "liquidationThreshold": "9000",
-      "reserveDecimals": "6",
-      "reserveFactor": "1000",
+      "liquidationBonus": 10500,
+      "liquidationThreshold": 9000,
+      "reserveDecimals": 6,
+      "reserveFactor": 1000,
       "stableBorrowRateEnabled": false,
       "tokenAddress": "0x29388a985C5904BFa13524f8c3Cb8bC10A02864C",
       "tokenReserve": "XSGD"
     },
     {
       "aTokenImpl": "AToken",
-      "baseLTVAsCollateral": "8000",
+      "baseLTVAsCollateral": 8000,
       "borrowingEnabled": false,
-      "liquidationBonus": "10500",
-      "liquidationThreshold": "8000",
-      "reserveDecimals": "18",
-      "reserveFactor": "1000",
+      "liquidationBonus": 10500,
+      "liquidationThreshold": 8000,
+      "reserveDecimals": 18,
+      "reserveFactor": 1000,
       "stableBorrowRateEnabled": false,
       "tokenAddress": "0xb842336B3143a7C76EFDbc3Eb5bFadCa04d4d2Fa",
       "tokenReserve": "LP_XSGD_USDC"

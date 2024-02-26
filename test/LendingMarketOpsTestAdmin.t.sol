@@ -24,7 +24,7 @@ import {
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 // import {UpdateATokenInput, UpdateDebtTokenInput } from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 
-import {FXEthPriceFeedOracle} from '../contracts/xave-oracles/FXEthPriceFeedOracle.sol';
+import {FXLPEthPriceFeedOracle} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
 
 import {OpsConfigHelper, IOpsTestData} from './helpers/OpsConfigHelper.sol';
 

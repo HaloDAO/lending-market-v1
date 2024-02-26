@@ -8,7 +8,46 @@
     "0",
     "0"
   ],
+  "chainLinkAggregator": [
+    {
+      "aggregator": "0x0",
+      "tokenReserve": "USDC"
+    },
+    {
+      "aggregator": "0x0",
+      "tokenReserve": "EUROC"
+    },
+    {
+      "aggregator": "0x0",
+      "tokenReserve": "VCHF"
+    },
+    {
+      "aggregator": "0x0",
+      "tokenReserve": "VEUR"
+    },
+    {
+      "aggregator": "0x0",
+      "token": "LP_EUROC_USDC"
+    },
+    {
+      "aggregator": "0x0",
+      "token": "LP_VEUR_USDC"
+    },
+    {
+      "aggregator": "0x0",
+      "token": "LP_VCHF_USDC"
+    }
+  ],
+  "deploymentParams": {
+    "poolAdmin": "0xb84067DA877B5650e31674F5a42c1E614c03B14b",
+    "poolEmergencyAdmin": "0xb84067DA877B5650e31674F5a42c1E614c03B14b"
+  },
   "marketId": "Xave Avalanche Market",
+  "protocolGlobalParams": {
+    "treasury": "0xb84067DA877B5650e31674F5a42c1E614c03B14b",
+    "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
+    "usdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+  },
   "rateStrategy": [
     {
       "baseVariableBorrowRate": "0",
@@ -16,7 +55,7 @@
       "optimalUtilizationRate": "900000000000000000000000000",
       "stableRateSlope1": "0",
       "stableRateSlope2": "0",
-      "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "tokenAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
       "tokenReserve": "USDC",
       "variableRateSlope1": "40000000000000000000000000",
       "variableRateSlope2": "600000000000000000000000000"
@@ -98,7 +137,7 @@
       "reserveDecimals": "6",
       "reserveFactor": "1000",
       "stableBorrowRateEnabled": false,
-      "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "tokenAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
       "tokenReserve": "USDC"
     },
     {

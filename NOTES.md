@@ -10,7 +10,18 @@
 - Will the utility/function of the “XaveLendingToken” be exactly the same with the Aave V2 reward token?
 - Will the “XaveLendingToken” be open for market trading?
 - Do we want to implement the stkAAVE module/ insurance module?
-- FXPool halts at 90% : 10%? Should be at 80% : 20%? Alpha at 0.8
+- [x] FXPool halts at 90% : 10%? Should be at 80% : 20%? Alpha at 0.8
+- [x] MockVariableDebtToken included instead of VariableDebtToken
+- confirm the Treasury address
+- AVAX: no USDC/ETH, EUR/ETH, feed
+- add `fxPriceFeed` to the repo + create tests for it
+  - VCHF:
+    - base: CHF / USD; quote: ETH / USD
+  - USDC:
+    - base: USDC / USD; quote: ETH / USD
+- Sepolia:
+  - deploy Mock ETH / USD oracle
+  - deploy LP Oracle
 
 ---
 
