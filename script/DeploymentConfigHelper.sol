@@ -1,24 +1,15 @@
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 import {CommonBase} from 'forge-std/Base.sol';
+import 'forge-std/console2.sol';
 
 interface IDeploymentConfig {
   struct Root {
-    uint256[] borrowRates;
-    // @TODO need to deploy in advance and update the JSON config file
-    ChainlinkAggregator[] chainlinkAggregators;
     DeploymentParams deploymentParams;
     string marketId;
     ProtocolGlobalParams protocolGlobalParams;
-    RateStrategy[] rateStrategy;
-    ReserveConfig[] reserveConfigs;
+    Token[] tokens;
   }
-
-  struct ChainlinkAggregator {
-    address aggregator;
-    string tokenReserve;
-  }
-
   struct DeploymentParams {
     address poolAdmin;
     address poolEmergencyAdmin;
@@ -28,8 +19,32 @@ interface IDeploymentConfig {
     address treasury;
     address usdAddress;
     address usdAggregator;
+    address wethAddress;
   }
 
+  struct Token {
+    address addr;
+    uint256 borrowRate;
+    ChainlinkAggregator chainlinkAggregator;
+    RateStrategy rateStrategy;
+    ReserveConfig reserveConfig;
+  }
+
+  struct ChainlinkAggregator {
+    address aggregator;
+    string tokenReserve;
+  }
+
+  struct RateStrategy {
+    uint256 baseVariableBorrowRate;
+    string name;
+    uint256 optimalUtilizationRate;
+    uint256 stableRateSlope1;
+    uint256 stableRateSlope2;
+    string tokenReserve;
+    uint256 variableRateSlope1;
+    uint256 variableRateSlope2;
+  }
   struct ReserveConfig {
     string aTokenImpl;
     uint256 baseLTVAsCollateral;
@@ -39,20 +54,7 @@ interface IDeploymentConfig {
     uint256 reserveDecimals;
     uint256 reserveFactor;
     bool stableBorrowRateEnabled;
-    address tokenAddress;
     string tokenReserve;
-  }
-
-  struct RateStrategy {
-    uint256 baseVariableBorrowRate;
-    uint256 optimalUtilizationRate;
-    string name;
-    uint256 stableRateSlope1;
-    uint256 stableRateSlope2;
-    address tokenAddress;
-    string tokenReserve;
-    uint256 variableRateSlope1;
-    uint256 variableRateSlope2;
   }
 }
 
@@ -63,12 +65,8 @@ contract DeploymentConfigHelper is CommonBase {
     bytes memory data = vm.parseJson(json);
     IDeploymentConfig.Root memory root = abi.decode(data, (IDeploymentConfig.Root));
 
-    require(root.borrowRates.length == root.rateStrategy.length, 'borrowRates.length != rateStrategy.length');
-    require(
-      root.borrowRates.length == root.chainlinkAggregators.length,
-      'borrowRates.length != chainlinkAggregators.length'
-    );
-    require(root.borrowRates.length == root.reserveConfigs.length, 'borrowRates.length != reserveConfigs.length');
+    console2.log('tokens[1].rateStrategy.tokenReserve', root.tokens[1].rateStrategy.tokenReserve);
+    console2.log('tokens[1].reserveConfig.tokenReserve', root.tokens[1].reserveConfig.tokenReserve);
 
     return root;
   }
