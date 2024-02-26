@@ -21,7 +21,7 @@ import './libraries/Math.sol';
 //       - +5%,  10%,  15%
 //       - -5%, -10%, -15%
 
-contract FXLPEthPriceFeedOracle {
+contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
   using SafeCast for uint256;
 
   using ABDKMath64x64 for int128;
@@ -64,31 +64,6 @@ contract FXLPEthPriceFeedOracle {
     return ((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice);
   }
 
-  // function latestAnswer() external view returns (int256) {
-  //   uint256 _decimals = uint256(10 ** uint256(decimals));
-  //   (uint256 liquidity, ) = IFXPool(fxp).liquidity();
-  //   uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
-
-  //   int128 balTokenQuote = IAssimilator(quoteAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
-
-  //   int128 balTokenBase = IAssimilator(baseAssimilator).viewNumeraireBalanceLPRatio(WEIGHT, WEIGHT, vault, poolId);
-
-  //   uint256 totalSupply = IFXPool(fxp).totalSupply();
-
-  //   int128 oGLiq = balTokenQuote + balTokenBase;
-
-  //   // assimilator implementation
-  //   uint256 totalSupplyWithUnclaimedFees = totalSupply +
-  //     (((oGLiq.inv()).mulu(unclaimedFees) * totalSupply) / _decimals);
-
-  //   uint256 hlp_usd = (liquidity * (_decimals)) / (totalSupplyWithUnclaimedFees);
-
-  //   (, int256 quotePrice, , , ) = IAggregatorV3Interface(quotePriceFeed).latestRoundData();
-  //   quotePrice = _scaleprice(quotePrice, quoteDecimals, decimals);
-
-  //   return ((hlp_usd.toInt256()) * ((uint256(10 ** 18)).toInt256())) / (quotePrice);
-  // }
-
   function _scaleprice(int256 _price, uint8 _priceDecimals, uint8 _decimals) internal pure returns (int256) {
     if (_priceDecimals < _decimals) {
       return _price * ((10 ** (uint256(_decimals - _priceDecimals))).toInt256());
@@ -99,17 +74,35 @@ contract FXLPEthPriceFeedOracle {
   }
 }
 
-interface IAssimilator {
-  function viewNumeraireBalanceLPRatio(uint256, uint256, address, bytes32) external view returns (int128);
-}
-
 interface IAggregatorV3Interface {
+  event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp);
+
+  function aggregator() external view returns (address);
+
+  function decimals() external view returns (uint8);
+
   function latestRoundData()
     external
     view
     returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 
-  function decimals() external view returns (uint8);
+  function latestAnswer() external view returns (int256);
+
+  function getAnswer(uint256 roundId) external view returns (int256);
+
+  // IAggregatorPricingOnly
+  function getRoundData(
+    uint80 _roundId
+  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+
+  function proposedGetRoundData(
+    uint80 roundId
+  ) external view returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+
+  function proposedLatestRoundData()
+    external
+    view
+    returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
 
 interface IFXPool {
