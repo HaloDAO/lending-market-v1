@@ -25,7 +25,7 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
   }
 
   function aggregator() external view override returns (address) {
-    return address(0);
+    return address(this);
   }
 
   function decimals() external view override returns (uint8) {

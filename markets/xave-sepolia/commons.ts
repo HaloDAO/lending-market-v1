@@ -212,7 +212,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.tenderly]: '',
   },
   WETH: {
-    [eEthereumNetwork.sepolia]: ZERO_ADDRESS, // ledger
+    [eEthereumNetwork.sepolia]: '0x35da2a468dc7b2c20965235d4a60e2a2a9dace8f', // ledger
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.kovan]: '',
