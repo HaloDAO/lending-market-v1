@@ -44,9 +44,9 @@
   },
   "marketId": "Xave Avalanche Market",
   "protocolGlobalParams": {
+    "ethUsdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
     "treasury": "0xb84067DA877B5650e31674F5a42c1E614c03B14b",
-    "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
-    "usdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96"
   },
   "rateStrategy": [
     {

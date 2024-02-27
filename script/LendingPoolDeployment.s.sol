@@ -26,42 +26,38 @@ import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingp
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
-import {DeploymentConfigHelper, IDeploymentConfig} from './DeploymentConfigHelper.sol';
+import {IDeploymentConfig} from './interfaces/IDeploymentConfig.sol';
+
+import {DeploymentConfigHelper} from './helpers/DeploymentConfigHelper.sol';
 import {AaveProtocolDataProvider} from '../contracts/misc/AaveProtocolDataProvider.sol';
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 
-contract Deployment is Script, DeploymentConfigHelper {
-  using stdJson for string;
+import {LendingPoolCollateralManager} from '../contracts/protocol/lendingpool/LendingPoolCollateralManager.sol';
+import {UiHaloPoolDataProvider} from '../contracts/misc/UiHaloPoolDataProvider.sol';
+import {UiIncentiveDataProvider} from '../contracts/misc/UiIncentiveDataProvider.sol';
 
-  address constant LP_TOKEN = 0x0099111Ed107BDF0B05162356aEe433514AaC440; // VCHF/USDC LP
-  address constant ETH_USD_ORACLE = 0x976B3D034E162d8bD72D6b9C989d545b839003b0;
-  address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
-  address constant VCHF_ASSIM = 0xC2750ad1cbD8523BE6e51F7d8FC6394dD7194D2d;
-  address constant USDC_ASSIM = 0x21720736Ada52d8887aFAC20B05f02005fD6f272;
-  // @TODO confirm correct
-  address constant XAVE_TREASURY = 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd;
-  // @TODO WETH.e address, there's also a WETH address
-  address constant WETH = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
+import {IChainlinkAggregator} from '../contracts/interfaces/IChainlinkAggregator.sol';
+
+contract LendingPoolDeployment is Script, DeploymentConfigHelper {
+  using stdJson for string;
 
   function run() external {
     IDeploymentConfig.Root memory c = _readDeploymentConfig(
-      string(abi.encodePacked('deployments_config_sepolia.json'))
+      string(abi.encodePacked('lending_market_config.sepolia.json'))
     );
-    // IDeploymentConfig.Root memory c = _readDeploymentConfig(string(abi.encodePacked('deployments_config.json')));
+    // for local development uncomment the following lines
+    // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
+    // address deployerAddress = vm.addr(deployerPrivateKey);
+    // vm.startBroadcast(deployerPrivateKey);
+    vm.startBroadcast();
 
-    uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
-    address deployerAddress = vm.addr(deployerPrivateKey);
-
-    vm.startBroadcast(deployerPrivateKey);
-
-    // @TODO call all the setters on the LendingPoolAddressesProvider
-    // see https://polygonscan.com/address/0x68aeB9C8775Cfc9b99753A1323D532556675c555#readContract
     LendingPoolAddressesProvider addressProvider = new LendingPoolAddressesProvider('Xave AVAX Market');
-    // @TODO fix this, should be the wallet deploying the contracts or
-    // some other wallet?
-    // @TODO after deployment is done, the owner should be c.deploymentParams.poolAdmin and poolEmergecyAdmin
+    // hacky: get the actual sender wallet address from the ownable contract
+    address deployerAddress = addressProvider.owner();
+    // set the pool admin as the wallet deploying the contracts
+    // later on we will transfer ownership to final desired owner
     addressProvider.setPoolAdmin(deployerAddress);
-    addressProvider.setEmergencyAdmin(deployerAddress);
+    addressProvider.setMarketId(c.protocolGlobalParams.marketId);
 
     LendingPoolAddressesProviderRegistry registry = new LendingPoolAddressesProviderRegistry();
     registry.registerAddressesProvider(address(addressProvider), 1);
@@ -75,9 +71,6 @@ contract Deployment is Script, DeploymentConfigHelper {
     addressProvider.setLendingPoolConfiguratorImpl(address(configurator));
     address configuratorProxy = addressProvider.getLendingPoolConfigurator();
 
-    // @TODO is this needed? how is it used?
-    // stableAndVariableTokensHelper = await deployStableAndVariableTokensHelper(
-    // [lendingPoolProxy.address, addressesProvider.address],
     StableAndVariableTokensHelper stableVarHelper = new StableAndVariableTokensHelper(
       payable(lendingPoolProxy),
       address(addressProvider)
@@ -91,103 +84,115 @@ contract Deployment is Script, DeploymentConfigHelper {
 
     // await deployATokenImplementations(ConfigNames.Halo, poolConfig.ReservesConfig, verify);
     console2.log('deploying oracles');
-    _deployOracles(stableVarHelper, c);
+    _deployOracles(addressProvider, stableVarHelper, c);
     console2.log('deploying data provider');
     _deployDataProvider(addressProvider);
     console2.log('init reserves by helper');
     _initReservesByHelper(addressProvider, c);
     _configureReservesByHelper(addressProvider, c, aTokensHelper, deployerAddress);
 
+    (UiHaloPoolDataProvider uiDataProvider, UiIncentiveDataProvider uiIncentiveDataProvider) = _deployAncillaries(
+      addressProvider,
+      c
+    );
+
+    // set final ownership
+    registry.transferOwnership(c.deploymentParams.poolAdmin);
+    addressProvider.setPoolAdmin(c.deploymentParams.poolAdmin);
+    addressProvider.setEmergencyAdmin(c.deploymentParams.poolEmergencyAdmin);
+    addressProvider.transferOwnership(c.deploymentParams.poolAdmin);
+    stableVarHelper.transferOwnership(c.deploymentParams.poolAdmin);
+    aTokensHelper.transferOwnership(c.deploymentParams.poolAdmin);
+
     vm.stopBroadcast();
+
+    console2.log('~~~~~~~~~ POST DEPLOYMENT INFO ~~~~~~~~~');
+    console2.log('MarketId\t\t\t', addressProvider.getMarketId());
+    console2.log('LendingPool\t\t\t', addressProvider.getLendingPool());
+    console2.log('LendingPoolCollateralManager\t', addressProvider.getLendingPoolCollateralManager());
+    console2.log('LendingPoolConfigurator\t', addressProvider.getLendingPoolConfigurator());
+    console2.log('PriceOracle\t\t\t', addressProvider.getPriceOracle());
+    console2.log('LendingRateOracle\t\t', addressProvider.getLendingRateOracle());
+    console2.log('uiDataProvider\t\t', address(uiDataProvider));
+    console2.log('uiIncentiveDataProvider\t', address(uiIncentiveDataProvider));
+    console2.log('~~~~~~~~~~~~ OWNERSHIP INFO ~~~~~~~~~~~~');
+
+    console2.log('addressProvider owner\t', addressProvider.owner());
+    console2.log('pool admin\t\t', addressProvider.getPoolAdmin());
+    console2.log('pool emergency admin\t', addressProvider.getEmergencyAdmin());
+    console2.log('registry owner\t', registry.owner());
+    console2.log('stableVarHelper owner\t', stableVarHelper.owner());
+    console2.log('aTokensHelper owner\t', aTokensHelper.owner());
   }
 
   // deploy Aave Oracle with assets, sources, fallbackOracle, baseCurrency, baseCurrencyUnit
   function _deployOracles(
+    LendingPoolAddressesProvider _addressProvider,
     StableAndVariableTokensHelper _stableVarHelper,
     IDeploymentConfig.Root memory _c
-  ) private returns (AaveOracle) {
-    uint256 len = _c.borrowRates.length;
+  ) private {
+    uint256 len = _c.tokens.length;
     address[] memory reserveAssets = new address[](len);
     uint256[] memory rates = new uint256[](len);
     address[] memory aggregators = new address[](len + 1);
     // tokensToWatch is reserveAssets + USD
     address[] memory tokensToWatch = new address[](len + 1);
     for (uint256 i = 0; i < len; i++) {
-      reserveAssets[i] = _c.rateStrategy[i].tokenAddress;
-      tokensToWatch[i] = _c.rateStrategy[i].tokenAddress;
-      aggregators[i] = _c.chainlinkAggregators[i].aggregator;
-      rates[i] = _c.borrowRates[i];
+      reserveAssets[i] = _c.tokens[i].addr;
+      tokensToWatch[i] = _c.tokens[i].addr;
+      aggregators[i] = _c.tokens[i].chainlinkAggregator.aggregator;
+      rates[i] = _c.tokens[i].borrowRate;
     }
-    console2.log('treasury', _c.protocolGlobalParams.treasury);
-    console2.log('USD', _c.protocolGlobalParams.usdAddress);
-    console2.log('USD Aggregator', _c.protocolGlobalParams.usdAggregator);
     tokensToWatch[len] = _c.protocolGlobalParams.usdAddress;
-    aggregators[len] = _c.protocolGlobalParams.usdAggregator;
+    aggregators[len] = _c.protocolGlobalParams.ethUsdAggregator;
 
     // AaveOracle calls _setAssetSources which also checks assets.length == sources.length
     AaveOracle oracle = new AaveOracle(
       tokensToWatch,
       aggregators,
       address(0), // fallbackOracle
-      WETH, // baseCurrency
+      _c.protocolGlobalParams.wethAddress, // baseCurrency
       1e18 // baseCurrencyUnit
     );
 
     LendingRateOracle lendingRateOracle = new LendingRateOracle();
+
+    _addressProvider.setPriceOracle(address(oracle));
+    _addressProvider.setLendingRateOracle(address(lendingRateOracle));
+
     // transfer ownership to StableAndVariableTokensHelper
     lendingRateOracle.transferOwnership(address(_stableVarHelper));
     _stableVarHelper.setOracleBorrowRates(reserveAssets, rates, address(lendingRateOracle));
     // transfer back ownership
-    // @TODO to where?
-    _stableVarHelper.setOracleOwnership(address(lendingRateOracle), address(this));
-
-    return oracle;
+    _stableVarHelper.setOracleOwnership(address(lendingRateOracle), _c.deploymentParams.poolAdmin);
   }
 
   function _deployDataProvider(LendingPoolAddressesProvider _addressProvider) private {
     new AaveProtocolDataProvider(ILendingPoolAddressesProvider(_addressProvider));
   }
 
-  function _deployDefaultReserveInterestStrategy(
-    address _lendingPoolAddressProvider
-  ) private returns (DefaultReserveInterestRateStrategy) {
-    return
-      new DefaultReserveInterestRateStrategy(
-        ILendingPoolAddressesProvider(_lendingPoolAddressProvider),
-        0.9 * 1e27, // optimal utilization rate
-        0 * 1e27, // baseVariableBorrowRate
-        0.04 * 1e27, // variableRateSlope1
-        0.60 * 1e27, // variableRateSlope2
-        0.02 * 1e27, // stableRateSlope1
-        0.60 * 1e27 // stableRateSlope2
-      );
-  }
-
   function _deployAaveTokens(
     IDeploymentConfig.Root memory _c,
     address _ledingPoolProxy
   ) private returns (AToken[] memory aTokens, StableDebtToken[] memory sdTokens, VariableDebtToken[] memory vdTokens) {
-    // @TODO do we need DelegationAwareAToken?
     // @see helpers/contracts-deployments.ts
     // cannot cache the length because of stack too deep error
-    aTokens = new AToken[](_c.rateStrategy.length);
-    sdTokens = new StableDebtToken[](_c.rateStrategy.length);
-    vdTokens = new VariableDebtToken[](_c.rateStrategy.length);
+    aTokens = new AToken[](_c.tokens.length);
+    sdTokens = new StableDebtToken[](_c.tokens.length);
+    vdTokens = new VariableDebtToken[](_c.tokens.length);
 
-    for (uint256 i = 0; i < _c.rateStrategy.length; i++) {
-      console2.log('deploying aToken', i, _c.rateStrategy[i].tokenReserve);
-      console2.log('deploying aToken', i, _c.rateStrategy[i].tokenAddress);
+    for (uint256 i = 0; i < _c.tokens.length; i++) {
       AToken a = new AToken();
       a.initialize(
         ILendingPool(_ledingPoolProxy),
         _c.protocolGlobalParams.treasury,
-        _c.rateStrategy[i].tokenAddress,
+        _c.tokens[i].addr,
         // @TODO do we need an incentives controller?
         // can it be updated after?
         IAaveIncentivesController(address(0)),
-        IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
-        string(abi.encodePacked('a', _c.rateStrategy[i].tokenReserve)),
-        string(abi.encodePacked('a', _c.rateStrategy[i].tokenReserve)),
+        IERC20Detailed(_c.tokens[i].addr).decimals(),
+        string(abi.encodePacked('a', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('a', _c.tokens[i].rateStrategy.tokenReserve)),
         bytes('')
       );
       aTokens[i] = a;
@@ -195,13 +200,13 @@ contract Deployment is Script, DeploymentConfigHelper {
       StableDebtToken sdt = new StableDebtToken();
       sdt.initialize(
         ILendingPool(_ledingPoolProxy),
-        _c.rateStrategy[i].tokenAddress,
+        _c.tokens[i].addr,
         // @TODO do we need an incentives controller?
         // can it be updated after?
         IAaveIncentivesController(address(0)),
-        IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
-        string(abi.encodePacked('sbt', _c.rateStrategy[i].tokenReserve)),
-        string(abi.encodePacked('sbt', _c.rateStrategy[i].tokenReserve)),
+        IERC20Detailed(_c.tokens[i].addr).decimals(),
+        string(abi.encodePacked('sbt', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('sbt', _c.tokens[i].rateStrategy.tokenReserve)),
         bytes('')
       );
       sdTokens[i] = sdt;
@@ -209,11 +214,11 @@ contract Deployment is Script, DeploymentConfigHelper {
       VariableDebtToken vdt = new VariableDebtToken();
       vdt.initialize(
         ILendingPool(_ledingPoolProxy),
-        _c.rateStrategy[i].tokenAddress,
+        _c.tokens[i].addr,
         IAaveIncentivesController(address(0)),
-        IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
-        string(abi.encodePacked('vdt', _c.rateStrategy[i].tokenReserve)),
-        string(abi.encodePacked('vdt', _c.rateStrategy[i].tokenReserve)),
+        IERC20Detailed(_c.tokens[i].addr).decimals(),
+        string(abi.encodePacked('vdt', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('vdt', _c.tokens[i].rateStrategy.tokenReserve)),
         bytes('')
       );
       vdTokens[i] = vdt;
@@ -233,29 +238,29 @@ contract Deployment is Script, DeploymentConfigHelper {
     ) = _deployAaveTokens(_c, _addressProvider.getLendingPool());
     LendingPoolConfigurator cfg = LendingPoolConfigurator(_addressProvider.getLendingPoolConfigurator());
 
-    uint256 l = _c.rateStrategy.length;
+    uint256 l = _c.tokens.length;
 
     for (uint256 i = 0; i < l; i++) {
       DefaultReserveInterestRateStrategy strategy = new DefaultReserveInterestRateStrategy(
         _addressProvider,
-        _c.rateStrategy[i].optimalUtilizationRate,
-        _c.rateStrategy[i].baseVariableBorrowRate,
-        _c.rateStrategy[i].variableRateSlope1,
-        _c.rateStrategy[i].variableRateSlope2,
-        _c.rateStrategy[i].stableRateSlope1,
-        _c.rateStrategy[i].stableRateSlope2
+        _c.tokens[i].rateStrategy.optimalUtilizationRate,
+        _c.tokens[i].rateStrategy.baseVariableBorrowRate,
+        _c.tokens[i].rateStrategy.variableRateSlope1,
+        _c.tokens[i].rateStrategy.variableRateSlope2,
+        _c.tokens[i].rateStrategy.stableRateSlope1,
+        _c.tokens[i].rateStrategy.stableRateSlope2
       );
       ILendingPoolConfigurator.InitReserveInput[] memory cfgInput = new ILendingPoolConfigurator.InitReserveInput[](1);
       cfgInput[0] = ILendingPoolConfigurator.InitReserveInput({
         aTokenImpl: address(aTokens[i]),
         stableDebtTokenImpl: address(sdTokens[i]),
         variableDebtTokenImpl: address(vdTokens[i]),
-        underlyingAssetDecimals: IERC20Detailed(_c.rateStrategy[i].tokenAddress).decimals(),
+        underlyingAssetDecimals: IERC20Detailed(_c.tokens[i].addr).decimals(),
         interestRateStrategyAddress: address(strategy),
-        underlyingAsset: _c.rateStrategy[i].tokenAddress,
+        underlyingAsset: _c.tokens[i].addr,
         treasury: _c.protocolGlobalParams.treasury,
         incentivesController: address(0),
-        underlyingAssetName: _c.rateStrategy[i].tokenReserve,
+        underlyingAssetName: _c.tokens[i].rateStrategy.tokenReserve,
         aTokenName: aTokens[i].name(),
         aTokenSymbol: aTokens[i].symbol(),
         variableDebtTokenName: vdTokens[i].name(),
@@ -277,28 +282,44 @@ contract Deployment is Script, DeploymentConfigHelper {
   ) private {
     _addressProvider.setPoolAdmin(address(_aTokensHelper));
 
-    uint256 l = _c.reserveConfigs.length;
+    uint256 l = _c.tokens.length;
     ATokensAndRatesHelper.ConfigureReserveInput[]
       memory inputParams = new ATokensAndRatesHelper.ConfigureReserveInput[](l);
     for (uint256 i = 0; i < l; i++) {
-      console2.log('_c.reserveConfigs[i].aTokenImpl', i, _c.reserveConfigs[i].aTokenImpl);
-      console2.log('_c.reserveConfigs[i].baseLTVAsCollateral', i, _c.reserveConfigs[i].baseLTVAsCollateral);
-      console2.log('_c.reserveConfigs[i].liquidationThreshold', i, _c.reserveConfigs[i].liquidationThreshold);
-      console2.log('_c.reserveConfigs[i].liquidationBonus', i, _c.reserveConfigs[i].liquidationBonus);
       inputParams[i] = ATokensAndRatesHelper.ConfigureReserveInput({
-        asset: _c.reserveConfigs[i].tokenAddress,
-        baseLTV: _c.reserveConfigs[i].baseLTVAsCollateral,
-        liquidationThreshold: _c.reserveConfigs[i].liquidationThreshold,
-        liquidationBonus: _c.reserveConfigs[i].liquidationBonus,
-        reserveFactor: _c.reserveConfigs[i].reserveFactor,
-        stableBorrowingEnabled: _c.reserveConfigs[i].stableBorrowRateEnabled,
-        borrowingEnabled: _c.reserveConfigs[i].borrowingEnabled
+        asset: _c.tokens[i].addr,
+        baseLTV: _c.tokens[i].reserveConfig.baseLTVAsCollateral,
+        liquidationThreshold: _c.tokens[i].reserveConfig.liquidationThreshold,
+        liquidationBonus: _c.tokens[i].reserveConfig.liquidationBonus,
+        reserveFactor: _c.tokens[i].reserveConfig.reserveFactor,
+        stableBorrowingEnabled: _c.tokens[i].reserveConfig.stableBorrowRateEnabled,
+        borrowingEnabled: _c.tokens[i].reserveConfig.borrowingEnabled
       });
     }
 
     _aTokensHelper.configureReserves(inputParams);
+  }
 
-    _addressProvider.setPoolAdmin(_deployer);
+  function _deployAncillaries(
+    LendingPoolAddressesProvider _addressProvider,
+    IDeploymentConfig.Root memory _c
+  ) private returns (UiHaloPoolDataProvider, UiIncentiveDataProvider) {
+    LendingPoolCollateralManager manager = new LendingPoolCollateralManager();
+    _addressProvider.setLendingPoolCollateralManager(address(manager));
+
+    console2.log('ethUsdAggregator', _c.protocolGlobalParams.ethUsdAggregator);
+    console2.log('nativeTokenUsdAggregator', _c.protocolGlobalParams.nativeTokenUsdAggregator);
+
+    UiHaloPoolDataProvider dataProvider = new UiHaloPoolDataProvider(
+      IChainlinkAggregator(_c.protocolGlobalParams.nativeTokenUsdAggregator),
+      IChainlinkAggregator(_c.protocolGlobalParams.ethUsdAggregator)
+    );
+
+    UiIncentiveDataProvider incentiveDataProvider = new UiIncentiveDataProvider();
+    // not needed by Aave directly so skip for now
+    // WalletBalanceProvider balanceProvider = new WalletBalanceProvider();
+
+    return (dataProvider, incentiveDataProvider);
   }
 }
 
