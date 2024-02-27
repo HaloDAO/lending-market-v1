@@ -58,14 +58,14 @@ export const CommonsConfig: ICommonConfiguration = {
 
   // If PoolAdmin/emergencyAdmin is set, will take priority over PoolAdminIndex/emergencyAdminIndex
   PoolAdmin: {
-    [eAvalancheNetwork.avalanche]: undefined,
-    [eAvalancheNetwork.fuji]: undefined,
+    [eAvalancheNetwork.avalanche]: '0x009c4ba01488A15816093F96BA91210494E2C644',
+    [eAvalancheNetwork.fuji]: '0x009c4ba01488A15816093F96BA91210494E2C644',
   },
   PoolAdminIndex: 0,
   EmergencyAdminIndex: 0,
   EmergencyAdmin: {
-    [eAvalancheNetwork.avalanche]: undefined,
-    [eAvalancheNetwork.fuji]: undefined,
+    [eAvalancheNetwork.avalanche]: '0x009c4ba01488A15816093F96BA91210494E2C644',
+    [eAvalancheNetwork.fuji]: '0x009c4ba01488A15816093F96BA91210494E2C644',
   },
   ProviderRegistry: {
     [eAvalancheNetwork.avalanche]: '',

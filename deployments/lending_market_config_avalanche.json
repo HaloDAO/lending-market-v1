@@ -1,0 +1,211 @@
+{
+  "deploymentParams": {
+    "poolAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "poolEmergencyAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644"
+  },
+  "protocolGlobalParams": {
+    "marketId": "Xave Avalanche Market",
+    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
+    "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
+    "wethAddress": ""
+  },
+  "tokens": [
+    {
+      "addr": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "borrowRate": "39000000000000000000000000",
+      "chainLinkAggregator": {
+        "aggregator": "0xF096872672F44d6EBA71458D74fe67F9a77a23B9",
+        "tokenReserve": "USDC"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "USDC",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": true,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "9000",
+        "reserveDecimals": "6",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "USDC"
+      }
+    },
+    {
+      "addr": "0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD",
+      "borrowRate": "35000000000000000000000000",
+      "chainLinkAggregator": {
+        "tokenReserve": "EUROC"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "EUROC",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": true,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "9000",
+        "reserveDecimals": "6",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "EUROC"
+      }
+    },
+    {
+      "addr": "0x228a48df6819CCc2eCa01e2192ebAFfFdAD56c19",
+      "borrowRate": "35000000000000000000000000",
+      "chainLinkAggregator": {
+        "tokenReserve": "VCHF"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "VCHF",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": true,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "9000",
+        "reserveDecimals": "18",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "VCHF"
+      }
+    },
+    {
+      "addr": "0x7678e162f38ec9ef2Bfd1d0aAF9fd93355E5Fa0b",
+      "borrowRate": "35000000000000000000000000",
+      "chainLinkAggregator": {
+        "tokenReserve": "VEUR"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "VEUR",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": true,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "9000",
+        "reserveDecimals": "18",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "VEUR"
+      }
+    },
+    {
+      "addr": "0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2",
+      "borrowRate": "0",
+      "chainLinkAggregator": {
+        "tokenReserve": "LP_EUROC_USDC"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "LP_EUROC_USDC",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": false,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "8000",
+        "reserveDecimals": "18",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "LP_EUROC_USDC"
+      }
+    },
+    {
+      "addr": "0x28F3a9e42667519c83cB090b5c4f6bd34e9F5569",
+      "borrowRate": "0",
+      "chainLinkAggregator": {
+        "tokenReserve": "LP_VEUR_USDC"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "LP_VEUR_USDC",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": false,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "8000",
+        "reserveDecimals": "18",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "LP_VEUR_USDC"
+      }
+    },
+    {
+      "addr": "0x0099111Ed107BDF0B05162356aEe433514AaC440",
+      "borrowRate": "0",
+      "chainLinkAggregator": {
+        "tokenReserve": "LP_VCHF_USDC"
+      },
+      "rateStrategy": {
+        "baseVariableBorrowRate": "0",
+        "name": "rateStrategyStableThree",
+        "optimalUtilizationRate": "900000000000000000000000000",
+        "stableRateSlope1": "0",
+        "stableRateSlope2": "0",
+        "tokenReserve": "LP_VCHF_USDC",
+        "variableRateSlope1": "40000000000000000000000000",
+        "variableRateSlope2": "600000000000000000000000000"
+      },
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": "8000",
+        "borrowingEnabled": false,
+        "liquidationBonus": "10500",
+        "liquidationThreshold": "8000",
+        "reserveDecimals": "18",
+        "reserveFactor": "1000",
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "LP_VCHF_USDC"
+      }
+    }
+  ]
+}

@@ -20,7 +20,7 @@ export const stringToBigNumber = (amount: string): BigNumber => new BigNumber(am
 export const getDb = () => low(new FileSync('./deployed-contracts.json'));
 
 export const getXaveDeploymentDb = (network: string) =>
-  low(new FileSync(`./deployments/deployments_config_${network}.json`));
+  low(new FileSync(`./deployments/lending_market_config_${network}.json`));
 
 export let DRE: HardhatRuntimeEnvironment | BuidlerRuntimeEnvironment;
 
