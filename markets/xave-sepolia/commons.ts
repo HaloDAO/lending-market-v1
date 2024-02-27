@@ -175,7 +175,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.sepolia]: {
       USDC: '0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E',
       XSGD: '0xd9239bB559B8f16DCD67f6186166d218b7514397',
-      LP_XSGD_USDC: ZERO_ADDRESS, // @todo deploy this
+      LP_XSGD_USDC: '0x11686977Ee03B751A15A9E239322cbBbAbc3Baa6', // @todo deploy this
     },
     [eEthereumNetwork.coverage]: {},
     [eEthereumNetwork.buidlerevm]: {},
