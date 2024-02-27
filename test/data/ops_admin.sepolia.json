@@ -1,7 +1,7 @@
 {
   "blockchain": {
     "eoaWallet": "0x18f7A91DD8B6593744Ef7aBcD19B7Dc07f21d8d9",
-    "forkBlock": 5339189
+    "forkBlock": 5371661
   },
   "chainlink": {
     "ethUsd": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
@@ -18,17 +18,18 @@
     "xsgdUsdcFxp": "0xb842336B3143a7C76EFDbc3Eb5bFadCa04d4d2Fa"
   },
   "lendingPool": {
-    "admin": "0x6D268872e5E0349072FcDB13410102daFCF73D30",
-    "collateralManager": "0xff551F4AFDCB6eb1306Bf226b30593393dfb4F95",
+    "admin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
+    "collateralManager": "0x410CF02414f80dC7b077177D28333FB15F6cD3F0",
     "donor": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
-    "emergencyAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644",
-    "lendingAddressProvider": "0x0F717741C11165B9588350852b856858Bf221D84",
-    "lendingPoolProxy": "0xe2E56CA629fF578b89E5be2F9d7CD68A5F9Aa51d",
-    "lendingRateOracle": "0x2d094708165FF2BB410fE6699ada81989f1804De",
+    "emergencyAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
+    "lendingAddressProvider": "0x1C74b4376D2331b6Fdc864ba4e311b38AEe3916F",
+    "lendingPoolConfiguratorContract": "0xb34cd8d48fCB65Ea4A04125Db7BCB7C61cC1A360",
+    "lendingPoolProxy": "0x670eAF2Da8b1BDb1496826EFBE30bA1f53d7b000",
+    "lendingRateOracle": "0xBA43cbC7f0871f17B70C0b4697EFD2C562144c4F",
     "oracleOwner": "0x009c4ba01488A15816093F96BA91210494E2C644",
-    "poolAddress": "0xe2E56CA629fF578b89E5be2F9d7CD68A5F9Aa51d",
-    "poolConfigurator": "0xb34cd8d48fCB65Ea4A04125Db7BCB7C61cC1A360",
-    "priceOracle": "0xCb0b358cF6133aA55B5E4483aD0F4dE511590C77",
+    "poolAddress": "0x670eAF2Da8b1BDb1496826EFBE30bA1f53d7b000",
+    "poolConfigurator": "0xbD18c755Ce6FDe90b84E3C4F26cfe0c174f39DaB",
+    "priceOracle": "0x02F86471d7Caf6738653D94B63d7d14D8003B13e",
     "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd"
   },
   "reserveConfigs": {
@@ -41,8 +42,9 @@
     }
   },
   "reserves": {
-    "usdc": "0x2eB4157CeFeb13C6E38035A11244E19BC396e97C",
-    "xsgd": "0x0000000000000000000000000000000000000000"
+    "lpXsgdUsdc": "0xD24beD8a9403dDbFA76dFbd65C4125E588fb21f8",
+    "usdc": "0xABbE99cF4868442840d8B0Fb59De9d81df2Fa656",
+    "xsgd": "0x6CeF93944d3e8a94EeDF0c333441bE1Da188E58D"
   },
   "tokens": {
     "usdc": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",

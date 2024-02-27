@@ -12,7 +12,12 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
   address public immutable quotePriceFeed;
   uint8 private immutable feedDecimals;
 
-  constructor(address _basePriceFeed, address _quotePriceFeed, uint8 _decimals, string memory _description) public {
+  constructor(
+    address _basePriceFeed,
+    address _quotePriceFeed,
+    uint8 _decimals,
+    string memory _description
+  ) public {
     basePriceFeed = _basePriceFeed;
     quotePriceFeed = _quotePriceFeed;
     description = _description;
@@ -35,13 +40,17 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
     return _price();
   }
 
-  function getRoundData(
-    uint80 _roundId
-  )
+  function getRoundData(uint80 _roundId)
     external
     view
     override
-    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    )
   {
     roundId = 1;
     startedAt = block.timestamp;
@@ -54,7 +63,13 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
     external
     view
     override
-    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    )
   {
     roundId = 1;
     startedAt = block.timestamp;
@@ -63,13 +78,17 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
     answer = _price();
   }
 
-  function proposedGetRoundData(
-    uint80 roundId
-  )
+  function proposedGetRoundData(uint80 roundId)
     external
     view
     override
-    returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+    returns (
+      uint80 id,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    )
   {
     id = 1;
     answer = _price();
@@ -82,7 +101,13 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
     external
     view
     override
-    returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+    returns (
+      uint80 id,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    )
   {
     id = 1;
     answer = _price();
@@ -92,7 +117,7 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
   }
 
   function _price() internal view returns (int256) {
-    int256 _decimals = int256(10 ** (uint256(feedDecimals)));
+    int256 _decimals = int256(10**(uint256(feedDecimals)));
 
     (, int256 basePrice, uint256 startedAtBase, , ) = IAggregatorV3Interface(basePriceFeed).latestRoundData();
 
@@ -118,11 +143,15 @@ contract FXEthBasePriceFeedOracle is IAggregatorV3Interface {
     return int256(uint256(basePrice).mul(uint256(_decimals)).div(uint256(quotePrice)));
   }
 
-  function _scaleprice(int256 _price, uint8 _priceDecimals, uint8 _decimals) internal pure returns (int256) {
+  function _scaleprice(
+    int256 _price,
+    uint8 _priceDecimals,
+    uint8 _decimals
+  ) internal pure returns (int256) {
     if (_priceDecimals < _decimals) {
-      return int256(uint256(_price).mul(uint256((10 ** (uint256(_decimals - _priceDecimals))))));
+      return int256(uint256(_price).mul(uint256((10**(uint256(_decimals - _priceDecimals))))));
     } else if (_priceDecimals > _decimals) {
-      return int256(uint256(_price).mul(uint256((10 ** (uint256(_priceDecimals - _decimals))))));
+      return int256(uint256(_price).mul(uint256((10**(uint256(_priceDecimals - _decimals))))));
     }
     return _price;
   }
