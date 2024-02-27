@@ -18,6 +18,7 @@ import {IAToken} from '../contracts/interfaces/IAToken.sol';
 import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
+import {LendingPool} from '../contracts/protocol/lendingpool/LendingPool.sol';
 import {
   DefaultReserveInterestRateStrategy
 } from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
@@ -187,6 +188,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testActivateAndDeactivateReserve() public {
+    LendingPool lendingPool = LendingPool(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPool());
     LendingPoolConfigurator lpc =
       LendingPoolConfigurator(
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
@@ -195,46 +197,28 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     ILendingPoolAddressesProvider lpAddrProvider =
       ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
 
-    console.log('lpAddrProvider.owner', ILendingPoolAddressesProviderWithOwner(address(lpAddrProvider)).owner());
-
-    vm.startPrank(0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A);
-    lpAddrProvider.setPoolAdmin(root.lendingPool.admin);
-    vm.stopPrank();
-
-    console.log('lpAddrProvider.owner', ILendingPoolAddressesProviderWithOwner(address(lpAddrProvider)).owner());
-
-    console.log('root.lendingPool.poolAddress: %s', root.lendingPool.poolAddress);
-    console.log('lpAddrProvider.getPoolAdmin(): %s', lpAddrProvider.getPoolAdmin());
-    console.log('root.lendingPool.admin: %s', root.lendingPool.admin);
     assertEq(lpAddrProvider.getPoolAdmin(), root.lendingPool.admin, 'correct pool admin set');
-
-    console.log('lpAddrProvider.getLendingPoolConfigurator(): %s', lpAddrProvider.getLendingPoolConfigurator());
 
     // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.activateReserve(root.reserves.usdc);
 
-    vm.startPrank(root.lendingPool.admin);
+    vm.prank(root.lendingPool.admin);
     lpc.activateReserve(root.reserves.usdc);
-    vm.stopPrank();
 
     // TODO: Failing in sepolia because the USDC reserve is of different address
-    // bool usdcReserveActive = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0;
-    // assertEq(usdcReserveActive, true, 'USDC borrowing enabled');
+    bool usdcReserveActive = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0;
+    assertEq(usdcReserveActive, true, 'USDC borrowing enabled');
 
-    // // Expect to fail if msg.sender is not poolAdmin
-    // vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    // lpc.deactivateReserve(root.reserves.usdc);
+    // Expect to fail if msg.sender is not poolAdmin
+    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
+    lpc.deactivateReserve(root.reserves.usdc);
 
-    // vm.startPrank(root.lendingPool.admin);
-    // // Will fail because [FAIL. Reason: revert: Cannot call fallback function from the proxy admin]
-    // vm.expectRevert(); // TODO: Remove once there is a fallback reserve
-    // lpc.deactivateReserve(root.reserves.usdc);
-    // // vm.expectEmit();
-    // vm.stopPrank();
+    vm.prank(root.lendingPool.admin);
+    lpc.deactivateReserve(root.reserves.usdc);
 
-    // DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-    //   lendingPool.getConfiguration(root.reserves.usdc);
+    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
+      lendingPool.getConfiguration(root.reserves.usdc);
 
     // assertEq(
     //   (((lendingPool.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0), // bit 56: Reserve is active
@@ -695,16 +679,16 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     (, int256 ethUsdPrice, , , ) = IOracle(root.chainlink.ethUsd).latestRoundData();
     (, int256 usdcUsdPrice, , , ) = IOracle(root.chainlink.usdcUsd).latestRoundData();
 
-    _addNewReserve();
+    // _addNewReserve();
 
     (uint256 totalCollateralETHBefore, , , , , uint256 healthFactorBefore) =
       lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
 
-    vm.startPrank(root.blockchain.eoaWallet);
     /** *Medium priority*
     - check lending pool balance
    */
 
+    vm.startPrank(root.blockchain.eoaWallet);
     IERC20(root.fxPool.xsgdUsdcFxp).approve(root.lendingPool.lendingPoolProxy, type(uint256).max);
     lendingPoolContract.deposit(
       root.fxPool.xsgdUsdcFxp,
@@ -712,6 +696,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       root.blockchain.eoaWallet,
       0 // referral code
     );
+    vm.stopPrank();
 
     DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.reserves.usdc);
 
@@ -720,9 +705,13 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
 
       uint256 maxAvailableUsdcBorrows =
-        (((availableBorrowsETHAfter * uint256(ethUsdPrice)) / uint256(usdcUsdPrice)) / 1e18);
+        (((availableBorrowsETHAfter * uint256(ethUsdPrice) * 1e6) / uint256(usdcUsdPrice)) / 1e18);
 
       uint256 usdcBalBeforeBorrow = IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet);
+      console2.log("totalCollateralETHAfterDeposit", totalCollateralETHAfterDeposit);
+      console2.log("availableBorrowsETHAfter", availableBorrowsETHAfter);
+      console2.log("usdc bal before borrow", usdcBalBeforeBorrow);
+      console2.log("maxAvailableUsdcBorrows", maxAvailableUsdcBorrows);
 
       // TODO: Another LP deposit USDC to ensure there is USDC reserve balance
 
@@ -738,7 +727,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
       // BORROW_ALLOWANCE_NOT_ENOUGH 59
 
-      vm.startPrank(root.blockchain.eoaWallet);
+
+
+      vm.prank(root.blockchain.eoaWallet);
       lendingPoolContract.borrow(
         root.tokens.usdc,
         maxAvailableUsdcBorrows,
@@ -747,9 +738,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         root.blockchain.eoaWallet
       );
 
-      vm.stopPrank();
 
       uint256 usdcBalAfterBorrow = IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet);
+      console2.log("usdc bal after borrow", usdcBalAfterBorrow);
 
       (uint256 totalCollateralETHAfterBorrow, , , , , uint256 healthFactorAfterBorrow) =
         lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
@@ -760,12 +751,11 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         'USDC balance increased after borrow'
       );
 
-      vm.startPrank(root.lendingPool.donor);
       DataTypes.ReserveData memory rdUSDC = lendingPoolContract.getReserveData(root.tokens.usdc);
       DataTypes.ReserveData memory rdLPXSGD = lendingPoolContract.getReserveData(root.fxPool.xsgdUsdcFxp);
 
       // TODO: Manipulate price to make loan health of eoa wallet below 1
-
+      vm.prank(root.lendingPool.donor);
       lendingPoolContract.liquidationCall(
         root.fxPool.xsgdUsdcFxp,
         root.tokens.usdc,
@@ -773,9 +763,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         type(uint256).max,
         true
       );
-
-      vm.stopPrank();
-
       // Assert balance of donor to increase in LP token
 
       // Assert loan health and position of eoa wallet to decrease
@@ -815,7 +802,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         'LP Token balance increased after withdraw'
       );
     }
-    vm.stopPrank();
   }
 
   /** *High Priority*

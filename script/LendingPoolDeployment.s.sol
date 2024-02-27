@@ -8,6 +8,7 @@ import 'forge-std/Script.sol';
 import 'forge-std/StdJson.sol';
 import 'forge-std/console2.sol';
 
+import {IERC20Detailed} from '../contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {FXLPEthPriceFeedOracle} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
 import {LendingPoolAddressesProviderRegistry} from '../contracts/protocol/configuration/LendingPoolAddressesProviderRegistry.sol';
 import {LendingPoolAddressesProvider} from '../contracts/protocol/configuration/LendingPoolAddressesProvider.sol';
@@ -27,19 +28,22 @@ import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentives
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
 import {IDeploymentLendingMarketConfig} from './interfaces/IDeploymentLendingMarketConfig.sol';
-
 import {DeploymentConfigHelper} from './helpers/DeploymentConfigHelper.sol';
 import {AaveProtocolDataProvider} from '../contracts/misc/AaveProtocolDataProvider.sol';
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
-
 import {LendingPoolCollateralManager} from '../contracts/protocol/lendingpool/LendingPoolCollateralManager.sol';
 import {UiHaloPoolDataProvider} from '../contracts/misc/UiHaloPoolDataProvider.sol';
 import {UiIncentiveDataProvider} from '../contracts/misc/UiIncentiveDataProvider.sol';
-
 import {IChainlinkAggregator} from '../contracts/interfaces/IChainlinkAggregator.sol';
+import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
+import {IAToken} from '../contracts/interfaces/IAToken.sol';
+import {ReserveConfiguration} from '../contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 
 contract LendingPoolDeployment is Script, DeploymentConfigHelper {
   using stdJson for string;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
+  DataTypes.ReserveData private _reserveData;
 
   function run() external {
     IDeploymentLendingMarketConfig.Root memory c = _readDeploymentLendingMarketConfig(
@@ -51,7 +55,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     // vm.startBroadcast(deployerPrivateKey);
     vm.startBroadcast();
 
-    LendingPoolAddressesProvider addressProvider = new LendingPoolAddressesProvider('Xave AVAX Market');
+    LendingPoolAddressesProvider addressProvider = new LendingPoolAddressesProvider(c.protocolGlobalParams.marketId);
     // hacky: get the actual sender wallet address from the ownable contract
     address deployerAddress = addressProvider.owner();
     // set the pool admin as the wallet deploying the contracts
@@ -108,6 +112,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
 
     console2.log('~~~~~~~~~ POST DEPLOYMENT INFO ~~~~~~~~~');
     console2.log('MarketId\t\t\t', addressProvider.getMarketId());
+    console2.log('LendingPoolAddressProvider\t', address(addressProvider));
     console2.log('LendingPool\t\t\t', addressProvider.getLendingPool());
     console2.log('LendingPoolCollateralManager\t', addressProvider.getLendingPoolCollateralManager());
     console2.log('LendingPoolConfigurator\t', addressProvider.getLendingPoolConfigurator());
@@ -115,6 +120,21 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     console2.log('LendingRateOracle\t\t', addressProvider.getLendingRateOracle());
     console2.log('uiDataProvider\t\t', address(uiDataProvider));
     console2.log('uiIncentiveDataProvider\t', address(uiIncentiveDataProvider));
+    console2.log('~~~~~~~~~~~~~ RESERVE DATA ~~~~~~~~~~~~~');
+
+    address[] memory rl = ILendingPool(addressProvider.getLendingPool()).getReservesList();
+    for (uint256 i = 0; i < rl.length; i++) {
+      _reserveData = ILendingPool(addressProvider.getLendingPool()).getReserveData(rl[i]);
+      console2.log(
+        string(abi.encodePacked('Reserve AToken\t\t\t', IERC20Detailed(_reserveData.aTokenAddress).symbol(), '\t\t')),
+        _reserveData.aTokenAddress
+      );
+      console2.log('Reserve Configuration\t\t',
+        _reserveData.configuration.getActive(),
+        _reserveData.configuration.getLiquidationThreshold()
+        );
+    }
+
     console2.log('~~~~~~~~~~~~ OWNERSHIP INFO ~~~~~~~~~~~~');
 
     console2.log('addressProvider owner\t', addressProvider.owner());
@@ -321,8 +341,4 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
 
     return (dataProvider, incentiveDataProvider);
   }
-}
-
-interface IERC20Detailed {
-  function decimals() external view returns (uint8);
 }

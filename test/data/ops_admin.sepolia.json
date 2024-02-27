@@ -22,7 +22,7 @@
     "collateralManager": "0x410CF02414f80dC7b077177D28333FB15F6cD3F0",
     "donor": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
     "emergencyAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
-    "lendingAddressProvider": "0x0F717741C11165B9588350852b856858Bf221D84",
+    "lendingAddressProvider": "0x1C74b4376D2331b6Fdc864ba4e311b38AEe3916F",
     "lendingPoolConfiguratorContract": "0xb34cd8d48fCB65Ea4A04125Db7BCB7C61cC1A360",
     "lendingPoolProxy": "0x670eAF2Da8b1BDb1496826EFBE30bA1f53d7b000",
     "lendingRateOracle": "0xBA43cbC7f0871f17B70C0b4697EFD2C562144c4F",
