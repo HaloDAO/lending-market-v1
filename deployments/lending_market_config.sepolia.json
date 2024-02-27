@@ -16,7 +16,7 @@
       "addr": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",
       "borrowRate": 39000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E",
         "tokenReserve": "USDC"
       },
       "rateStrategy": {
@@ -45,7 +45,7 @@
       "addr": "0x29388a985C5904BFa13524f8c3Cb8bC10A02864C",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0xd9239bB559B8f16DCD67f6186166d218b7514397",
         "tokenReserve": "XSGD"
       },
       "rateStrategy":  {
@@ -73,7 +73,7 @@
     {
       "addr": "0xb842336B3143a7C76EFDbc3Eb5bFadCa04d4d2Fa",
       "borrowRate": 0,
-      "chainLinkAggregator":    {
+      "chainLinkAggregator": {
         "aggregator": "0x0000000000000000000000000000000000000000",
         "tokenReserve": "LP_XSGD_USDC"
       },
