@@ -82,12 +82,7 @@ contract LendingMarketTestHelper is Test {
   }
 
   function _deployAndSetLPOracle(address baseAssim, address quoteAssim) internal returns (address) {
-    FXLPEthPriceFeedOracle lpOracle = new FXLPEthPriceFeedOracle(
-      LP_XSGD,
-      ETH_USD_ORACLE,
-      'LPXSGD-USDC/ETH',
-      BALANCER_VAULT
-    );
+    FXLPEthPriceFeedOracle lpOracle = new FXLPEthPriceFeedOracle(LP_XSGD, ETH_USD_ORACLE, 'LPXSGD-USDC/ETH');
 
     address aaveOracle = ILendingPoolAddressesProvider(LENDINGPOOL_ADDRESS_PROVIDER).getPriceOracle();
 

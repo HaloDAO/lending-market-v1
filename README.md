@@ -249,10 +249,30 @@ Run `yarn hardhat external:disable-borrow-reserve --symbol {symbol of the asset}
 
 ## Foundry Script deployments and testing
 
+Local deployment development and testing:
+
 ```sh
 # start a fork of AVAX with anvil
 yarn run anvil:avax
 
 # in another terminal run the deployment script in watch more, pointing at the local anvil node
 yarn run watch:script-local
+```
+
+## Sepolia Deployment
+
+```sh
+# assuming you've imported a private key with cast wallet as such
+# foundry will **encrypt** and store the private key in
+# ~/.foundry/keystores/MY_DEPLOYER_WALLET
+cast wallet import "MY_DEPLOYER_WALLET" --interactive
+
+# deploy Xave Oracles for the Lending Market
+# NB: notice the last "sepolia" value which is the network value passed into the `run` method
+forge script script/XaveOraclesDeployment.s.sol:XaveOraclesDeployment --sig "run(string memory network)" --slow --account "MY_DEPLOYER_WALLET" --broadcast --rpc-url "${SEPOLIA_RPC_URL}" -vvv sepolia
+
+# deploy lending market
+source .env && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --slow --account "MY_DEPLOYER_WALLET" --broadcast -vvv --rpc-url "${SEPOLIA_RPC_URL}"
+
+
 ```
