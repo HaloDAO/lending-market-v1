@@ -37,21 +37,16 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
   }
 
   function updateLatestAnswer() external returns (int256) {
-    _price();
-    emit AnswerUpdated(1, 1, block.timestamp);
+    emit AnswerUpdated(_price(), 1, block.timestamp);
   }
 
-  function getRoundData(uint80 _roundId)
+  function getRoundData(
+    uint80 _roundId
+  )
     external
     view
     override
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    )
+    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
   {
     roundId = 1;
     startedAt = block.timestamp;
@@ -72,13 +67,7 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
     external
     view
     override
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    )
+    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
   {
     roundId = 1;
     startedAt = block.timestamp;
@@ -87,17 +76,13 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
     answer = _price();
   }
 
-  function proposedGetRoundData(uint80 roundId)
+  function proposedGetRoundData(
+    uint80 roundId
+  )
     external
     view
     override
-    returns (
-      uint80 id,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    )
+    returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
   {
     id = 1;
     answer = _price();
@@ -110,13 +95,7 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
     external
     view
     override
-    returns (
-      uint80 id,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    )
+    returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
   {
     id = 1;
     answer = _price();
@@ -126,7 +105,7 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
   }
 
   function _price() internal view returns (int256) {
-    uint256 _decimals = uint256(10**uint256(oracleDecimals));
+    uint256 _decimals = uint256(10 ** uint256(oracleDecimals));
     (uint256 liquidity, ) = IFXPool(fxp).liquidity();
     uint256 unclaimedFees = IFXPool(fxp).totalUnclaimedFeesInNumeraire();
 
@@ -139,18 +118,14 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
 
     quotePrice = _scaleprice(quotePrice, quoteDecimals, oracleDecimals);
 
-    return int256((hlp_usd.mul(uint256(10**18))).div(uint256(quotePrice)));
+    return int256((hlp_usd.mul(uint256(10 ** 18))).div(uint256(quotePrice)));
   }
 
-  function _scaleprice(
-    int256 _price,
-    uint8 _priceDecimals,
-    uint8 _decimals
-  ) internal pure returns (int256) {
+  function _scaleprice(int256 _price, uint8 _priceDecimals, uint8 _decimals) internal pure returns (int256) {
     if (_priceDecimals < _decimals) {
-      return int256(uint256(_price).mul(uint256((10**(uint256(_decimals - _priceDecimals))))));
+      return int256(uint256(_price).mul(uint256((10 ** (uint256(_decimals - _priceDecimals))))));
     } else if (_priceDecimals > _decimals) {
-      return int256(uint256(_price).mul(uint256((10**(uint256(_priceDecimals - _decimals))))));
+      return int256(uint256(_price).mul(uint256((10 ** (uint256(_priceDecimals - _decimals))))));
     }
     return _price;
   }
