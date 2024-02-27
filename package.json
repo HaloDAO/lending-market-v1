@@ -12,7 +12,7 @@
     "anvil:avax": "anvil --fork-url https://api.avax.network/ext/bc/C/rpc@41745214",
     "anvil:sepolia": "anvil --fork-url https://eth-sepolia.g.alchemy.com/v2/U7tte8molsSlREKDCvXxIXR1OBmyKRhp",
     "watch:script-local": "nodemon --ext sol,json --watch deployments/ --watch script/ --watch test --watch contracts --exec 'clear && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --legacy --fork-url http://127.0.0.1:8545 --broadcast -vvvvv'",
-    "watch:script-local-metamask-account": "nodemon --ext sol,json --watch deployments/ --watch script/ --watch test --watch contracts --exec 'clear && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --slow --account \"MMHotWallet#2\" --fork-url http://127.0.0.1:8545 --broadcast -vvvvv'",
+    "watch:script-local-metamask-account": "nodemon --ext sol,json --watch deployments/ --watch script/ --watch test --watch contracts --exec 'clear && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --fork-url http://127.0.0.1:8545 --broadcast -vvvvv'",
     "hardhat": "hardhat",
     "hardhat:kovan": "hardhat --network kovan",
     "hardhat:tenderly-main": "hardhat --network tenderlyMain",
