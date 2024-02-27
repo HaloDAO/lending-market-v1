@@ -43,6 +43,7 @@ interface IOpsTestData {
     address donor;
     address emergencyAdmin;
     address lendingAddressProvider;
+    address lendingPoolConfiguratorContract;
     address lendingPoolProxy;
     address lendingRateOracle;
     address oracleOwner;
@@ -65,6 +66,7 @@ interface IOpsTestData {
   }
 
   struct ReservesValues {
+    address lpXsgdUsdc;
     address usdc;
     address xsgd;
   }
