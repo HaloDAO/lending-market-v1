@@ -1,0 +1,5 @@
+{
+  "description": "LP-XSGD-USDC Oracle",
+  "ethUsdAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+  "fxPool": "0xb842336B3143a7C76EFDbc3Eb5bFadCa04d4d2Fa"
+}

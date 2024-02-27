@@ -267,5 +267,12 @@ yarn run watch:script-local
 # ~/.foundry/keystores/MY_DEPLOYER_WALLET
 cast wallet import "MY_DEPLOYER_WALLET" --interactive
 
+# deploy Xave Oracles for the Lending Market
+# NB: notice the last "sepolia" value which is the network value passed into the `run` method
+forge script script/XaveOraclesDeployment.s.sol:XaveOraclesDeployment --sig "run(string memory network)" --slow --account "MY_DEPLOYER_WALLET" --broadcast --rpc-url "${SEPOLIA_RPC_URL}" -vvv sepolia
+
+# deploy lending market
 source .env && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --slow --account "MY_DEPLOYER_WALLET" --broadcast -vvv --rpc-url "${SEPOLIA_RPC_URL}"
+
+
 ```

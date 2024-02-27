@@ -74,7 +74,7 @@
       "addr": "0xb842336B3143a7C76EFDbc3Eb5bFadCa04d4d2Fa",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0x11686977Ee03B751A15A9E239322cbBbAbc3Baa6",
         "tokenReserve": "LP_XSGD_USDC"
       },
       "rateStrategy": {

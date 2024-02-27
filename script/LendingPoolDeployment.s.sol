@@ -26,7 +26,7 @@ import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingp
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
 import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
-import {IDeploymentConfig} from './interfaces/IDeploymentConfig.sol';
+import {IDeploymentLendingMarketConfig} from './interfaces/IDeploymentLendingMarketConfig.sol';
 
 import {DeploymentConfigHelper} from './helpers/DeploymentConfigHelper.sol';
 import {AaveProtocolDataProvider} from '../contracts/misc/AaveProtocolDataProvider.sol';
@@ -42,7 +42,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
   using stdJson for string;
 
   function run() external {
-    IDeploymentConfig.Root memory c = _readDeploymentConfig(
+    IDeploymentLendingMarketConfig.Root memory c = _readDeploymentLendingMarketConfig(
       string(abi.encodePacked('lending_market_config.sepolia.json'))
     );
     // for local development uncomment the following lines
@@ -129,7 +129,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
   function _deployOracles(
     LendingPoolAddressesProvider _addressProvider,
     StableAndVariableTokensHelper _stableVarHelper,
-    IDeploymentConfig.Root memory _c
+    IDeploymentLendingMarketConfig.Root memory _c
   ) private {
     uint256 len = _c.tokens.length;
     address[] memory reserveAssets = new address[](len);
@@ -172,7 +172,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
   }
 
   function _deployAaveTokens(
-    IDeploymentConfig.Root memory _c,
+    IDeploymentLendingMarketConfig.Root memory _c,
     address _ledingPoolProxy
   ) private returns (AToken[] memory aTokens, StableDebtToken[] memory sdTokens, VariableDebtToken[] memory vdTokens) {
     // @see helpers/contracts-deployments.ts
@@ -229,7 +229,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
 
   function _initReservesByHelper(
     LendingPoolAddressesProvider _addressProvider,
-    IDeploymentConfig.Root memory _c
+    IDeploymentLendingMarketConfig.Root memory _c
   ) private {
     (
       AToken[] memory aTokens,
@@ -276,7 +276,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
 
   function _configureReservesByHelper(
     LendingPoolAddressesProvider _addressProvider,
-    IDeploymentConfig.Root memory _c,
+    IDeploymentLendingMarketConfig.Root memory _c,
     ATokensAndRatesHelper _aTokensHelper,
     address _deployer
   ) private {
@@ -302,7 +302,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
 
   function _deployAncillaries(
     LendingPoolAddressesProvider _addressProvider,
-    IDeploymentConfig.Root memory _c
+    IDeploymentLendingMarketConfig.Root memory _c
   ) private returns (UiHaloPoolDataProvider, UiIncentiveDataProvider) {
     LendingPoolCollateralManager manager = new LendingPoolCollateralManager();
     _addressProvider.setLendingPoolCollateralManager(address(manager));
