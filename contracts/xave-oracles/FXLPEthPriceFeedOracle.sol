@@ -14,20 +14,17 @@ contract FXLPEthPriceFeedOracle is IAggregatorV3Interface {
   address public immutable fxp;
   address public immutable quotePriceFeed;
   uint8 public immutable quoteDecimals;
-  address public immutable vault;
   bytes32 public immutable poolId;
 
   constructor(
     address _fxp, // FXPool address
     address _quotePriceFeed, // eg. ETH / USD
-    string memory _priceFeed,
-    address _vault // Balance Vault
+    string memory _priceFeed
   ) public {
     fxp = _fxp;
     quotePriceFeed = _quotePriceFeed;
     quoteDecimals = IAggregatorV3Interface(_quotePriceFeed).decimals();
     priceFeed = _priceFeed;
-    vault = _vault;
     poolId = IFXPool(_fxp).getPoolId();
   }
 
