@@ -68,40 +68,40 @@ export const CommonsConfig: ICommonConfiguration = {
     [eAvalancheNetwork.fuji]: '0x009c4ba01488A15816093F96BA91210494E2C644',
   },
   ProviderRegistry: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   ProviderRegistryOwner: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   LendingRateOracle: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   LendingPoolCollateralManager: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   LendingPoolConfigurator: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   LendingPool: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   WethGateway: {
-    [eAvalancheNetwork.avalanche]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
     [eAvalancheNetwork.fuji]: '0x62AF6258d26838f33BADFbb33cf1De8FaB8EB19f',
   },
   TokenDistributor: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   AaveOracle: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   FallbackOracle: {
     [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
@@ -109,7 +109,13 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ChainlinkAggregator: {
     [eAvalancheNetwork.avalanche]: {
-      USDC: '0xF096872672F44d6EBA71458D74fe67F9a77a23B9', //@todo check others
+      USDC: '0xF096872672F44d6EBA71458D74fe67F9a77a23B9',
+      VCHF: ZERO_ADDRESS,
+      EUROC: ZERO_ADDRESS,
+      VEUR: ZERO_ADDRESS,
+      LP_EUROC_USDC: ZERO_ADDRESS,
+      LP_VEUR_USDC: ZERO_ADDRESS,
+      LP_VCHF_USDC: ZERO_ADDRESS,
     },
     [eAvalancheNetwork.fuji]: {},
   },
@@ -119,20 +125,20 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ReservesConfig: {},
   ATokenDomainSeparator: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   WETH: {
-    [eAvalancheNetwork.avalanche]: '',
-    [eAvalancheNetwork.fuji]: '',
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS,
   },
   WrappedNativeToken: {
     [eAvalancheNetwork.avalanche]: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', // Official WAVAX
     [eAvalancheNetwork.fuji]: '0xd00ae08403B9bbb9124bB305C09058E32C39A48c', // Official WAVAX
   },
   ReserveFactorTreasuryAddress: {
-    [eAvalancheNetwork.avalanche]: '', // @todo
-    [eAvalancheNetwork.fuji]: '', // Self-controlled EOA for testing
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS, // @todo
+    [eAvalancheNetwork.fuji]: ZERO_ADDRESS, // Self-controlled EOA for testing
   },
   IncentivesController: {
     [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,

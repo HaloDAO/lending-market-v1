@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { generateMarketConfigJSON } from '../../helpers/foundry-helpers';
 import { ConfigNames } from '../../helpers/configuration';
-import { eAvalancheNetwork, eEthereumNetwork } from '../../helpers/types';
+import { eAvalancheNetwork } from '../../helpers/types';
 
 task('xave:avax-deployment-config', 'Export used config').setAction(async ({ verify }, localBRE) => {
   await localBRE.run('set-DRE');
