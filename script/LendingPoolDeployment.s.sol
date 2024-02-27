@@ -126,7 +126,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     for (uint256 i = 0; i < rl.length; i++) {
       _reserveData = ILendingPool(addressProvider.getLendingPool()).getReserveData(rl[i]);
       console2.log(
-        string(abi.encodePacked('Reserve AToken\t\t\t', IERC20Detailed(_reserveData.aTokenAddress).symbol(), '\t\t')),
+        string(abi.encodePacked('Reserve AToken\t\t', IERC20Detailed(_reserveData.aTokenAddress).symbol(), '\t\t')),
         _reserveData.aTokenAddress
       );
       console2.log('Reserve Configuration\t\t',
