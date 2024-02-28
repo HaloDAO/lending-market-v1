@@ -43,14 +43,13 @@ interface IOpsTestData {
     address donor;
     address emergencyAdmin;
     address lendingAddressProvider;
-    address lendingPoolConfiguratorContract;
     address lendingPoolProxy;
     address lendingRateOracle;
     address oracleOwner;
-    address poolAddress;
     address poolConfigurator;
     address priceOracle;
     address treasury;
+    address uiDataProvider;
   }
 
   struct ReserveConfigsValues {

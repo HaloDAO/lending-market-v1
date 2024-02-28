@@ -1,7 +1,7 @@
 {
   "blockchain": {
     "eoaWallet": "0x18f7A91DD8B6593744Ef7aBcD19B7Dc07f21d8d9",
-    "forkBlock": 5371661
+    "forkBlock": 5380037
   },
   "chainlink": {
     "ethUsd": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
@@ -18,19 +18,18 @@
     "xsgdUsdcFxp": "0xb842336B3143a7C76EFDbc3Eb5bFadCa04d4d2Fa"
   },
   "lendingPool": {
-    "admin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
-    "collateralManager": "0x410CF02414f80dC7b077177D28333FB15F6cD3F0",
+    "admin": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "collateralManager": "0xF25076132F12480302e342a6f83B3F6ef35509B5",
     "donor": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
-    "emergencyAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
-    "lendingAddressProvider": "0x1C74b4376D2331b6Fdc864ba4e311b38AEe3916F",
-    "lendingPoolConfiguratorContract": "0xb34cd8d48fCB65Ea4A04125Db7BCB7C61cC1A360",
-    "lendingPoolProxy": "0x670eAF2Da8b1BDb1496826EFBE30bA1f53d7b000",
-    "lendingRateOracle": "0xBA43cbC7f0871f17B70C0b4697EFD2C562144c4F",
-    "oracleOwner": "0x009c4ba01488A15816093F96BA91210494E2C644",
-    "poolAddress": "0x670eAF2Da8b1BDb1496826EFBE30bA1f53d7b000",
-    "poolConfigurator": "0xbD18c755Ce6FDe90b84E3C4F26cfe0c174f39DaB",
-    "priceOracle": "0x02F86471d7Caf6738653D94B63d7d14D8003B13e",
-    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd"
+    "emergencyAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "lendingAddressProvider": "0xD33562824ff2B522c6e8c0B12e63C62F090b3856",
+    "lendingPoolProxy": "0x2a6B689F145A130fd4bB2005233c96899ae3e81c",
+    "lendingRateOracle": "0x829444A0bFCBdb2FBC85E9C1d3aCEAdE5F2b5ea9",
+    "oracleOwner": "0x26800B513141219E1604c8467DCb574C890d9613",
+    "poolConfigurator": "0xF87CD045716F285035A62874Feb12670295489A5",
+    "priceOracle": "0xB37379A512b043E5e2e6A9Cb8ae9D0fAaa18DFF8",
+    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
+    "uiDataProvider": "0x89f48AE1CEca3635B49aa90f8BAACE777347aA82"
   },
   "reserveConfigs": {
     "lpXsgdUsdc": {
@@ -42,9 +41,9 @@
     }
   },
   "reserves": {
-    "lpXsgdUsdc": "0xD24beD8a9403dDbFA76dFbd65C4125E588fb21f8",
-    "usdc": "0xABbE99cF4868442840d8B0Fb59De9d81df2Fa656",
-    "xsgd": "0x6CeF93944d3e8a94EeDF0c333441bE1Da188E58D"
+    "lpXsgdUsdc": "0x0b9821e7F7c5D33Ec8Fe7c9E9023753307aeb7c5",
+    "usdc": "0x92929523556cD6e5C44D70595a02cA33A4Bd253A",
+    "xsgd": "0x9fC2e8eD871616fc3AA5FC2Feb17498a7ba18Ce2"
   },
   "tokens": {
     "usdc": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",
