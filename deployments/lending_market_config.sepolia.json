@@ -1,13 +1,13 @@
 {
   "deploymentParams": {
-    "poolAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
-    "poolEmergencyAdmin": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A"
+    "poolAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "poolEmergencyAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644"
   },
   "protocolGlobalParams": {
     "ethUsdAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
     "marketId": "Xave Sepolia Market",
     "nativeTokenUsdAggregator": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
-    "treasury": "0xeab5992305fffaB8BB77ae07973b92fd4dA51a2A",
+    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
     "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
     "wethAddress": "0x35da2a468dc7b2c20965235d4a60e2a2a9dace8f"
   },
@@ -48,7 +48,7 @@
         "aggregator": "0xd9239bB559B8f16DCD67f6186166d218b7514397",
         "tokenReserve": "XSGD"
       },
-      "rateStrategy":  {
+      "rateStrategy": {
         "baseVariableBorrowRate": 0,
         "name": "rateStrategyStableThree",
         "optimalUtilizationRate": 900000000000000000000000000,
@@ -87,17 +87,17 @@
         "variableRateSlope1": 40000000000000000000000000,
         "variableRateSlope2": 600000000000000000000000000
       },
-        "reserveConfig": {
-          "aTokenImpl": "AToken",
-          "baseLTVAsCollateral": 8000,
-          "borrowingEnabled": false,
-          "liquidationBonus": 10500,
-          "liquidationThreshold": 8000,
-          "reserveDecimals": 18,
-          "reserveFactor": 1000,
-          "stableBorrowRateEnabled": false,
-          "tokenReserve": "LP_XSGD_USDC"
-        }
+      "reserveConfig": {
+        "aTokenImpl": "AToken",
+        "baseLTVAsCollateral": 8000,
+        "borrowingEnabled": false,
+        "liquidationBonus": 10500,
+        "liquidationThreshold": 8000,
+        "reserveDecimals": 18,
+        "reserveFactor": 1000,
+        "stableBorrowRateEnabled": false,
+        "tokenReserve": "LP_XSGD_USDC"
+      }
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { ConfigNames, loadPoolConfig } from './configuration';
+import { ZERO_ADDRESS } from './constants';
 import { getXaveDeploymentDb } from './misc-utils';
 import { eArbitrumNetwork, eAvalancheNetwork, eEthereumNetwork, ePolygonNetwork } from './types';
 
@@ -92,6 +93,10 @@ const ethAndNativeAggregators: {
     ethUsdOracle: '0x9326BFA02ADD2366b30bacB125260Af641031331',
     nativeTokenOracle: '0x9326BFA02ADD2366b30bacB125260Af641031331',
   },
+  [eEthereumNetwork.sepolia]: {
+    ethUsdOracle: '0x694AA1769357215DE4FAC081bf1f309aDC325306',
+    nativeTokenOracle: '0x694AA1769357215DE4FAC081bf1f309aDC325306',
+  },
   [eEthereumNetwork.main]: {
     ethUsdOracle: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
     nativeTokenOracle: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
@@ -111,11 +116,11 @@ const ethAndNativeAggregators: {
   },
   [eAvalancheNetwork.avalanche]: {
     ethUsdOracle: '0x976B3D034E162d8bD72D6b9C989d545b839003b0',
-    nativeTokenOracle: '',
+    nativeTokenOracle: ZERO_ADDRESS,
   },
   [eAvalancheNetwork.fuji]: {
     ethUsdOracle: '0x86d67c3D38D2bCeE722E601025C25a575021c6EA',
-    nativeTokenOracle: '',
+    nativeTokenOracle: ZERO_ADDRESS,
   },
 };
 
@@ -170,9 +175,9 @@ export const generateMarketConfigJSON = async (
 
   await getXaveDeploymentDb(network)
     .set('protocolGlobalParams', {
-      ethUsdAggregator: ethAndNativeAggregators.ethUsdOracle,
+      ethUsdAggregator: ethAndNativeAggregators[network].ethUsdOracle,
       marketId: poolConfig.MarketId,
-      nativeTokenUsdAggregator: ethAndNativeAggregators.nativeTokenOracle,
+      nativeTokenUsdAggregator: ethAndNativeAggregators[network].nativeTokenOracle,
       treasury: getOpsMultisig(eEthereumNetwork.sepolia),
       usdAddress: poolConfig.ProtocolGlobalParams.UsdAddress,
       wethAddress: poolConfig.WETH[network],
