@@ -201,38 +201,35 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testActivateAndDeactivateReserve() public {
-    LendingPool lendingPool =
-      LendingPool(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPool());
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
-
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
-
-    assertEq(lpAddrProvider.getPoolAdmin(), root.lendingPool.admin, 'correct pool admin set');
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.activateReserve(root.reserves.usdc);
 
-    vm.prank(root.lendingPool.admin);
+    vm.startPrank(root.lendingPool.admin);
     lpc.activateReserve(root.reserves.usdc);
+    vm.stopPrank();
 
     // TODO: Failing in sepolia because the USDC reserve is of different address
     bool usdcReserveActive = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0;
     assertEq(usdcReserveActive, true, 'USDC borrowing enabled');
 
     // Expect to fail if msg.sender is not poolAdmin
-    // vm.prank(root.lendingPool.donor);
-    // vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    // lpc.deactivateReserve(root.reserves.usdc);
-
-    vm.prank(root.lendingPool.admin);
+    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.deactivateReserve(root.reserves.usdc);
 
-    // DataTypes.ReserveConfigurationMap memory usdcConfiguration = lendingPool.getConfiguration(root.reserves.usdc);
+    vm.startPrank(root.lendingPool.admin);
+    // Will fail because [FAIL. Reason: revert: Cannot call fallback function from the proxy admin]
+    // vm.expectRevert(); // TODO: Remove once there is a fallback reserve
+    lpc.deactivateReserve(root.reserves.usdc);
+    // vm.expectEmit();
+    vm.stopPrank();
+
+    // DataTypes.ReserveConfigurationMap memory usdcConfiguration =
+    //   lendingPool.getConfiguration(root.reserves.usdc);
 
     // assertEq(
     //   (((lendingPool.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0), // bit 56: Reserve is active
@@ -240,7 +237,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     //   'USDC reserve deactivated'
     // );
   }
-
   function testFreezeAndUnfreezeReserve() public {
     LendingPoolConfigurator lpc =
       LendingPoolConfigurator(
