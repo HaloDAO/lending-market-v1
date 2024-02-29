@@ -635,8 +635,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       DataTypes.ReserveData memory rdUSDC = lendingPoolContract.getReserveData(root.tokens.usdc);
       DataTypes.ReserveData memory rdLPXSGD = lendingPoolContract.getReserveData(root.fxPool.xsgdUsdcFxp);
 
+      address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
+
       {
-        address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
         uint256 usdcPrice = AaveOracle(aaveOracle).getAssetPrice(root.tokens.usdc);
         console.log('usdcPrice:', usdcPrice);
         MockAggregator manipulatedLPOracle = new MockAggregator(10_500, 8);
@@ -651,70 +652,39 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         AaveOracle(aaveOracle).setAssetSources(assets, sources);
       }
 
+      {
+        uint256 lpTokenPrice = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
+        console.log('lpTokenPrice Before Manipulation:', lpTokenPrice);
+
+        (, , , , , uint256 healthFactorBeforeManip) =
+          lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+
+        console.log('HF before price manipulation', healthFactorBeforeManip / 1e18);
+      }
+      _manipulatePriceOracle(root.fxPool.xsgdUsdcFxp, 1, 18);
+      
+
       // TODO: Manipulate price to make loan health of eoa wallet below 1
       {
-        address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
-        uint256 lpTokenPrice = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
-        console.log('lpTokenPrice:', lpTokenPrice);
-        MockAggregator manipulatedLPOracle = new MockAggregator(1, 18);
-
-        address[] memory assets = new address[](1);
-        assets[0] = root.fxPool.xsgdUsdcFxp;
-        address[] memory sources = new address[](1);
-        sources[0] = address(manipulatedLPOracle);
-
-        console.log('whos da owner:', ILendingPoolAddressesProviderWithOwner(aaveOracle).owner());
-
-        vm.prank(root.lendingPool.oracleOwner);
-        // LP token Price manipulation is working
-        AaveOracle(aaveOracle).setAssetSources(assets, sources);
-
         uint256 lpTokenPriceAfter = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
-        console.log('lpTokenPriceAfter:', lpTokenPriceAfter);
+        console.log('lpTokenPriceAfter After Manipulation:', lpTokenPriceAfter);
 
-        (, , uint256 availableBorrowsETHAfterPriceManip, , , uint256 healthFactorAfterBorrowAfter) =
+        (, , , , , uint256 healthFactorAfterBorrowAfter) =
           lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
-        console.log('a4 price manip HF', healthFactorAfterBorrowAfter / 1e18);
-        console.log('a4 price manip availableBorrowsETHAfterPriceManip', availableBorrowsETHAfterPriceManip);
 
-        console.log(
-          'price oracle',
-          ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle()
-        );
+        console.log('HF after price manipulation', healthFactorAfterBorrowAfter / 1e18);
+
       }
 
-      _reserveData = ILendingPool(root.lendingPool.lendingPoolProxy).getReserveData(root.reserves.lpXsgdUsdc);
-      console.log('reserveData.reserveLiquidationThreshold', _reserveData.configuration.getLiquidationThreshold());
-
-      {
-        console2.log('getting here');
-
-        address[] memory reserveList = lendingPoolContract.getReservesList();
-        for (uint256 i = 0; i < reserveList.length; i++) {
-          console2.log('reserveList[i]', reserveList[i]);
-        }
-
-        (IHaloUiPoolDataProvider.AggregatedReserveData[] memory reservesData, ) =
-          IHaloUiPoolDataProvider(root.lendingPool.uiDataProvider).getReservesData(
-            ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider)
-          );
-        console2.log('reservesData.length', reservesData.length);
-        for (uint256 i = 0; i < reservesData.length; i++) {
-          if (reservesData[i].underlyingAsset == root.fxPool.xsgdUsdcFxp)
-            console2.log('reserve reserveLiquidationThreshold', reservesData[i].reserveLiquidationThreshold);
-        }
-      }
-
-      vm.startPrank(root.lendingPool.donor);
-      IERC20(root.tokens.usdc).approve(root.lendingPool.lendingPoolProxy, type(uint256).max);
-      lendingPoolContract.liquidationCall(
+      _liquidatePosition(
+        root.lendingPool.donor,
+        root.blockchain.eoaWallet,
         root.fxPool.xsgdUsdcFxp,
         root.tokens.usdc,
-        root.blockchain.eoaWallet,
         type(uint256).max,
         true
       );
-      vm.stopPrank();
+
       // Assert balance of donor to increase in LP token
 
       // Assert loan health and position of eoa wallet to decrease
