@@ -18,6 +18,7 @@
     "xsgdUsdcFxp": "0xE6D8FcD23eD4e417d7e9D1195eDf2cA634684e0E"
   },
   "lendingPool": {
+    "aaveOracle": "0x0000000000000000000000000000000000000000",
     "admin": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
     "collateralManager": "0xDF512Eb2468D4938D81fA1F15d91567c5EdEe6a8",
     "donor": "0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245",

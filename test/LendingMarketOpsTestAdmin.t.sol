@@ -90,60 +90,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     );
   }
 
-  function _addNewReserve() private {
-    // Deploy reserve
-    _deployReserve();
-
-    // TODO: Query this from FX Pool value so value is dynamic when we use this test in different network
-
-    (IERC20[] memory tokens, , ) =
-      IVault(root.fxPool.vault).getPoolTokens(IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId());
-
-    address baseAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[0]));
-    address quoteAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[1]));
-
-    // Set Oracle for asset
-    address lpOracle = _deployOracle(root.fxPool.xsgdUsdcFxp, baseAssimilator, quoteAssimilator);
-
-    // Set oracle source for asset
-    address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
-
-    address[] memory assets = new address[](1);
-    assets[0] = root.fxPool.xsgdUsdcFxp;
-    address[] memory sources = new address[](1);
-    sources[0] = address(lpOracle);
-
-    vm.expectRevert(bytes('Ownable: caller is not the owner'));
-    AaveOracle(aaveOracle).setAssetSources(assets, sources);
-
-    vm.prank(root.lendingPool.oracleOwner);
-    AaveOracle(aaveOracle).setAssetSources(assets, sources);
-
-    uint256 _price = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
-
-    // testConfigureReserveAsCollateral
-
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    LendingPoolConfigurator(root.lendingPool.poolConfigurator).configureReserveAsCollateral(
-      root.fxPool.xsgdUsdcFxp,
-      root.reserveConfigs.lpXsgdUsdc.baseLtv,
-      root.reserveConfigs.lpXsgdUsdc.liquidationBonus,
-      root.reserveConfigs.lpXsgdUsdc.liquidationThreshold
-    );
-
-    address poolAdmin = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPoolAdmin();
-
-    vm.startPrank(poolAdmin);
-
-    LendingPoolConfigurator(root.lendingPool.poolConfigurator).configureReserveAsCollateral(
-      root.fxPool.xsgdUsdcFxp,
-      root.reserveConfigs.lpXsgdUsdc.baseLtv,
-      root.reserveConfigs.lpXsgdUsdc.liquidationBonus,
-      root.reserveConfigs.lpXsgdUsdc.liquidationThreshold
-    );
-    vm.stopPrank();
-  }
-
   function testLendingPoolPauseAndUnpause() public {
     vm.expectRevert(bytes(Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR));
     lendingPoolContract.setPause(true);
@@ -163,41 +109,32 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
 
-    // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.enableBorrowingOnReserve(root.reserves.usdc, true);
+    lpc.disableBorrowingOnReserve(root.tokens.usdc);
 
     vm.startPrank(root.lendingPool.admin);
-    lpc.enableBorrowingOnReserve(root.reserves.usdc, true);
-    vm.stopPrank();
-
-    uint256 liquidationThreshold = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (16 << 31));
-    // console.log('testEnableAndDisableReserveBorrowing liquidationThreshold:', liquidationThreshold);
-    console.log(
-      '(lendingPoolContract.getConfiguration(root.reserves.usdc)).data',
-      (lendingPoolContract.getConfiguration(root.reserves.usdc)).data
-    );
-
-    bool usdcBorrowIsEnabled = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 58)) != 0;
-    assertEq(usdcBorrowIsEnabled, true, 'USDC borrowing enabled');
-
-    // Expect to fail if msg.sender is not poolAdmin
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.disableBorrowingOnReserve(root.reserves.usdc);
-
-    vm.startPrank(root.lendingPool.admin);
-    lpc.disableBorrowingOnReserve(root.reserves.usdc);
+    lpc.disableBorrowingOnReserve(root.tokens.usdc);
     // vm.expectEmit();
     vm.stopPrank();
 
-    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-      lendingPoolContract.getConfiguration(root.reserves.usdc);
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     assertEq(
-      (((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 58)) != 0), // bit 58: borrowing is enabled
+      _reserveData.configuration.getBorrowingEnabled(),
       false,
       'USDC borrowing disabled'
     );
+
+    // enableBorrowingOnReserve
+    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
+    lpc.enableBorrowingOnReserve(root.tokens.usdc, true);
+
+    vm.startPrank(root.lendingPool.admin);
+    lpc.enableBorrowingOnReserve(root.tokens.usdc, true);
+    vm.stopPrank();
+
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
+    assertEq(_reserveData.configuration.getBorrowingEnabled(), true, 'USDC borrowing enabled');
   }
 
   function testActivateAndDeactivateReserve() public {
@@ -205,37 +142,36 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
     );
 
-    // enableBorrowingOnReserve
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.activateReserve(root.reserves.usdc);
-
-    vm.startPrank(root.lendingPool.admin);
-    lpc.activateReserve(root.reserves.usdc);
-    vm.stopPrank();
-
-    // TODO: Failing in sepolia because the USDC reserve is of different address
-    bool usdcReserveActive = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0;
-    assertEq(usdcReserveActive, true, 'USDC borrowing enabled');
-
     // Expect to fail if msg.sender is not poolAdmin
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.deactivateReserve(root.reserves.usdc);
+    lpc.deactivateReserve(root.tokens.usdc);
 
     vm.startPrank(root.lendingPool.admin);
     // Will fail because [FAIL. Reason: revert: Cannot call fallback function from the proxy admin]
     // vm.expectRevert(); // TODO: Remove once there is a fallback reserve
-    lpc.deactivateReserve(root.reserves.usdc);
+    lpc.deactivateReserve(root.tokens.usdc);
     // vm.expectEmit();
     vm.stopPrank();
 
-    // DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-    //   lendingPool.getConfiguration(root.reserves.usdc);
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    // assertEq(
-    //   (((lendingPool.getConfiguration(root.reserves.usdc)).data & (1 << 56)) != 0), // bit 56: Reserve is active
-    //   false,
-    //   'USDC reserve deactivated'
-    // );
+    assertEq(
+      _reserveData.configuration.getActive(),
+      false,
+      'USDC reserve deactivated'
+    );
+
+    // enableBorrowingOnReserve
+    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
+    lpc.activateReserve(root.tokens.usdc);
+
+    vm.startPrank(root.lendingPool.admin);
+    lpc.activateReserve(root.tokens.usdc);
+    vm.stopPrank();
+
+    // TODO: Failing in sepolia because the USDC reserve is of different address
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
+    assertEq(_reserveData.configuration.getActive(), true, 'USDC borrowing enabled');
   }
   function testFreezeAndUnfreezeReserve() public {
     LendingPoolConfigurator lpc =
@@ -244,34 +180,33 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       );
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.freezeReserve(root.reserves.usdc);
+    lpc.freezeReserve(root.tokens.usdc);
 
     vm.prank(root.lendingPool.admin);
-    lpc.freezeReserve(root.reserves.usdc);
+    lpc.freezeReserve(root.tokens.usdc);
 
-    // bit 57: reserve is frozen
-    bool isFrozen = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 57)) != 0;
-    assertEq(isFrozen, true, 'USDC reserve frozen');
+
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
+    assertEq(_reserveData.configuration.getFrozen(), true, 'USDC reserve frozen');
 
     // TODO: Add LP user deposit reserve to test if reserve is frozen (add expect revert)
     vm.prank(root.blockchain.eoaWallet);
     vm.expectRevert();
-    lendingPoolContract.deposit(root.reserves.usdc, 1000 * 1e6, root.blockchain.eoaWallet, 0);
+    lendingPoolContract.deposit(root.tokens.usdc, 1000 * 1e6, root.blockchain.eoaWallet, 0);
 
     // Expect to fail if msg.sender is not poolAdmin
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.unfreezeReserve(root.reserves.usdc);
+    lpc.unfreezeReserve(root.tokens.usdc);
 
     vm.startPrank(root.lendingPool.admin);
-    lpc.unfreezeReserve(root.reserves.usdc);
+    lpc.unfreezeReserve(root.tokens.usdc);
     // vm.expectEmit();
     vm.stopPrank();
 
-    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-      lendingPoolContract.getConfiguration(root.reserves.usdc);
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     assertEq(
-      (((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 57)) != 0), // bit 57: reserve is frozen
+      _reserveData.configuration.getFrozen(),
       false,
       'USDC reserve unfroze'
     );
@@ -283,37 +218,32 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
 
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
-
-    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.enableReserveStableRate(root.reserves.usdc);
-
-    vm.startPrank(root.lendingPool.admin);
-    lpc.enableReserveStableRate(root.reserves.usdc);
-    vm.stopPrank();
-
-    // bit 59: stable rate borrowing enabled
-    bool isFrozen = ((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 59)) != 0;
-    assertEq(isFrozen, true, 'USDC stable rate enabled');
-
     // Expect to fail if msg.sender is not poolAdmin
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.disableReserveStableRate(root.reserves.usdc);
+    lpc.disableReserveStableRate(root.tokens.usdc);
 
     vm.startPrank(root.lendingPool.admin);
-    lpc.disableReserveStableRate(root.reserves.usdc);
+    lpc.disableReserveStableRate(root.tokens.usdc);
     // vm.expectEmit();
     vm.stopPrank();
 
-    DataTypes.ReserveConfigurationMap memory usdcConfiguration =
-      lendingPoolContract.getConfiguration(root.reserves.usdc);
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     assertEq(
-      (((lendingPoolContract.getConfiguration(root.reserves.usdc)).data & (1 << 59)) != 0), // bit 59: stable rate borrowing enabled
+      _reserveData.configuration.getStableRateBorrowingEnabled(),
       false,
       'USDC stable rate disabled'
     );
+  
+    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
+    lpc.enableReserveStableRate(root.tokens.usdc);
+
+    vm.startPrank(root.lendingPool.admin);
+    lpc.enableReserveStableRate(root.tokens.usdc);
+    vm.stopPrank();
+
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
+    assertEq(_reserveData.configuration.getStableRateBorrowingEnabled(), true, 'USDC stable rate enabled');
   }
 
   function testSetReserveFactor() public {
@@ -322,25 +252,22 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
 
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
-
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.setReserveFactor(root.reserves.usdc, 0);
+    lpc.setReserveFactor(root.tokens.usdc, 0);
 
     vm.startPrank(root.lendingPool.admin);
-    lpc.setReserveFactor(root.reserves.usdc, 0);
+    lpc.setReserveFactor(root.tokens.usdc, 0);
     vm.stopPrank();
 
-    // bit 64-79: reserve factor
+    // // bit 64-79: reserve factor
+    // // Step 1: Shift the data to the right by 64 bits to position the reserve factor in bits 0-15
+    // uint256 shifted = (lendingPoolContract.getConfiguration(root.tokens.usdc)).data >> 64;
+    // // Step 2: Apply the mask to isolate bits 0-15, which now contain the reserve factor
+    // uint256 reserveFactor = shifted & ((1 << 16) - 1);
 
-    // Step 1: Shift the data to the right by 64 bits to position the reserve factor in bits 0-15
-    uint256 shifted = (lendingPoolContract.getConfiguration(root.reserves.usdc)).data >> 64;
+    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    // Step 2: Apply the mask to isolate bits 0-15, which now contain the reserve factor
-    uint256 reserveFactor = shifted & ((1 << 16) - 1);
-
-    assertEq(reserveFactor, 0, 'USDC reserve factor set to 0');
+    assertEq(_reserveData.configuration.getReserveFactor(), 0, 'USDC reserve factor set to 0');
   }
 
   function testSetReserveInterestRateStrategyAddress() public {
@@ -349,17 +276,14 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
 
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
-
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
-    lpc.setReserveInterestRateStrategyAddress(root.reserves.usdc, 0x0000000000000000000000000000000000000000);
+    lpc.setReserveInterestRateStrategyAddress(root.tokens.usdc, 0x0000000000000000000000000000000000000000);
 
     vm.startPrank(root.lendingPool.admin);
-    lpc.setReserveInterestRateStrategyAddress(root.reserves.usdc, 0x0000000000000000000000000000000000000000);
+    lpc.setReserveInterestRateStrategyAddress(root.tokens.usdc, 0x0000000000000000000000000000000000000000);
     vm.stopPrank();
 
-    DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.reserves.usdc);
+    DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
   }
@@ -369,9 +293,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       LendingPoolConfigurator(
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
-
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
 
     // TODO: Actual deployment of proxy implementation contract
     address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
@@ -394,7 +315,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // lpc.updateAToken(input);
     // vm.stopPrank();
 
-    // DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.reserves.usdc);
+    // DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     // assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
   }
@@ -405,8 +326,19 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
 
-    // TODO: Actual deployment of proxy implementation contract
+    // TODO: Actual deployment of incentives controller
     address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
+    StableDebtToken sdt = new StableDebtToken();
+
+    sdt.initialize(
+      ILendingPool(root.lendingPool.lendingPoolProxy),
+      root.tokens.usdc,
+      IAaveIncentivesController(0x0000000000000000000000000000000000000000),
+      18,
+      'Test USDC Debt Token',
+      'TDUSDC',
+      bytes('0x')
+    );
 
     ILendingPoolConfigurator.UpdateDebtTokenInput memory input =
       ILendingPoolConfigurator.UpdateDebtTokenInput({
@@ -414,7 +346,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         incentivesController: aTokenImpl,
         name: 'aXSGD',
         symbol: 'aXSGD',
-        implementation: aTokenImpl,
+        implementation: address(sdt),
         params: bytes('0x')
       });
 
@@ -422,12 +354,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lpc.updateStableDebtToken(input);
 
     // vm.startPrank(root.lendingPool.admin);
-    // lpc.updateAToken(input);
+    // lpc.updateStableDebtToken(input);
     // vm.stopPrank();
 
-    // DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.reserves.usdc);
+    // DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    // assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
+    // assertEq(usdcReserveData.stableDebtTokenAddress, address(sdt));
   }
 
   function testUpdateVariableDebtToken() public {
@@ -436,8 +368,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
       );
 
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
 
     // TODO: Actual deployment of proxy implementation contract
     address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
@@ -456,107 +386,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     lpc.updateVariableDebtToken(input);
 
     // vm.startPrank(root.lendingPool.admin);
-    // lpc.updateAToken(input);
+    // lpc.updateVariableDebtToken(input);
     // vm.stopPrank();
 
-    // DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.reserves.usdc);
+    // DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    // assertEq(usdcReserveData.interestRateStrategyAddress, 0x0000000000000000000000000000000000000000);
-  }
-
-  function _deployReserve() private {
-    address XAVE_TREASURY = 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd;
-
-    // Deploy Aave Tokens
-    AToken aToken = new AToken();
-    aToken.initialize(
-      lendingPoolContract,
-      XAVE_TREASURY,
-      root.fxPool.xsgdUsdcFxp,
-      IAaveIncentivesController(address(0)),
-      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
-      'aXSGD-USDC',
-      'aXSGD-USDC',
-      bytes('')
-    );
-
-    StableDebtToken sdt = new StableDebtToken();
-    sdt.initialize(
-      lendingPoolContract,
-      root.fxPool.xsgdUsdcFxp,
-      IAaveIncentivesController(address(0)),
-      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
-      'sbtXSGD-USDC',
-      'sbtXSGD-USDC',
-      bytes('')
-    );
-    VariableDebtToken vdt = new VariableDebtToken();
-
-    vdt.initialize(
-      lendingPoolContract,
-      root.fxPool.xsgdUsdcFxp,
-      IAaveIncentivesController(address(0)),
-      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
-      'vdtXSGD-USDC',
-      'vdtXSGD-USDC',
-      bytes('')
-    );
-
-    // Deploy default reserve interest strategy
-    DefaultReserveInterestRateStrategy dris =
-      new DefaultReserveInterestRateStrategy(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider),
-        0.9 * 1e27, // optimal utilization rate
-        0 * 1e27, // baseVariableBorrowRate
-        0.04 * 1e27, // variableRateSlope1
-        0.60 * 1e27, // variableRateSlope2
-        0.02 * 1e27, // stableRateSlope1
-        0.60 * 1e27 // stableRateSlope2
-      );
-
-    // Deploy Reserve
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
-
-    ILendingPoolConfigurator.InitReserveInput[] memory input = new ILendingPoolConfigurator.InitReserveInput[](1);
-    input[0] = ILendingPoolConfigurator.InitReserveInput({
-      aTokenImpl: address(aToken),
-      stableDebtTokenImpl: address(sdt),
-      variableDebtTokenImpl: address(vdt),
-      underlyingAssetDecimals: IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
-      interestRateStrategyAddress: address(dris),
-      underlyingAsset: root.fxPool.xsgdUsdcFxp,
-      treasury: XAVE_TREASURY,
-      incentivesController: address(0),
-      underlyingAssetName: 'XSGD-USDC',
-      aTokenName: 'aXSGD-USDC',
-      aTokenSymbol: 'aXSGD-USDC',
-      variableDebtTokenName: vdt.name(),
-      variableDebtTokenSymbol: vdt.symbol(),
-      stableDebtTokenName: sdt.name(),
-      stableDebtTokenSymbol: sdt.symbol(),
-      params: bytes('')
-    });
-
-    vm.prank(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPoolAdmin());
-    lpc.batchInitReserve(input);
-  }
-
-  function _deployOracle(
-    address asset,
-    address baseAssim,
-    address quoteAssim
-  ) internal returns (address) {
-    FXLPEthPriceFeedOracle lpOracle =
-      new FXLPEthPriceFeedOracle(
-        asset,
-        root.chainlink.ethUsd, // ETH USD Oracle
-        'LPXSGD-USDC/ETH'
-      );
-
-    return address(lpOracle);
+    // assertEq(usdcReserveData.variableDebtTokenAddress, 0x0000000000000000000000000000000000000000);
   }
 
 
@@ -587,7 +422,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       console.log('healthFactorAfterDeposit', healthFactorAfterDeposit / 1e27);
     }
 
-    DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.reserves.usdc);
+    DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     {
       (uint256 totalCollateralETHAfterDeposit, , uint256 availableBorrowsETHAfter, , , uint256 healthFactorAfter) =
@@ -832,18 +667,154 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.stopPrank();
   }
 
-  /** *High Priority*
-  // TODO: Test WETH gateway for AVAX chain?
-  // Invoke WETHGateway.depositETH() check (technically its WAVAX or W-MATIC)
-   */
+  function _deployOracle(
+    address asset,
+    address baseAssim,
+    address quoteAssim
+  ) internal returns (address) {
+    FXLPEthPriceFeedOracle lpOracle =
+      new FXLPEthPriceFeedOracle(
+        asset,
+        root.chainlink.ethUsd, // ETH USD Oracle
+        'LPXSGD-USDC/ETH'
+      );
 
-  /** *Low Priority*
-  TODO: Add repay test if it improve health factor
-  - User pov (done)
-  - Lending pool pov
+    return address(lpOracle);
+  }
 
-   */
+  function _addNewReserve() private {
+    // Deploy reserve
+    _deployReserve();
 
+    // TODO: Query this from FX Pool value so value is dynamic when we use this test in different network
+
+    (IERC20[] memory tokens, , ) =
+      IVault(root.fxPool.vault).getPoolTokens(IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId());
+
+    address baseAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[0]));
+    address quoteAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[1]));
+
+    // Set Oracle for asset
+    address lpOracle = _deployOracle(root.fxPool.xsgdUsdcFxp, baseAssimilator, quoteAssimilator);
+
+    // Set oracle source for asset
+    address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
+
+    address[] memory assets = new address[](1);
+    assets[0] = root.fxPool.xsgdUsdcFxp;
+    address[] memory sources = new address[](1);
+    sources[0] = address(lpOracle);
+
+    vm.expectRevert(bytes('Ownable: caller is not the owner'));
+    AaveOracle(aaveOracle).setAssetSources(assets, sources);
+
+    vm.prank(root.lendingPool.oracleOwner);
+    AaveOracle(aaveOracle).setAssetSources(assets, sources);
+
+    uint256 _price = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
+
+    // testConfigureReserveAsCollateral
+
+    vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
+    LendingPoolConfigurator(root.lendingPool.poolConfigurator).configureReserveAsCollateral(
+      root.fxPool.xsgdUsdcFxp,
+      root.reserveConfigs.lpXsgdUsdc.baseLtv,
+      root.reserveConfigs.lpXsgdUsdc.liquidationBonus,
+      root.reserveConfigs.lpXsgdUsdc.liquidationThreshold
+    );
+
+    address poolAdmin = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPoolAdmin();
+
+    vm.startPrank(poolAdmin);
+
+    LendingPoolConfigurator(root.lendingPool.poolConfigurator).configureReserveAsCollateral(
+      root.fxPool.xsgdUsdcFxp,
+      root.reserveConfigs.lpXsgdUsdc.baseLtv,
+      root.reserveConfigs.lpXsgdUsdc.liquidationBonus,
+      root.reserveConfigs.lpXsgdUsdc.liquidationThreshold
+    );
+    vm.stopPrank();
+  }
+
+  function _deployReserve() private {
+    address XAVE_TREASURY = 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd;
+
+    // Deploy Aave Tokens
+    AToken aToken = new AToken();
+    aToken.initialize(
+      lendingPoolContract,
+      XAVE_TREASURY,
+      root.fxPool.xsgdUsdcFxp,
+      IAaveIncentivesController(address(0)),
+      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      'aXSGD-USDC',
+      'aXSGD-USDC',
+      bytes('')
+    );
+
+    StableDebtToken sdt = new StableDebtToken();
+    sdt.initialize(
+      lendingPoolContract,
+      root.fxPool.xsgdUsdcFxp,
+      IAaveIncentivesController(address(0)),
+      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      'sbtXSGD-USDC',
+      'sbtXSGD-USDC',
+      bytes('')
+    );
+    VariableDebtToken vdt = new VariableDebtToken();
+
+    vdt.initialize(
+      lendingPoolContract,
+      root.fxPool.xsgdUsdcFxp,
+      IAaveIncentivesController(address(0)),
+      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      'vdtXSGD-USDC',
+      'vdtXSGD-USDC',
+      bytes('')
+    );
+
+    // Deploy default reserve interest strategy
+    DefaultReserveInterestRateStrategy dris =
+      new DefaultReserveInterestRateStrategy(
+        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider),
+        0.9 * 1e27, // optimal utilization rate
+        0 * 1e27, // baseVariableBorrowRate
+        0.04 * 1e27, // variableRateSlope1
+        0.60 * 1e27, // variableRateSlope2
+        0.02 * 1e27, // stableRateSlope1
+        0.60 * 1e27 // stableRateSlope2
+      );
+
+    // Deploy Reserve
+    LendingPoolConfigurator lpc =
+      LendingPoolConfigurator(
+        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+      );
+
+    ILendingPoolConfigurator.InitReserveInput[] memory input = new ILendingPoolConfigurator.InitReserveInput[](1);
+    input[0] = ILendingPoolConfigurator.InitReserveInput({
+      aTokenImpl: address(aToken),
+      stableDebtTokenImpl: address(sdt),
+      variableDebtTokenImpl: address(vdt),
+      underlyingAssetDecimals: IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      interestRateStrategyAddress: address(dris),
+      underlyingAsset: root.fxPool.xsgdUsdcFxp,
+      treasury: XAVE_TREASURY,
+      incentivesController: address(0),
+      underlyingAssetName: 'XSGD-USDC',
+      aTokenName: 'aXSGD-USDC',
+      aTokenSymbol: 'aXSGD-USDC',
+      variableDebtTokenName: vdt.name(),
+      variableDebtTokenSymbol: vdt.symbol(),
+      stableDebtTokenName: sdt.name(),
+      stableDebtTokenSymbol: sdt.symbol(),
+      params: bytes('')
+    });
+
+    vm.prank(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPoolAdmin());
+    lpc.batchInitReserve(input);
+  }
   /**
    In future, Test incentive emission?
     */

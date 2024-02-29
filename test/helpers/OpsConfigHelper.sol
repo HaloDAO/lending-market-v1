@@ -38,6 +38,7 @@ interface IOpsTestData {
   }
 
   struct LendingPoolValues {
+    address aaveOracle;
     address admin;
     address collateralManager;
     address donor;
