@@ -19,9 +19,7 @@ import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
 import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToken.sol';
 import {LendingPool} from '../contracts/protocol/lendingpool/LendingPool.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 // import {UpdateATokenInput, UpdateDebtTokenInput } from '../contracts/interfaces/ILendingPoolConfigurator.sol';
 
@@ -40,17 +38,13 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   //// network dependent config
   //// only the following lines are needed to be changed for different networks
+  // @todo connect avalanche
   string private NETWORK = 'sepolia';
   string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
 
-  // string private NETWORK = 'polygon';
-  // string private RPC_URL = vm.envString('POLYGON_RPC_URL');
-
-  //// network dependent config end
-
   IOpsTestData.Root root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
 
-  ILendingPool lendingPoolContract = ILendingPool(root.lendingPool.lendingPoolProxy); 
+  ILendingPool lendingPoolContract = ILendingPool(root.lendingPool.lendingPoolProxy);
 
   DataTypes.ReserveData private _reserveData;
 
@@ -60,8 +54,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
   function testLendingMarketAddresses() public {
     console.log('Running tests in network: %s', NETWORK);
-    ILendingPoolAddressesProvider lpAddrProvider =
-      ILendingPoolAddressesProvider(lendingPoolContract.getAddressesProvider());
+    ILendingPoolAddressesProvider lpAddrProvider = ILendingPoolAddressesProvider(
+      lendingPoolContract.getAddressesProvider()
+    );
 
     assertEq(root.lendingPool.admin, lpAddrProvider.getPoolAdmin(), 'correct pool admin set');
 
@@ -104,10 +99,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testEnableAndDisableReserveBorrowing() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.disableBorrowingOnReserve(root.tokens.usdc);
@@ -119,11 +113,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    assertEq(
-      _reserveData.configuration.getBorrowingEnabled(),
-      false,
-      'USDC borrowing disabled'
-    );
+    assertEq(_reserveData.configuration.getBorrowingEnabled(), false, 'USDC borrowing disabled');
 
     // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
@@ -142,49 +132,38 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
     );
 
-    // Expect to fail if msg.sender is not poolAdmin
+    vm.startPrank(root.lendingPool.admin);
+    // reserve is currently deactivated
+    assertEq(_isReserveActive(root.tokens.usdc), true);
+
+    // deactivate reserve
+    lpc.deactivateReserve(root.tokens.usdc);
+    assertEq(_isReserveActive(root.tokens.usdc), false);
+
+    // activate again
+    lpc.activateReserve(root.tokens.usdc);
+    assertEq(_isReserveActive(root.tokens.usdc), true);
+
+    vm.stopPrank();
+
+    // not pool admin tests
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.deactivateReserve(root.tokens.usdc);
 
-    vm.startPrank(root.lendingPool.admin);
-    // Will fail because [FAIL. Reason: revert: Cannot call fallback function from the proxy admin]
-    // vm.expectRevert(); // TODO: Remove once there is a fallback reserve
-    lpc.deactivateReserve(root.tokens.usdc);
-    // vm.expectEmit();
-    vm.stopPrank();
-
-    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
-
-    assertEq(
-      _reserveData.configuration.getActive(),
-      false,
-      'USDC reserve deactivated'
-    );
-
-    // enableBorrowingOnReserve
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.activateReserve(root.tokens.usdc);
-
-    vm.startPrank(root.lendingPool.admin);
-    lpc.activateReserve(root.tokens.usdc);
-    vm.stopPrank();
-
-    // TODO: Failing in sepolia because the USDC reserve is of different address
-    _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
-    assertEq(_reserveData.configuration.getActive(), true, 'USDC borrowing enabled');
   }
+
   function testFreezeAndUnfreezeReserve() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.freezeReserve(root.tokens.usdc);
 
     vm.prank(root.lendingPool.admin);
     lpc.freezeReserve(root.tokens.usdc);
-
 
     _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
     assertEq(_reserveData.configuration.getFrozen(), true, 'USDC reserve frozen');
@@ -205,18 +184,13 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    assertEq(
-      _reserveData.configuration.getFrozen(),
-      false,
-      'USDC reserve unfroze'
-    );
+    assertEq(_reserveData.configuration.getFrozen(), false, 'USDC reserve unfroze');
   }
 
   function testEnableAndDisableReserveStableRate() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     // Expect to fail if msg.sender is not poolAdmin
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
@@ -229,12 +203,8 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     _reserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
-    assertEq(
-      _reserveData.configuration.getStableRateBorrowingEnabled(),
-      false,
-      'USDC stable rate disabled'
-    );
-  
+    assertEq(_reserveData.configuration.getStableRateBorrowingEnabled(), false, 'USDC stable rate disabled');
+
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.enableReserveStableRate(root.tokens.usdc);
 
@@ -247,10 +217,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testSetReserveFactor() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.setReserveFactor(root.tokens.usdc, 0);
@@ -271,10 +240,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testSetReserveInterestRateStrategyAddress() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.setReserveInterestRateStrategyAddress(root.tokens.usdc, 0x0000000000000000000000000000000000000000);
@@ -289,24 +257,22 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testUpdateATokens() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     // TODO: Actual deployment of proxy implementation contract
     address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
 
-    ILendingPoolConfigurator.UpdateATokenInput memory input =
-      ILendingPoolConfigurator.UpdateATokenInput({
-        asset: root.tokens.xsgd,
-        treasury: root.fxPool.vault,
-        incentivesController: aTokenImpl,
-        name: 'aXSGD',
-        symbol: 'aXSGD',
-        implementation: aTokenImpl,
-        params: bytes('0x')
-      });
+    ILendingPoolConfigurator.UpdateATokenInput memory input = ILendingPoolConfigurator.UpdateATokenInput({
+      asset: root.tokens.xsgd,
+      treasury: root.fxPool.vault,
+      incentivesController: aTokenImpl,
+      name: 'aXSGD',
+      symbol: 'aXSGD',
+      implementation: aTokenImpl,
+      params: bytes('0x')
+    });
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.updateAToken(input);
@@ -321,10 +287,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testUpdateStableDebtToken() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     // TODO: Actual deployment of incentives controller
     address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
@@ -340,15 +305,14 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       bytes('0x')
     );
 
-    ILendingPoolConfigurator.UpdateDebtTokenInput memory input =
-      ILendingPoolConfigurator.UpdateDebtTokenInput({
-        asset: root.tokens.xsgd,
-        incentivesController: aTokenImpl,
-        name: 'aXSGD',
-        symbol: 'aXSGD',
-        implementation: address(sdt),
-        params: bytes('0x')
-      });
+    ILendingPoolConfigurator.UpdateDebtTokenInput memory input = ILendingPoolConfigurator.UpdateDebtTokenInput({
+      asset: root.tokens.xsgd,
+      incentivesController: aTokenImpl,
+      name: 'aXSGD',
+      symbol: 'aXSGD',
+      implementation: address(sdt),
+      params: bytes('0x')
+    });
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.updateStableDebtToken(input);
@@ -363,24 +327,21 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   }
 
   function testUpdateVariableDebtToken() public {
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
-
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     // TODO: Actual deployment of proxy implementation contract
     address aTokenImpl = address(0x1a13F4Ca1d028320A707D99520AbFefca3998b7F);
 
-    ILendingPoolConfigurator.UpdateDebtTokenInput memory input =
-      ILendingPoolConfigurator.UpdateDebtTokenInput({
-        asset: root.tokens.xsgd,
-        incentivesController: aTokenImpl,
-        name: 'aXSGD',
-        symbol: 'aXSGD',
-        implementation: aTokenImpl,
-        params: bytes('0x')
-      });
+    ILendingPoolConfigurator.UpdateDebtTokenInput memory input = ILendingPoolConfigurator.UpdateDebtTokenInput({
+      asset: root.tokens.xsgd,
+      incentivesController: aTokenImpl,
+      name: 'aXSGD',
+      symbol: 'aXSGD',
+      implementation: aTokenImpl,
+      params: bytes('0x')
+    });
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     lpc.updateVariableDebtToken(input);
@@ -394,7 +355,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // assertEq(usdcReserveData.variableDebtTokenAddress, 0x0000000000000000000000000000000000000000);
   }
 
-
   // TODO: Break down into different tests. Create internal functions for each operation so that it can be reused for state flow dependency
   function testLPUserOperations() public {
     _getTokenBalances(root.blockchain.eoaWallet);
@@ -404,15 +364,14 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     // _addNewReserve();
 
-    (uint256 totalCollateralETHBefore, , , , , uint256 healthFactorBeforeDeposit) =
-      lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+    (uint256 totalCollateralETHBefore, , , , , uint256 healthFactorBeforeDeposit) = lendingPoolContract
+      .getUserAccountData(root.blockchain.eoaWallet);
 
     /** *Medium priority*
     - check lending pool balance
    */
 
-  console.log('healthFactorBeforeDeposit', healthFactorBeforeDeposit / 1e27);
-
+    console.log('healthFactorBeforeDeposit', healthFactorBeforeDeposit / 1e27);
 
     _putCollateralInLendingPool(root.blockchain.eoaWallet, root.fxPool.xsgdUsdcFxp, 1000 * 1e18);
 
@@ -425,11 +384,17 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     DataTypes.ReserveData memory usdcReserveData = lendingPoolContract.getReserveData(root.tokens.usdc);
 
     {
-      (uint256 totalCollateralETHAfterDeposit, , uint256 availableBorrowsETHAfter, , , uint256 healthFactorAfter) =
-        lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+      (
+        uint256 totalCollateralETHAfterDeposit,
+        ,
+        uint256 availableBorrowsETHAfter,
+        ,
+        ,
+        uint256 healthFactorAfter
+      ) = lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
 
-      uint256 maxAvailableUsdcBorrows =
-        (((availableBorrowsETHAfter * uint256(ethUsdPrice) * 1e6) / uint256(usdcUsdPrice)) / 1e18);
+      uint256 maxAvailableUsdcBorrows = (((availableBorrowsETHAfter * uint256(ethUsdPrice) * 1e6) /
+        uint256(usdcUsdPrice)) / 1e18);
 
       uint256 usdcBalBeforeBorrow = IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet);
       console2.log('totalCollateralETHAfterDeposit', totalCollateralETHAfterDeposit);
@@ -440,13 +405,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       // TODO: Another LP deposit USDC to ensure there is USDC reserve balance
 
       _putCollateralInLendingPool(root.lendingPool.donor, root.tokens.usdc, 10_000 * 1e6);
-      
 
       // BORROW_ALLOWANCE_NOT_ENOUGH 59
 
       {
-        (uint256 totalCollateralETHAfterBorrow, , , , , uint256 healthFactorBeforeBorrow) =
-          lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+        (uint256 totalCollateralETHAfterBorrow, , , , , uint256 healthFactorBeforeBorrow) = lendingPoolContract
+          .getUserAccountData(root.blockchain.eoaWallet);
 
         console.log('healthFactorBeforeBorrow', healthFactorBeforeBorrow / 1e27);
       }
@@ -456,8 +420,8 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       uint256 usdcBalAfterBorrow = IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet);
       console2.log('usdc bal after borrow', usdcBalAfterBorrow);
 
-      (uint256 totalCollateralETHAfterBorrow, , , , , uint256 healthFactorAfterBorrow) =
-        lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+      (uint256 totalCollateralETHAfterBorrow, , , , , uint256 healthFactorAfterBorrow) = lendingPoolContract
+        .getUserAccountData(root.blockchain.eoaWallet);
 
       assertEq(
         usdcBalAfterBorrow,
@@ -491,24 +455,22 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         uint256 lpTokenPrice = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
         console.log('lpTokenPrice Before Manipulation:', lpTokenPrice);
 
-        (, , , , , uint256 healthFactorBeforeManip) =
-          lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+        (, , , , , uint256 healthFactorBeforeManip) = lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
 
         console.log('HF before price manipulation', healthFactorBeforeManip / 1e18);
       }
       _manipulatePriceOracle(root.fxPool.xsgdUsdcFxp, 1, 18);
-      
 
       // TODO: Manipulate price to make loan health of eoa wallet below 1
       {
         uint256 lpTokenPriceAfter = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
         console.log('lpTokenPriceAfter After Manipulation:', lpTokenPriceAfter);
 
-        (, , , , , uint256 healthFactorAfterBorrowAfter) =
-          lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
+        (, , , , , uint256 healthFactorAfterBorrowAfter) = lendingPoolContract.getUserAccountData(
+          root.blockchain.eoaWallet
+        );
 
         console.log('HF after price manipulation', healthFactorAfterBorrowAfter / 1e18);
-
       }
 
       _liquidatePosition(
@@ -561,6 +523,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     }
   }
 
+  function _isReserveActive(address token) internal returns (bool) {
+    DataTypes.ReserveData memory baseData = lendingPoolContract.getReserveData(token);
+    (bool isActive, , , ) = baseData.configuration.getFlagsMemory();
+    return isActive;
+  }
+
   function _getTokenBalances(address receiver) private {
     vm.startPrank(root.faucets.usdcWhale);
     IERC20(root.tokens.usdc).transfer(receiver, 10_000 * 1e6);
@@ -579,30 +547,38 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     );
   }
 
-  function _getLendingPoolAccountData(address user) private returns (uint256 totalCollateralETH,
+  function _getLendingPoolAccountData(
+    address user
+  )
+    private
+    returns (
+      uint256 totalCollateralETH,
       uint256 totalDebtETH,
       uint256 availableBorrowsETH,
       uint256 currentLiquidationThreshold,
       uint256 ltv,
-      uint256 healthFactor){
-    (uint256 totalCollateralETH,
+      uint256 healthFactor
+    )
+  {
+    (
+      uint256 totalCollateralETH,
       uint256 totalDebtETH,
       uint256 availableBorrowsETH,
       uint256 currentLiquidationThreshold,
       uint256 ltv,
-      uint256 healthFactor) = lendingPoolContract.getUserAccountData(user);
+      uint256 healthFactor
+    ) = lendingPoolContract.getUserAccountData(user);
   }
 
   function _getReservesData() private {
-    (IHaloUiPoolDataProvider.AggregatedReserveData[] memory reservesData, ) =
-          IHaloUiPoolDataProvider(root.lendingPool.uiDataProvider).getReservesData(
-            ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider)
-          );
-        console2.log('reservesData.length', reservesData.length);
-        for (uint256 i = 0; i < reservesData.length; i++) {
-          if (reservesData[i].underlyingAsset == root.fxPool.xsgdUsdcFxp)
-            console2.log('reserve reserveLiquidationThreshold', reservesData[i].reserveLiquidationThreshold);
-        }
+    (IHaloUiPoolDataProvider.AggregatedReserveData[] memory reservesData, ) = IHaloUiPoolDataProvider(
+      root.lendingPool.uiDataProvider
+    ).getReservesData(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider));
+    console2.log('reservesData.length', reservesData.length);
+    for (uint256 i = 0; i < reservesData.length; i++) {
+      if (reservesData[i].underlyingAsset == root.fxPool.xsgdUsdcFxp)
+        console2.log('reserve reserveLiquidationThreshold', reservesData[i].reserveLiquidationThreshold);
+    }
   }
 
   function _putCollateralInLendingPool(address depositor, address token, uint256 amount) private {
@@ -642,16 +618,17 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
   }
 
-  function _liquidatePosition(address liquidator, address liquidatee, address collateralToken, address paymentToken, uint256 amount, bool inATokens) private {
+  function _liquidatePosition(
+    address liquidator,
+    address liquidatee,
+    address collateralToken,
+    address paymentToken,
+    uint256 amount,
+    bool inATokens
+  ) private {
     vm.startPrank(liquidator);
     IERC20(root.tokens.usdc).approve(root.lendingPool.lendingPoolProxy, type(uint256).max);
-    lendingPoolContract.liquidationCall(
-      collateralToken,
-      paymentToken,
-      liquidatee,
-      amount,
-      inATokens
-    );
+    lendingPoolContract.liquidationCall(collateralToken, paymentToken, liquidatee, amount, inATokens);
     vm.stopPrank();
   }
 
@@ -667,17 +644,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.stopPrank();
   }
 
-  function _deployOracle(
-    address asset,
-    address baseAssim,
-    address quoteAssim
-  ) internal returns (address) {
-    FXLPEthPriceFeedOracle lpOracle =
-      new FXLPEthPriceFeedOracle(
-        asset,
-        root.chainlink.ethUsd, // ETH USD Oracle
-        'LPXSGD-USDC/ETH'
-      );
+  function _deployOracle(address asset, address baseAssim, address quoteAssim) internal returns (address) {
+    FXLPEthPriceFeedOracle lpOracle = new FXLPEthPriceFeedOracle(
+      asset,
+      root.chainlink.ethUsd, // ETH USD Oracle
+      'LPXSGD-USDC/ETH'
+    );
 
     return address(lpOracle);
   }
@@ -688,8 +660,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     // TODO: Query this from FX Pool value so value is dynamic when we use this test in different network
 
-    (IERC20[] memory tokens, , ) =
-      IVault(root.fxPool.vault).getPoolTokens(IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId());
+    (IERC20[] memory tokens, , ) = IVault(root.fxPool.vault).getPoolTokens(
+      IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId()
+    );
 
     address baseAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[0]));
     address quoteAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[1]));
@@ -775,22 +748,20 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     );
 
     // Deploy default reserve interest strategy
-    DefaultReserveInterestRateStrategy dris =
-      new DefaultReserveInterestRateStrategy(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider),
-        0.9 * 1e27, // optimal utilization rate
-        0 * 1e27, // baseVariableBorrowRate
-        0.04 * 1e27, // variableRateSlope1
-        0.60 * 1e27, // variableRateSlope2
-        0.02 * 1e27, // stableRateSlope1
-        0.60 * 1e27 // stableRateSlope2
-      );
+    DefaultReserveInterestRateStrategy dris = new DefaultReserveInterestRateStrategy(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider),
+      0.9 * 1e27, // optimal utilization rate
+      0 * 1e27, // baseVariableBorrowRate
+      0.04 * 1e27, // variableRateSlope1
+      0.60 * 1e27, // variableRateSlope2
+      0.02 * 1e27, // stableRateSlope1
+      0.60 * 1e27 // stableRateSlope2
+    );
 
     // Deploy Reserve
-    LendingPoolConfigurator lpc =
-      LendingPoolConfigurator(
-        ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
-      );
+    LendingPoolConfigurator lpc = LendingPoolConfigurator(
+      ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getLendingPoolConfigurator()
+    );
 
     ILendingPoolConfigurator.InitReserveInput[] memory input = new ILendingPoolConfigurator.InitReserveInput[](1);
     input[0] = ILendingPoolConfigurator.InitReserveInput({
@@ -815,17 +786,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.prank(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPoolAdmin());
     lpc.batchInitReserve(input);
   }
+
   /**
    In future, Test incentive emission?
     */
 
-  function _addLiquidity(
-    bytes32 _poolId,
-    uint256 _depositNumeraire,
-    address _user,
-    address _tA,
-    address _tB
-  ) private {
+  function _addLiquidity(bytes32 _poolId, uint256 _depositNumeraire, address _user, address _tA, address _tB) private {
     (_tA, _tB) = _tA < _tB ? (_tA, _tB) : (_tB, _tA);
 
     address[] memory assets = new address[](2);
@@ -845,8 +811,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     userAssets[1] = _tB;
     bytes memory userDataJoin = abi.encode(_depositNumeraire, userAssets);
 
-    IVault.JoinPoolRequest memory reqJoin =
-      IVault.JoinPoolRequest(_asIAsset(assets), maxAmountsIn, userDataJoin, false);
+    IVault.JoinPoolRequest memory reqJoin = IVault.JoinPoolRequest(
+      _asIAsset(assets),
+      maxAmountsIn,
+      userDataJoin,
+      false
+    );
 
     vm.startPrank(_user);
     IERC20(_tA).approve(root.fxPool.vault, type(uint256).max);
@@ -868,12 +838,7 @@ interface IERC20Detailed {
 }
 
 interface IVault {
-  function joinPool(
-    bytes32 poolId,
-    address sender,
-    address recipient,
-    JoinPoolRequest memory request
-  ) external payable;
+  function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request) external payable;
 
   struct JoinPoolRequest {
     IAsset[] assets;
@@ -882,14 +847,9 @@ interface IVault {
     bool fromInternalBalance;
   }
 
-  function getPoolTokens(bytes32 poolId)
-    external
-    view
-    returns (
-      IERC20[] memory tokens,
-      uint256[] memory balances,
-      uint256 lastChangeBlock
-    );
+  function getPoolTokens(
+    bytes32 poolId
+  ) external view returns (IERC20[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
 }
 
 interface IAsset {
@@ -913,16 +873,7 @@ interface IFXPool {
 }
 
 interface IOracle {
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80,
-      int256,
-      uint256,
-      uint256,
-      uint80
-    );
+  function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80);
 }
 
 interface ILendingPoolAddressesProviderWithOwner is ILendingPoolAddressesProvider {

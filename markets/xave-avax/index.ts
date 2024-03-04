@@ -32,7 +32,7 @@ export const XaveAvalancheConfig: IXaveAvalancheConfiguration = {
   },
   ReserveAssets: {
     [eAvalancheNetwork.avalanche]: {
-      USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+      USDC: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
       // XSGD: '0xDC3326e71D45186F113a2F448984CA0e8D201995',
       EUROC: '0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD',
       VCHF: '0x228a48df6819CCc2eCa01e2192ebAFfFdAD56c19',

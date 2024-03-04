@@ -7,6 +7,7 @@ task('xave:avax-deployment-config', 'Export used config').setAction(async ({ ver
   await localBRE.run('set-DRE');
 
   const tokens: string[] = ['USDC', 'EUROC', 'VCHF', 'VEUR', 'LP_EUROC_USDC', 'LP_VEUR_USDC', 'LP_VCHF_USDC'];
+  // const tokens: string[] = ['USDC'];
 
   await generateMarketConfigJSON(tokens, ConfigNames.XaveAvalanche, eAvalancheNetwork.avalanche);
 });

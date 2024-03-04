@@ -45,9 +45,9 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
 
   DataTypes.ReserveData private _reserveData;
 
-  function run() external {
+  function run(string memory network) external {
     IDeploymentLendingMarketConfig.Root memory c = _readDeploymentLendingMarketConfig(
-      string(abi.encodePacked('lending_market_config.sepolia.json'))
+      string(abi.encodePacked('lending_market_config.', network, '.json'))
     );
     // for local development uncomment the following lines
     // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
@@ -93,7 +93,9 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     _deployDataProvider(addressProvider);
     console2.log('init reserves by helper');
     _initReservesByHelper(addressProvider, c);
+    console2.log('reserves initialize, configuring..');
     _configureReservesByHelper(addressProvider, c, aTokensHelper, deployerAddress);
+    console2.log('reserves configured');
 
     (UiHaloPoolDataProvider uiDataProvider, UiIncentiveDataProvider uiIncentiveDataProvider) = _deployAncillaries(
       addressProvider,
@@ -129,10 +131,11 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
         string(abi.encodePacked('Reserve AToken\t\t', IERC20Detailed(_reserveData.aTokenAddress).symbol(), '\t\t')),
         _reserveData.aTokenAddress
       );
-      console2.log('Reserve Configuration\t\t',
+      console2.log(
+        'Reserve Configuration\t\t',
         _reserveData.configuration.getActive(),
         _reserveData.configuration.getLiquidationThreshold()
-        );
+      );
     }
 
     console2.log('~~~~~~~~~~~~ OWNERSHIP INFO ~~~~~~~~~~~~');
@@ -202,6 +205,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     vdTokens = new VariableDebtToken[](_c.tokens.length);
 
     for (uint256 i = 0; i < _c.tokens.length; i++) {
+      console2.log('deploying atokens for ', _c.tokens[i].addr);
       AToken a = new AToken();
       a.initialize(
         ILendingPool(_ledingPoolProxy),
@@ -216,7 +220,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
         bytes('')
       );
       aTokens[i] = a;
-
+      console2.log('deploying stableDebt for ', _c.tokens[i].addr);
       StableDebtToken sdt = new StableDebtToken();
       sdt.initialize(
         ILendingPool(_ledingPoolProxy),
@@ -230,7 +234,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
         bytes('')
       );
       sdTokens[i] = sdt;
-
+      console2.log('deploying variableDebt for ', _c.tokens[i].addr);
       VariableDebtToken vdt = new VariableDebtToken();
       vdt.initialize(
         ILendingPool(_ledingPoolProxy),
@@ -251,16 +255,22 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     LendingPoolAddressesProvider _addressProvider,
     IDeploymentLendingMarketConfig.Root memory _c
   ) private {
+    console.log('deploying aave tokens');
     (
       AToken[] memory aTokens,
       StableDebtToken[] memory sdTokens,
       VariableDebtToken[] memory vdTokens
     ) = _deployAaveTokens(_c, _addressProvider.getLendingPool());
+    console.log('aave tokens deployed');
+
     LendingPoolConfigurator cfg = LendingPoolConfigurator(_addressProvider.getLendingPoolConfigurator());
+
+    console.log('lending pool configurator deployed');
 
     uint256 l = _c.tokens.length;
 
     for (uint256 i = 0; i < l; i++) {
+      console.log('depoying strategy - ', i);
       DefaultReserveInterestRateStrategy strategy = new DefaultReserveInterestRateStrategy(
         _addressProvider,
         _c.tokens[i].rateStrategy.optimalUtilizationRate,
@@ -324,6 +334,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     LendingPoolAddressesProvider _addressProvider,
     IDeploymentLendingMarketConfig.Root memory _c
   ) private returns (UiHaloPoolDataProvider, UiIncentiveDataProvider) {
+    console2.log('deploying ancillaries..');
     LendingPoolCollateralManager manager = new LendingPoolCollateralManager();
     _addressProvider.setLendingPoolCollateralManager(address(manager));
 
