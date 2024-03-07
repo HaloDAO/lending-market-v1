@@ -177,7 +177,7 @@ export const generateMarketConfigJSON = async (
     .set('protocolGlobalParams', {
       ethUsdAggregator: ethAndNativeAggregators[network].ethUsdOracle,
       marketId: poolConfig.MarketId,
-      nativeTokenUsdAggregator: ethAndNativeAggregators[network].nativeTokenOracle,
+      nativeTokenUsdAggregator: ethAndNativeAggregators[network].ethUsdOracle, // keeping this as this gives the most accurate info
       treasury: getOpsMultisig(eEthereumNetwork.sepolia),
       usdAddress: poolConfig.ProtocolGlobalParams.UsdAddress,
       wethAddress: poolConfig.WETH[network],

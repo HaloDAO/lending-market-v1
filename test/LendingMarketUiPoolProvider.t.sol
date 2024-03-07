@@ -12,7 +12,7 @@ import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolD
 
 contract LendingMarketUiPoolProvider is Test, LendingMarketTestHelper {
   // Buildbear
-  address constant LP_ADDRESS_PROVIDER_ADD = 0xc82d27ad88893C9b3f9bF42bA46fC6FA610144F4;
+  address constant LP_ADDRESS_PROVIDER_ADD = 0xde29585a4134752632a07f09BCA0f02F72a33B8d;
   address constant UI_POOL_PROVIDER_ADD = 0xf89E599bB7c19bE276e95c1EA55A9684ac740255;
 
   function setUp() public {
@@ -23,6 +23,7 @@ contract LendingMarketUiPoolProvider is Test, LendingMarketTestHelper {
     (IHaloUiPoolDataProvider.AggregatedReserveData[] memory reservesData, ) = IHaloUiPoolDataProvider(
       UI_POOL_PROVIDER_ADD
     ).getReservesData(ILendingPoolAddressesProvider(LP_ADDRESS_PROVIDER_ADD));
+    // must not revert
 
     console2.log(reservesData[0].name);
   }
