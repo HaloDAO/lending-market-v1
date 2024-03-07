@@ -39,8 +39,11 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   //// network dependent config
   //// only the following lines are needed to be changed for different networks
 
-  string private NETWORK = 'sepolia';
-  string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
+  // string private NETWORK = 'sepolia';
+  // string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
+
+  string private NETWORK = 'avalanche';
+  string private RPC_URL = vm.envString('https://rpc.buildbear.io/xclabs');
 
   IOpsTestData.Root root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
 
