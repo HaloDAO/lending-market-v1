@@ -9,30 +9,26 @@
 ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝
 ```
 
-# HaloDAO Lending Market V1
+# Xave Finance Lending Market
 
-This repository contains the smart contracts source code and markets configuration for HaloDAO Lending Market. The repository uses Docker Compose and Hardhat as development enviroment for compilation, testing and deployment tasks.
+This repository contains the smart contracts source code and markets configuration for Xave Finance Lending Market. The repository uses Docker Compose and Hardhat as development enviroment for compilation, testing and deployment tasks.
 
-## What is HaloDAO?
+## What is Xave Finance?
 
-HaloDAO aims to incentivize and build asset-backed stablecoin liquidity by establishing the foundational money lego of DeFi. However, rather than using ETH or BTC to generate synthetic USD stablecoins as initial protocols have done, HaloDAO will;
+Xave Finance aims to incentivize and build asset-backed stablecoin liquidity by establishing the foundational money lego of DeFi. However, rather than using ETH or BTC to generate synthetic USD stablecoins as initial protocols have done, Xave Finance will;
 
 - Build an Automated Market Maker (AMM) to enable efficient trades between stablecoins
 - Build a Lending Market to allow more capital efficient lending and borrowing of stablecoins
 
-One effect of launching two fundamental money legos under one protocol is the ability to replicate the early "recycling" of superfluid capital that contributed to the rapid rise of Total Value Locked (TVL) in DeFi. HaloDAO aims to replicate this behavior specifically for stablecoin liquidity.
+One effect of launching two fundamental money legos under one protocol is the ability to replicate the early "recycling" of superfluid capital that contributed to the rapid rise of Total Value Locked (TVL) in DeFi. Xave Finance aims to replicate this behavior specifically for stablecoin liquidity.
 
 ## Documentation
 
-Please check the latest documentation [here](https://docs.halodao.com/).
+Please check the latest documentation [here](https://docs.xave.co/).
 
 ## Audits
 
 - (pending)
-
-## Connect with the community
-
-You can join at the [Discord](https://discord.com/invite/halodao) channel or at the [Governance Forum](https://snapshot.org/#/halodao.eth) for asking questions about the protocol or talk about HaloDAO Lending Market with other peers.
 
 ## Getting Started
 
@@ -102,9 +98,9 @@ TENDERLY_USERNAME=""
 
 ## Markets configuration
 
-The configurations related with the HaloDAO Lending Market Markets are located at `markets` directory. You can follow the `IAaveConfiguration` interface to create new Markets configuration or extend the current HaloDAO Lending Market configuration.
+The configurations related with the Xave Finance Lending Market Markets are located at `markets` directory. You can follow the `IAaveConfiguration` interface to create new Markets configuration or extend the current Xave Finance Lending Market configuration.
 
-Each market should have his own Market configuration file, and their own set of deployment tasks, using the HaloDAO Lending Market market config and tasks as a reference.
+Each market should have his own Market configuration file, and their own set of deployment tasks, using the Xave Finance Lending Market market config and tasks as a reference.
 
 ## Test
 
@@ -134,15 +130,15 @@ NOTES:
 
 ### Mainnet fork deployment via Docker
 
-You can deploy HaloDAO Lending Market in a forked Mainnet chain using Hardhat built-in fork feature:
+You can deploy Xave Finance Lending Market in a forked Mainnet chain using Hardhat built-in fork feature:
 
 ```
 docker-compose run contracts-env npm run aave:fork:main
 ```
 
-### Deploy HaloDAO Lending Market into a Mainnet Fork via console with Docker
+### Deploy Xave Finance Lending Market into a Mainnet Fork via console with Docker
 
-You can deploy HaloDAO Lending Market into the Hardhat console in fork mode, to interact with the protocol inside the fork or for testing purposes.
+You can deploy Xave Finance Lending Market into the Hardhat console in fork mode, to interact with the protocol inside the fork or for testing purposes.
 
 Run the console in Mainnet fork mode:
 
@@ -150,10 +146,10 @@ Run the console in Mainnet fork mode:
 docker-compose run contracts-env npm run console:fork
 ```
 
-At the Hardhat console, interact with the HaloDAO Lending Market protocol in Mainnet fork mode:
+At the Hardhat console, interact with the Xave Finance Lending Market protocol in Mainnet fork mode:
 
 ```
-// Deploy the HaloDAO Lending Market protocol in fork mode
+// Deploy the Xave Finance Lending Market protocol in fork mode
 await run('aave:mainnet')
 
 // Or your custom Hardhat task
@@ -184,9 +180,9 @@ await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('
 
 ```
 
-## Interact with HaloDAO Lending Market in Mainnet via console with Docker
+## Interact with Xave Finance Lending Market in Mainnet via console with Docker
 
-You can interact with HaloDAO Lending Market at Mainnet network using the Hardhat console, in the scenario where the frontend is down or you want to interact directly. You can check the deployed addresses at https://docs.aave.com/developers/deployed-contracts.
+You can interact with Xave Finance Lending Market at Mainnet network using the Hardhat console, in the scenario where the frontend is down or you want to interact directly. You can check the deployed addresses at https://docs.aave.com/developers/deployed-contracts.
 
 Run the Hardhat console pointing to the Mainnet network:
 
@@ -200,7 +196,7 @@ At the Hardhat console, you can interact with the protocol:
 // Load the HRE into helpers to access signers
 run("set-DRE")
 
-// Import getters to instance any HaloDAO Lending Market contract
+// Import getters to instance any Xave Finance Lending Market contract
 const contractGetters = require('./helpers/contracts-getters');
 
 // Load the first signer
@@ -241,7 +237,7 @@ note 2: check the addresses especially when running localhost node
 
 ## Adding a new asset in the market
 
-[Refer to this document](https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/169017345/Adding+New+Asset+using+script)
+[Refer to this document](https://Xave Finance.atlassian.net/wiki/spaces/Xave Finance/pages/169017345/Adding+New+Asset+using+script)
 
 ## Disable borrowing asset
 
@@ -259,7 +255,9 @@ yarn run anvil:avax
 yarn run watch:script-local
 ```
 
-## Sepolia Deployment
+## Full Market Deployment With Foundry
+
+1 - Import deployer 2 mnemonic inside cast.
 
 ```sh
 # assuming you've imported a private key with cast wallet as such
@@ -267,12 +265,39 @@ yarn run watch:script-local
 # ~/.foundry/keystores/MY_DEPLOYER_WALLET
 cast wallet import "MY_DEPLOYER_WALLET" --interactive
 
+```
+
+2 - Make or edit the `deployments/lending_market_config.{network}.json`
+Get all required USD oracles pair tokens and LP tokens inside the config
+
+3 - Deploy all required oracles.
+
+```sh
 # deploy Xave Oracles for the Lending Market
 # NB: notice the last "sepolia" value which is the network value passed into the `run` method
-forge script script/XaveOraclesDeployment.s.sol:XaveOraclesDeployment --sig "run(string memory network)" --slow --account "MY_DEPLOYER_WALLET" --broadcast --rpc-url "${SEPOLIA_RPC_URL}" -vvv sepolia
+forge script script/XaveOraclesDeployment.s.sol:XaveOraclesDeployment --sig "run(string memory network)" --slow --account "MY_DEPLOYER_WALLET" --broadcast --rpc-url "${NETWORK_RPC_URL}" -vvv sepolia
 
+```
+
+4 - Generate `lending_market_config.network.json` by running the command
+
+```sh
+yarn hardhat xave:avax-deployment-config
+```
+
+Remove all the " on the numbers by finding using the regex mode `"(\d+)"` and replacing it with `$1`
+
+5 - deploy lending market
+
+```sh
 # deploy lending market
 source .env && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --slow --account "MY_DEPLOYER_WALLET" --broadcast -vvv --rpc-url "${SEPOLIA_RPC_URL}"
 
 
+# or
+# the ff address is deployer 2
+# network - is the network to deploy so we can access json config
+
+
+forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --sig "run(string memory network)" --slow --account 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd --broadcast --rpc-url "RPC_URL" -vvv {network}
 ```

@@ -18,7 +18,7 @@ export const CommonsConfig: ICommonConfiguration = {
   ProtocolGlobalParams: {
     TokenDistributorPercentageBase: '10000',
     MockUsdPriceInWei: '5848466240000000',
-    UsdAddress: '0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96', // @todo check
+    UsdAddress: '0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96',
     NilAddress: '0x0000000000000000000000000000000000000000',
     OneAddress: '0x0000000000000000000000000000000000000001',
     AaveReferral: '0',
@@ -34,7 +34,7 @@ export const CommonsConfig: ICommonConfiguration = {
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
-  // @todo for the lp token
+
   LendingRateOracleRatesCommon: {
     USDC: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
@@ -109,13 +109,13 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ChainlinkAggregator: {
     [eAvalancheNetwork.avalanche]: {
-      USDC: '0xF096872672F44d6EBA71458D74fe67F9a77a23B9',
-      VCHF: ZERO_ADDRESS,
-      EUROC: ZERO_ADDRESS,
-      VEUR: ZERO_ADDRESS,
-      LP_EUROC_USDC: ZERO_ADDRESS,
-      LP_VEUR_USDC: ZERO_ADDRESS,
-      LP_VCHF_USDC: ZERO_ADDRESS,
+      USDC: '0x29388a985C5904BFa13524f8c3Cb8bC10A02864C',
+      VCHF: '0x132b37560040268aA7c03F6C4f415F0eBf30A87b',
+      EUROC: '0xB9f4E777491bb848578B6FBa5c8A744A40d11128',
+      VEUR: '0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa',
+      LP_EUROC_USDC: '0x94d81606Dca42D3680c0DFc1d93eeaF6C2D55f2d',
+      LP_VEUR_USDC: '0x6360a8Adb883CA076e7F2c6d2fF37531A771e414',
+      LP_VCHF_USDC: '0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c',
     },
     [eAvalancheNetwork.fuji]: {},
   },
@@ -137,7 +137,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eAvalancheNetwork.fuji]: '0xd00ae08403B9bbb9124bB305C09058E32C39A48c', // Official WAVAX
   },
   ReserveFactorTreasuryAddress: {
-    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS, // @todo
+    [eAvalancheNetwork.avalanche]: ZERO_ADDRESS,
     [eAvalancheNetwork.fuji]: ZERO_ADDRESS, // Self-controlled EOA for testing
   },
   IncentivesController: {

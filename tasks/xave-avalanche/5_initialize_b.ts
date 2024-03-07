@@ -44,7 +44,7 @@ task('xave:avax-initialize-5-b', 'Initialize lending pool configuration.')
     const lendingPoolAddress = await addressesProvider.getLendingPool();
     const reserveAssets = await getParamPerNetwork(ReserveAssets, network);
     const incentiveController = await getRnbwIncentivesController();
-    const treasury = ZERO_ADDRESS; //@todo ops?
+    const treasury = ZERO_ADDRESS;
 
     console.log('initializing reserves..');
     // Initialize and Configure Reserves, Atokens, Debt Tokens

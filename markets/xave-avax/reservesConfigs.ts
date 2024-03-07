@@ -6,7 +6,7 @@ import { rateStrategyStableThree } from './rateStrategies';
 export const strategyUSDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
-  liquidationThreshold: '9000', // @todo VERIFY
+  liquidationThreshold: '9000',
   liquidationBonus: '10500', // 5% liquidation bonus
   borrowingEnabled: true,
   stableBorrowRateEnabled: false,
@@ -18,7 +18,7 @@ export const strategyUSDC: IReserveParams = {
 export const strategyXSGD: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
-  liquidationThreshold: '9000', // @todo VERIFY
+  liquidationThreshold: '9000',
   liquidationBonus: '10500', // 5% liquidation bonus
   borrowingEnabled: true,
   stableBorrowRateEnabled: false,
@@ -30,9 +30,9 @@ export const strategyXSGD: IReserveParams = {
 export const strategyEUROC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
-  liquidationThreshold: '9000', // @todo VERIFY
+  liquidationThreshold: '9000',
   liquidationBonus: '10500', // 5% liquidation bonus
-  borrowingEnabled: true,
+  borrowingEnabled: false,
   stableBorrowRateEnabled: false,
   reserveDecimals: '6',
   aTokenImpl: eContractid.AToken,
@@ -42,9 +42,9 @@ export const strategyEUROC: IReserveParams = {
 export const strategyVCHF: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
-  liquidationThreshold: '9000', // @todo VERIFY
+  liquidationThreshold: '9000',
   liquidationBonus: '10500', // 5% liquidation bonus
-  borrowingEnabled: true,
+  borrowingEnabled: false,
   stableBorrowRateEnabled: false,
   reserveDecimals: '18',
   aTokenImpl: eContractid.AToken,
@@ -54,9 +54,9 @@ export const strategyVCHF: IReserveParams = {
 export const strategyVEUR: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
-  liquidationThreshold: '9000', // @todo VERIFY
+  liquidationThreshold: '9000',
   liquidationBonus: '10500', // 5% liquidation bonus
-  borrowingEnabled: true,
+  borrowingEnabled: false,
   stableBorrowRateEnabled: false,
   reserveDecimals: '18',
   aTokenImpl: eContractid.AToken,

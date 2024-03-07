@@ -9,7 +9,7 @@ import { strategyUSDC, strategyXSGD, strategyLP_XSGD_USDC } from './reservesConf
 export const XaveSepoliaConfig: IXaveSepoliaConfiguration = {
   ...CommonsConfig,
   MarketId: 'Xave Sepolia Market',
-  ProviderId: 4, // @todo check
+  ProviderId: 4,
   ReservesConfig: {
     USDC: strategyUSDC,
     XSGD: strategyXSGD,

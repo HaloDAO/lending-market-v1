@@ -26,6 +26,7 @@ import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToke
 import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
+import {WalletBalanceProvider} from 'contracts/misc/WalletBalanceProvider.sol';
 import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
 import {IDeploymentLendingMarketConfig} from './interfaces/IDeploymentLendingMarketConfig.sol';
 import {DeploymentConfigHelper} from './helpers/DeploymentConfigHelper.sol';
@@ -97,10 +98,11 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     _configureReservesByHelper(addressProvider, c, aTokensHelper, deployerAddress);
     console2.log('reserves configured');
 
-    (UiHaloPoolDataProvider uiDataProvider, UiIncentiveDataProvider uiIncentiveDataProvider) = _deployAncillaries(
-      addressProvider,
-      c
-    );
+    (
+      UiHaloPoolDataProvider uiDataProvider,
+      UiIncentiveDataProvider uiIncentiveDataProvider,
+      WalletBalanceProvider balanceProvider
+    ) = _deployAncillaries(addressProvider, c);
 
     // set final ownership
     registry.transferOwnership(c.deploymentParams.poolAdmin);
@@ -122,6 +124,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     console2.log('LendingRateOracle\t\t', addressProvider.getLendingRateOracle());
     console2.log('uiDataProvider\t\t', address(uiDataProvider));
     console2.log('uiIncentiveDataProvider\t', address(uiIncentiveDataProvider));
+    console2.log('Wallet Balance Provider\t', address(balanceProvider));
     console2.log('~~~~~~~~~~~~~ RESERVE DATA ~~~~~~~~~~~~~');
 
     address[] memory rl = ILendingPool(addressProvider.getLendingPool()).getReservesList();
@@ -178,6 +181,8 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
       1e18 // baseCurrencyUnit
     );
 
+    oracle.transferOwnership(_c.deploymentParams.poolAdmin);
+
     LendingRateOracle lendingRateOracle = new LendingRateOracle();
 
     _addressProvider.setPriceOracle(address(oracle));
@@ -215,8 +220,8 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
         // can it be updated after?
         IAaveIncentivesController(address(0)),
         IERC20Detailed(_c.tokens[i].addr).decimals(),
-        string(abi.encodePacked('a', _c.tokens[i].rateStrategy.tokenReserve)),
-        string(abi.encodePacked('a', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('x', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('x', _c.tokens[i].rateStrategy.tokenReserve)),
         bytes('')
       );
       aTokens[i] = a;
@@ -229,8 +234,8 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
         // can it be updated after?
         IAaveIncentivesController(address(0)),
         IERC20Detailed(_c.tokens[i].addr).decimals(),
-        string(abi.encodePacked('sbt', _c.tokens[i].rateStrategy.tokenReserve)),
-        string(abi.encodePacked('sbt', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('xsbt', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('xsbt', _c.tokens[i].rateStrategy.tokenReserve)),
         bytes('')
       );
       sdTokens[i] = sdt;
@@ -241,8 +246,8 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
         _c.tokens[i].addr,
         IAaveIncentivesController(address(0)),
         IERC20Detailed(_c.tokens[i].addr).decimals(),
-        string(abi.encodePacked('vdt', _c.tokens[i].rateStrategy.tokenReserve)),
-        string(abi.encodePacked('vdt', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('xvdt', _c.tokens[i].rateStrategy.tokenReserve)),
+        string(abi.encodePacked('xvdt', _c.tokens[i].rateStrategy.tokenReserve)),
         bytes('')
       );
       vdTokens[i] = vdt;
@@ -333,7 +338,7 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
   function _deployAncillaries(
     LendingPoolAddressesProvider _addressProvider,
     IDeploymentLendingMarketConfig.Root memory _c
-  ) private returns (UiHaloPoolDataProvider, UiIncentiveDataProvider) {
+  ) private returns (UiHaloPoolDataProvider, UiIncentiveDataProvider, WalletBalanceProvider) {
     console2.log('deploying ancillaries..');
     LendingPoolCollateralManager manager = new LendingPoolCollateralManager();
     _addressProvider.setLendingPoolCollateralManager(address(manager));
@@ -347,9 +352,10 @@ contract LendingPoolDeployment is Script, DeploymentConfigHelper {
     );
 
     UiIncentiveDataProvider incentiveDataProvider = new UiIncentiveDataProvider();
+    WalletBalanceProvider balanceProvider = new WalletBalanceProvider();
     // not needed by Aave directly so skip for now
     // WalletBalanceProvider balanceProvider = new WalletBalanceProvider();
 
-    return (dataProvider, incentiveDataProvider);
+    return (dataProvider, incentiveDataProvider, balanceProvider);
   }
 }

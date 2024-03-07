@@ -19,7 +19,7 @@ import {
 export const XaveAvalancheConfig: IXaveAvalancheConfiguration = {
   ...CommonsConfig,
   MarketId: 'Xave Avalanche Market',
-  ProviderId: 3, // @todo check
+  ProviderId: 3,
   ReservesConfig: {
     USDC: strategyUSDC,
     // XSGD: strategyXSGD,

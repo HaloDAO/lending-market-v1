@@ -17,7 +17,7 @@ export const CommonsConfig: ICommonConfiguration = {
   ProtocolGlobalParams: {
     TokenDistributorPercentageBase: '10000',
     MockUsdPriceInWei: '5848466240000000',
-    UsdAddress: '0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96', // @todo check
+    UsdAddress: '0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96',
     NilAddress: '0x0000000000000000000000000000000000000000',
     OneAddress: '0x0000000000000000000000000000000000000001',
     AaveReferral: '0',
@@ -33,7 +33,7 @@ export const CommonsConfig: ICommonConfiguration = {
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
-  // @todo for the lp token
+
   LendingRateOracleRatesCommon: {
     USDC: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
@@ -175,7 +175,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.sepolia]: {
       USDC: '0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E',
       XSGD: '0xd9239bB559B8f16DCD67f6186166d218b7514397',
-      LP_XSGD_USDC: '0x11686977Ee03B751A15A9E239322cbBbAbc3Baa6', // @todo deploy this
+      LP_XSGD_USDC: '0x11686977Ee03B751A15A9E239322cbBbAbc3Baa6',
     },
     [eEthereumNetwork.coverage]: {},
     [eEthereumNetwork.buidlerevm]: {},

@@ -28,7 +28,7 @@ task('xave:avax-oracles-3', 'Deploy oracles for prod enviroment')
 
     const tokensToWatch: SymbolMap<string> = {
       ...reserveAssets,
-      USD: UsdAddress, //@todo check
+      USD: UsdAddress,
     };
 
     const chainlinkAggregators = await getParamPerNetwork(ChainlinkAggregator, network);

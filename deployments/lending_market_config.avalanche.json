@@ -6,7 +6,7 @@
   "protocolGlobalParams": {
     "ethUsdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
     "marketId": "Xave Avalanche Market",
-    "nativeTokenUsdAggregator": "0x0000000000000000000000000000000000000000",
+    "nativeTokenUsdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
     "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
     "usdAddress": "0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96",
     "wethAddress": "0x0000000000000000000000000000000000000000"
@@ -45,7 +45,7 @@
       "addr": "0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa",
         "tokenReserve": "EUROC"
       },
       "rateStrategy": {
@@ -61,7 +61,7 @@
       "reserveConfig": {
         "aTokenImpl": "AToken",
         "baseLTVAsCollateral": 8000,
-        "borrowingEnabled": true,
+        "borrowingEnabled": false,
         "liquidationBonus": 10500,
         "liquidationThreshold": 9000,
         "reserveDecimals": 6,
@@ -74,7 +74,7 @@
       "addr": "0x228a48df6819CCc2eCa01e2192ebAFfFdAD56c19",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0xc33745C6cD00C4097faE924CB7e2594FfF4b7d7E",
         "tokenReserve": "VCHF"
       },
       "rateStrategy": {
@@ -90,7 +90,7 @@
       "reserveConfig": {
         "aTokenImpl": "AToken",
         "baseLTVAsCollateral": 8000,
-        "borrowingEnabled": true,
+        "borrowingEnabled": false,
         "liquidationBonus": 10500,
         "liquidationThreshold": 9000,
         "reserveDecimals": 18,
@@ -103,7 +103,7 @@
       "addr": "0x7678e162f38ec9ef2Bfd1d0aAF9fd93355E5Fa0b",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0x132b37560040268aA7c03F6C4f415F0eBf30A87b",
         "tokenReserve": "VEUR"
       },
       "rateStrategy": {
@@ -119,7 +119,7 @@
       "reserveConfig": {
         "aTokenImpl": "AToken",
         "baseLTVAsCollateral": 8000,
-        "borrowingEnabled": true,
+        "borrowingEnabled": false,
         "liquidationBonus": 10500,
         "liquidationThreshold": 9000,
         "reserveDecimals": 18,
@@ -132,7 +132,7 @@
       "addr": "0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c",
         "tokenReserve": "LP_EUROC_USDC"
       },
       "rateStrategy": {
@@ -161,7 +161,7 @@
       "addr": "0x28F3a9e42667519c83cB090b5c4f6bd34e9F5569",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0x29388a985C5904BFa13524f8c3Cb8bC10A02864C",
         "tokenReserve": "LP_VEUR_USDC"
       },
       "rateStrategy": {
@@ -190,7 +190,7 @@
       "addr": "0x0099111Ed107BDF0B05162356aEe433514AaC440",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0x0000000000000000000000000000000000000000",
+        "aggregator": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",
         "tokenReserve": "LP_VCHF_USDC"
       },
       "rateStrategy": {

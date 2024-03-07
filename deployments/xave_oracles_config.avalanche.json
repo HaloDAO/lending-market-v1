@@ -1,6 +1,12 @@
 {
   "baseOracles": [
     {
+      "basePriceFeed": "0xF096872672F44d6EBA71458D74fe67F9a77a23B9",
+      "decimals": 18,
+      "description": "USDC/ETH Oracle",
+      "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    },
+    {
       "basePriceFeed": "0x3368310bC4AeE5D96486A73bae8E6b49FcDE62D3",
       "decimals": 18,
       "description": "EUROC/ETH Oracle",

@@ -38,7 +38,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   //// network dependent config
   //// only the following lines are needed to be changed for different networks
-  // @todo connect avalanche
+
   string private NETWORK = 'sepolia';
   string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
 
