@@ -257,6 +257,8 @@ yarn run watch:script-local
 
 ## Full Market Deployment With Foundry
 
+0 - Prepare the folder of the network in the markets folder. name the folder as `xave-{network}` and new tasks per network based on the previous deployments.
+
 1 - Import deployer 2 mnemonic inside cast.
 
 ```sh
@@ -267,7 +269,7 @@ cast wallet import "MY_DEPLOYER_WALLET" --interactive
 
 ```
 
-2 - Make or edit the `deployments/lending_market_config.{network}.json`
+2 - Make or edit the `deployments/xave_oracles_config.{network}.json`
 Get all required USD oracles pair tokens and LP tokens inside the config
 
 3 - Deploy all required oracles.
