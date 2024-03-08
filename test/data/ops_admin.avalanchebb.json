@@ -1,0 +1,54 @@
+{
+  "blockchain": {
+    "eoaWallet": "0x0000000000000000000000000000000000000000",
+    "forkBlock": 0
+  },
+  "chainlink": {
+    "ethUsd": "0x0000000000000000000000000000000000000000",
+    "usdcUsd": "0x0000000000000000000000000000000000000000"
+  },
+  "faucets": {
+    "usdcWhale": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
+    "xsgdWhale": "0x0000000000000000000000000000000000000000"
+  },
+  "fxPool": {
+    "fxp": "0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2",
+    "usdcAssimilator": "0x0000000000000000000000000000000000000000",
+    "vault": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+    "xsgdAssimilator": "0x0000000000000000000000000000000000000000"
+  },
+  "lendingPool": {
+    "aaveOracle": "0x0000000000000000000000000000000000000000",
+    "admin": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "collateralManager": "0xf89E599bB7c19bE276e95c1EA55A9684ac740255",
+    "donor": "0x0000000000000000000000000000000000000000",
+    "emergencyAdmin": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "lendingAddressProvider": "0x85B210deD75878CC7824D0cf2AEfd0b42Ee0e265",
+    "lendingPoolProxy": "0x6d110eA2bBE8F63bcbE1579b6D1742b72dBa681c",
+    "lendingRateOracle": "0xbcB66eD6419857b49Fa5947af58865538F8fba2C",
+    "oracleOwner": "0x009c4ba01488A15816093F96BA91210494E2C644",
+    "poolConfigurator": "0x5C7B88Ac302DCceb99Be754a523697BFB8822fD6",
+    "priceOracle": "0x5610fc80a0DA409a636B488De533BB84fB3Ec11e",
+    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
+    "uiDataProvider": "0x9cFf4A10b6Fb163a4DF369AaFed9d95838222ca6",
+    "walletBalanceProvider": "0x0000000000000000000000000000000000000000"
+  },
+  "reserveConfigs": {
+    "fxpLp": {
+      "baseLtv": 8000,
+      "liquidationThreshold": 8500,
+      "liquidationBonus": 10500,
+      "reserveDecimals": 6,
+      "reserveFactor": 1000
+    }
+  },
+  "reserves": {
+    "fxpLp": "0xe07d83194aE61c3DdB7058010279F0bC10FFE68f",
+    "usdc": "0xcA1179c6F85dDEA96210d9d06450737dAB111e9d",
+    "xsgd": "0x8d42F793e66Be39fBf4664ee9dC8a823814B0256"
+  },
+  "tokens": {
+    "usdc": "0x0000000000000000000000000000000000000000",
+    "xsgd": "0x0000000000000000000000000000000000000000"
+  }
+}

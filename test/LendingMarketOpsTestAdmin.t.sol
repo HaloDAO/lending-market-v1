@@ -33,6 +33,11 @@ import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolD
 
 import {ReserveConfiguration} from '../contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 
+import { IHaloUiPoolDataProvider } from '../contracts/misc/interfaces/IHaloUiPoolDataProvider.sol';
+import { UiHaloPoolDataProvider } from '../contracts/misc/UiHaloPoolDataProvider.sol';
+
+import { WalletBalanceProvider } from '../contracts/misc/WalletBalanceProvider.sol';
+
 // forge test -w -vv --match-path test/LendingMarketOpsTestAdmin.t.sol
 contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -42,8 +47,12 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   // string private NETWORK = 'sepolia';
   // string private RPC_URL = vm.envString('SEPOLIA_RPC_URL');
 
+  // string private NETWORK = 'polygon';
+  // string private RPC_URL = vm.envString('POLYGON_RPC_URL');
+
   string private NETWORK = 'avalanche';
-  string private RPC_URL = vm.envString('https://rpc.buildbear.io/xclabs');
+  string private RPC_URL = vm.envString('AVALANCHE_RPC_URL');
+  // string private RPC_URL = 'https://rpc.buildbear.io/xclabs';
 
   IOpsTestData.Root root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
 
@@ -376,7 +385,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     console.log('healthFactorBeforeDeposit', healthFactorBeforeDeposit / 1e27);
 
-    _putCollateralInLendingPool(root.blockchain.eoaWallet, root.fxPool.xsgdUsdcFxp, 1000 * 1e18);
+    _putCollateralInLendingPool(root.blockchain.eoaWallet, root.fxPool.fxp, 1000 * 1e18);
 
     {
       (, , , , , uint256 healthFactorAfterDeposit) = lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
@@ -435,7 +444,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       console.log('b4 price manip HF', healthFactorAfterBorrow / 1e18);
 
       DataTypes.ReserveData memory rdUSDC = lendingPoolContract.getReserveData(root.tokens.usdc);
-      DataTypes.ReserveData memory rdLPXSGD = lendingPoolContract.getReserveData(root.fxPool.xsgdUsdcFxp);
+      DataTypes.ReserveData memory rdLPXSGD = lendingPoolContract.getReserveData(root.fxPool.fxp);
 
       address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
 
@@ -455,18 +464,18 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       }
 
       {
-        uint256 lpTokenPrice = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
+        uint256 lpTokenPrice = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.fxp);
         console.log('lpTokenPrice Before Manipulation:', lpTokenPrice);
 
         (, , , , , uint256 healthFactorBeforeManip) = lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
 
         console.log('HF before price manipulation', healthFactorBeforeManip / 1e18);
       }
-      _manipulatePriceOracle(root.fxPool.xsgdUsdcFxp, 1, 18);
+      _manipulatePriceOracle(root.fxPool.fxp, 1, 18);
 
       // TODO: Manipulate price to make loan health of eoa wallet below 1
       {
-        uint256 lpTokenPriceAfter = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
+        uint256 lpTokenPriceAfter = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.fxp);
         console.log('lpTokenPriceAfter After Manipulation:', lpTokenPriceAfter);
 
         (, , , , , uint256 healthFactorAfterBorrowAfter) = lendingPoolContract.getUserAccountData(
@@ -479,7 +488,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       _liquidatePosition(
         root.lendingPool.donor,
         root.blockchain.eoaWallet,
-        root.fxPool.xsgdUsdcFxp,
+        root.fxPool.fxp,
         root.tokens.usdc,
         type(uint256).max,
         true
@@ -489,42 +498,64 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
       // Assert loan health and position of eoa wallet to decrease
 
-      // vm.warp(block.timestamp + 31536000);
-      // vm.startPrank(root.blockchain.eoaWallet);
-      // IERC20(root.tokens.usdc).approve(root.lendingPool.lendingPoolProxy, type(uint256).max);
+      vm.warp(block.timestamp + 31536000);
+      vm.startPrank(root.blockchain.eoaWallet);
+      IERC20(root.tokens.usdc).approve(root.lendingPool.lendingPoolProxy, type(uint256).max);
 
-      // uint256 xsgdLpBalBeforeRepay = IERC20(root.fxPool.xsgdUsdcFxp).balanceOf(root.blockchain.eoaWallet);
+      uint256 xsgdLpBalBeforeRepay = IERC20(root.fxPool.fxp).balanceOf(root.blockchain.eoaWallet);
 
-      // lendingPoolContract.repay(
-      //   root.tokens.usdc,
-      //   maxAvailableUsdcBorrows - 200 * 1e6,
-      //   2, // stablecoin borrowing
-      //   root.blockchain.eoaWallet
-      // );
-      // vm.stopPrank();
+      lendingPoolContract.repay(
+        root.tokens.usdc,
+        maxAvailableUsdcBorrows - 200 * 1e6,
+        2, // stablecoin borrowing
+        root.blockchain.eoaWallet
+      );
+      vm.stopPrank();
 
-      // // TODO: In sepolia, 0 healthFactor becomes very big number (underflow), how to deal with this?
-      // // assertGt(healthFactorAfterBorrow, healthFactorBefore, 'Health factor increased after borrow');
+      // TODO: In sepolia, 0 healthFactor becomes very big number (underflow), how to deal with this?
+      // assertGt(healthFactorAfterBorrow, healthFactorBefore, 'Health factor increased after borrow');
 
-      // assertGt(totalCollateralETHAfterBorrow, totalCollateralETHBefore, 'totalCollateralETHAfterBorrow increased');
+      // TODO: Fix stack too deep
+      // assertGt(totalCollateralETHAfterBorrow, totalCollateralETHBefore, 'totalCollateralETHAfterBorrow increased');      
 
-      // assertGt(
-      //   usdcBalAfterBorrow,
-      //   IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet),
-      //   'USDC balance decreased after repay'
-      // );
+      assertGt(
+        usdcBalAfterBorrow,
+        IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet),
+        'USDC balance decreased after repay'
+      );
 
-      // vm.startPrank(root.blockchain.eoaWallet);
-      // lendingPoolContract.withdraw(root.fxPool.xsgdUsdcFxp, 200 * 1e18, root.blockchain.eoaWallet);
-      // vm.stopPrank();
+      vm.startPrank(root.blockchain.eoaWallet);
+      lendingPoolContract.withdraw(root.fxPool.fxp, 200 * 1e18, root.blockchain.eoaWallet);
+      vm.stopPrank();
 
-      // assertGt(
-      //   IERC20(root.fxPool.xsgdUsdcFxp).balanceOf(root.blockchain.eoaWallet),
-      //   xsgdLpBalBeforeRepay,
-      //   'LP Token balance increased after withdraw'
-      // );
+      assertGt(
+        IERC20(root.fxPool.fxp).balanceOf(root.blockchain.eoaWallet),
+        xsgdLpBalBeforeRepay,
+        'LP Token balance increased after withdraw'
+      );
+      
     }
   }
+
+  function testUiDataProvider() public {
+    (IHaloUiPoolDataProvider.AggregatedReserveData[] memory reservesData, IHaloUiPoolDataProvider.BaseCurrencyInfo memory baseCurrencyInfo) = IHaloUiPoolDataProvider(
+      root.lendingPool.uiDataProvider
+    ).getReservesData(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider));
+
+    assertEq(reservesData.length, 9, 'Reserves data length is 3');
+  }
+
+  function testWalletBalanceProvider() public {
+    WalletBalanceProvider wbp = WalletBalanceProvider(payable(root.lendingPool.walletBalanceProvider));
+
+    (address[] memory reserves, uint256[] memory balances) = wbp.getUserWalletBalances(
+      root.lendingPool.walletBalanceProvider,
+      root.blockchain.eoaWallet
+    );
+
+    assertEq(reserves.length, 3, 'Reserves length is 3');
+  }
+
 
   function _isReserveActive(address token) internal returns (bool) {
     DataTypes.ReserveData memory baseData = lendingPoolContract.getReserveData(token);
@@ -542,7 +573,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.stopPrank();
 
     _addLiquidity(
-      IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId(),
+      IFXPool(root.fxPool.fxp).getPoolId(),
       1_000 * 1e18,
       receiver,
       root.tokens.usdc,
@@ -579,7 +610,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     ).getReservesData(ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider));
     console2.log('reservesData.length', reservesData.length);
     for (uint256 i = 0; i < reservesData.length; i++) {
-      if (reservesData[i].underlyingAsset == root.fxPool.xsgdUsdcFxp)
+      if (reservesData[i].underlyingAsset == root.fxPool.fxp)
         console2.log('reserve reserveLiquidationThreshold', reservesData[i].reserveLiquidationThreshold);
     }
   }
@@ -664,20 +695,20 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     // TODO: Query this from FX Pool value so value is dynamic when we use this test in different network
 
     (IERC20[] memory tokens, , ) = IVault(root.fxPool.vault).getPoolTokens(
-      IFXPool(root.fxPool.xsgdUsdcFxp).getPoolId()
+      IFXPool(root.fxPool.fxp).getPoolId()
     );
 
-    address baseAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[0]));
-    address quoteAssimilator = IFXPool(root.fxPool.xsgdUsdcFxp).assimilator(address(tokens[1]));
+    address baseAssimilator = IFXPool(root.fxPool.fxp).assimilator(address(tokens[0]));
+    address quoteAssimilator = IFXPool(root.fxPool.fxp).assimilator(address(tokens[1]));
 
     // Set Oracle for asset
-    address lpOracle = _deployOracle(root.fxPool.xsgdUsdcFxp, baseAssimilator, quoteAssimilator);
+    address lpOracle = _deployOracle(root.fxPool.fxp, baseAssimilator, quoteAssimilator);
 
     // Set oracle source for asset
     address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
 
     address[] memory assets = new address[](1);
-    assets[0] = root.fxPool.xsgdUsdcFxp;
+    assets[0] = root.fxPool.fxp;
     address[] memory sources = new address[](1);
     sources[0] = address(lpOracle);
 
@@ -687,16 +718,16 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.prank(root.lendingPool.oracleOwner);
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
 
-    uint256 _price = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.xsgdUsdcFxp);
+    uint256 _price = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.fxp);
 
     // testConfigureReserveAsCollateral
 
     vm.expectRevert(bytes(Errors.CALLER_NOT_POOL_ADMIN));
     LendingPoolConfigurator(root.lendingPool.poolConfigurator).configureReserveAsCollateral(
-      root.fxPool.xsgdUsdcFxp,
-      root.reserveConfigs.lpXsgdUsdc.baseLtv,
-      root.reserveConfigs.lpXsgdUsdc.liquidationBonus,
-      root.reserveConfigs.lpXsgdUsdc.liquidationThreshold
+      root.fxPool.fxp,
+      root.reserveConfigs.fxpLp.baseLtv,
+      root.reserveConfigs.fxpLp.liquidationBonus,
+      root.reserveConfigs.fxpLp.liquidationThreshold
     );
 
     address poolAdmin = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPoolAdmin();
@@ -704,10 +735,10 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.startPrank(poolAdmin);
 
     LendingPoolConfigurator(root.lendingPool.poolConfigurator).configureReserveAsCollateral(
-      root.fxPool.xsgdUsdcFxp,
-      root.reserveConfigs.lpXsgdUsdc.baseLtv,
-      root.reserveConfigs.lpXsgdUsdc.liquidationBonus,
-      root.reserveConfigs.lpXsgdUsdc.liquidationThreshold
+      root.fxPool.fxp,
+      root.reserveConfigs.fxpLp.baseLtv,
+      root.reserveConfigs.fxpLp.liquidationBonus,
+      root.reserveConfigs.fxpLp.liquidationThreshold
     );
     vm.stopPrank();
   }
@@ -720,9 +751,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     aToken.initialize(
       lendingPoolContract,
       XAVE_TREASURY,
-      root.fxPool.xsgdUsdcFxp,
+      root.fxPool.fxp,
       IAaveIncentivesController(address(0)),
-      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      IERC20Detailed(root.fxPool.fxp).decimals(),
       'aXSGD-USDC',
       'aXSGD-USDC',
       bytes('')
@@ -731,9 +762,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     StableDebtToken sdt = new StableDebtToken();
     sdt.initialize(
       lendingPoolContract,
-      root.fxPool.xsgdUsdcFxp,
+      root.fxPool.fxp,
       IAaveIncentivesController(address(0)),
-      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      IERC20Detailed(root.fxPool.fxp).decimals(),
       'sbtXSGD-USDC',
       'sbtXSGD-USDC',
       bytes('')
@@ -742,9 +773,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     vdt.initialize(
       lendingPoolContract,
-      root.fxPool.xsgdUsdcFxp,
+      root.fxPool.fxp,
       IAaveIncentivesController(address(0)),
-      IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      IERC20Detailed(root.fxPool.fxp).decimals(),
       'vdtXSGD-USDC',
       'vdtXSGD-USDC',
       bytes('')
@@ -771,9 +802,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       aTokenImpl: address(aToken),
       stableDebtTokenImpl: address(sdt),
       variableDebtTokenImpl: address(vdt),
-      underlyingAssetDecimals: IERC20Detailed(root.fxPool.xsgdUsdcFxp).decimals(),
+      underlyingAssetDecimals: IERC20Detailed(root.fxPool.fxp).decimals(),
       interestRateStrategyAddress: address(dris),
-      underlyingAsset: root.fxPool.xsgdUsdcFxp,
+      underlyingAsset: root.fxPool.fxp,
       treasury: XAVE_TREASURY,
       incentivesController: address(0),
       underlyingAssetName: 'XSGD-USDC',
