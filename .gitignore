@@ -16,3 +16,15 @@ coverage
 .coverage_cache
 .coverage_contracts
 
+
+.env
+.env.local
+
+.DS_Store
+
+# Forge
+forge-artifacts/
+forge-cache/
+broadcast/
+cache_forge/
+out/

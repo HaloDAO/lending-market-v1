@@ -3,6 +3,7 @@ import { getEthersSignersAddresses, getParamPerPool } from './contracts-helpers'
 import AaveConfig from '../markets/aave';
 import MaticConfig from '../markets/matic';
 import HaloConfig from '../markets/halo';
+import HaloArbConfig from '../markets/halo-arb';
 import AvalancheConfig from '../markets/avalanche';
 import AmmConfig from '../markets/amm';
 
@@ -11,6 +12,9 @@ import { DRE, filterMapBy } from './misc-utils';
 import { tEthereumAddress } from './types';
 import { getParamPerNetwork } from './contracts-helpers';
 import { deployWETHMocked } from './contracts-deployments';
+import HaloMaticConfig from '../markets/halo-matic';
+import XaveSepoliaConfig from '../markets/xave-sepolia';
+import XaveAvalancheConfig from '../markets/xave-avax';
 
 export enum ConfigNames {
   Commons = 'Commons',
@@ -19,6 +23,10 @@ export enum ConfigNames {
   Amm = 'Amm',
   Avalanche = 'Avalanche',
   Halo = 'Halo',
+  HaloMatic = 'HaloMatic',
+  HaloArb = 'HaloArb',
+  XaveAvalanche = 'XaveAvalanche',
+  XaveSepolia = 'XaveSepolia',
 }
 
 export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
@@ -27,12 +35,20 @@ export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
       return AaveConfig;
     case ConfigNames.Halo:
       return HaloConfig;
+    case ConfigNames.HaloMatic:
+      return HaloMaticConfig;
+    case ConfigNames.HaloArb:
+      return HaloArbConfig;
     case ConfigNames.Matic:
       return MaticConfig;
     case ConfigNames.Amm:
       return AmmConfig;
     case ConfigNames.Avalanche:
       return AvalancheConfig;
+    case ConfigNames.XaveSepolia:
+      return XaveSepoliaConfig;
+    case ConfigNames.XaveAvalanche:
+      return XaveAvalancheConfig;
     case ConfigNames.Commons:
       return CommonsConfig;
     default:
@@ -56,6 +72,9 @@ export const getReservesConfigByPool = (pool: AavePools): iMultiPoolsAssets<IRes
       },
       [AavePools.halo]: {
         ...HaloConfig.ReservesConfig,
+      },
+      [AavePools.haloArb]: {
+        ...HaloArbConfig.ReservesConfig,
       },
       [AavePools.amm]: {
         ...AmmConfig.ReservesConfig,

@@ -8,6 +8,6 @@ task('halo:dev:deploy-mock-tokens', 'Deploy mock tokens for dev enviroment')
     await localBRE.run('set-DRE');
     const signer = await getFirstSigner();
 
-    console.log(await signer.getAddress());
+    // console.log(await signer.getAddress());
     await deployAllHaloMockTokens(verify);
   });

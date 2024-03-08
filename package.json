@@ -8,6 +8,11 @@
   ],
   "scripts": {
     "run-env": "npm i && tail -f /dev/null",
+    "watch:script": "nodemon --ext sol --watch script/ --watch test --watch contracts --exec \"clear && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --legacy --fork-url https://rpc.tenderly.co/fork/bad1e0c5-b2ec-4fa8-ab95-44ea8c0830c8 --broadcast -vvvvv\"",
+    "anvil:avax": "anvil --fork-url https://api.avax.network/ext/bc/C/rpc@41745214",
+    "anvil:sepolia": "anvil --fork-url https://eth-sepolia.g.alchemy.com/v2/U7tte8molsSlREKDCvXxIXR1OBmyKRhp",
+    "watch:script-local": "nodemon --ext sol,json --watch deployments/ --watch script/ --watch test --watch contracts --exec 'clear && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --legacy --fork-url http://127.0.0.1:8545 --broadcast -vvvvv'",
+    "watch:script-local-metamask-account": "nodemon --ext sol,json --watch deployments/ --watch script/ --watch test --watch contracts --exec 'clear && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --fork-url http://127.0.0.1:8545 --broadcast -vvvvv'",
     "hardhat": "hardhat",
     "hardhat:kovan": "hardhat --network kovan",
     "hardhat:tenderly-main": "hardhat --network tenderlyMain",
@@ -70,7 +75,7 @@
     "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/test-aave/**/*.ts'",
     "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/test-aave/**/*.ts'",
     "ci:test": "npm run compile && npm run test",
-    "ci:clean": "rm -rf ./artifacts ./cache ./types",
+    "ci:clean": "rm -rf ./artifacts ./cache ./types ./node_modules",
     "print-contracts:kovan": "npm run hardhat:kovan -- print-contracts",
     "print-contracts:main": "npm run hardhat:main -- print-contracts",
     "print-contracts:ropsten": "npm run hardhat:main -- print-contracts",
@@ -110,6 +115,8 @@
     "external:halo:deploy-assets-main": "npm run compile && hardhat --network main external:deploy-new-asset-halo --symbol ${SYMBOL} --verify"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-foundry": "^1.1.1",
+    "@halodao/halodao-contract-addresses": "^1.0.63",
     "@nomiclabs/buidler": "^1.4.7",
     "@nomiclabs/buidler-ethers": "2.0.0",
     "@nomiclabs/buidler-etherscan": "^2.1.0",
@@ -132,6 +139,7 @@
     "chai": "4.2.0",
     "chai-bignumber": "3.0.0",
     "chai-bn": "^0.2.1",
+    "concurrently": "^8.2.2",
     "defender-relay-client": "^1.7.0",
     "dotenv": "^8.2.0",
     "eth-sig-util": "2.5.3",
@@ -144,6 +152,7 @@
     "hardhat-typechain": "^0.3.3",
     "husky": "^4.2.5",
     "lowdb": "1.0.0",
+    "nodemon": "^3.0.3",
     "prettier": "^2.0.5",
     "prettier-plugin-solidity": "^1.0.0-alpha.53",
     "pretty-quick": "^2.0.1",
@@ -174,7 +183,8 @@
   "license": "AGPLv3",
   "dependencies": {
     "axios-curlirize": "^1.3.7",
-    "tmp-promise": "^3.0.2"
+    "tmp-promise": "^3.0.2",
+    "yarn": "^1.22.21"
   },
   "keywords": [
     "aave",

@@ -459,7 +459,7 @@ export const deployAllMockTokens = async (verify?: boolean) => {
 export const deployAllHaloMockTokens = async (verify?: boolean) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
 
-  const protoConfigData = getReservesConfigByPool(AavePools.proto); // TODO: Change
+  const protoConfigData = getReservesConfigByPool(AavePools.halo); // TODO: Change
 
   for (const tokenSymbol of Object.keys(HaloTokenContractId)) {
     const decimals = '18';

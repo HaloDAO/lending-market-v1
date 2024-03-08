@@ -1,0 +1,45 @@
+{
+  "baseOracles": [
+    {
+      "basePriceFeed": "0xF096872672F44d6EBA71458D74fe67F9a77a23B9",
+      "decimals": 18,
+      "description": "USDC/ETH Oracle",
+      "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    },
+    {
+      "basePriceFeed": "0x3368310bC4AeE5D96486A73bae8E6b49FcDE62D3",
+      "decimals": 18,
+      "description": "EUROC/ETH Oracle",
+      "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    },
+    {
+      "basePriceFeed": "0x192f2DBA961Bb0277520C082d6bfa87D5961333E",
+      "decimals": 18,
+      "description": "VEUR/ETH Oracle",
+      "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    },
+    {
+      "basePriceFeed": "0xA418573AB5226711c8564Eeb449c3618ABFaf677",
+      "decimals": 18,
+      "description": "VCHF/ETH Oracle",
+      "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    }
+  ],
+  "lpOracles": [
+    {
+      "description": "LP_EUROC_USDC Oracle",
+      "ethUsdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
+      "fxPool": "0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2"
+    },
+    {
+      "description": "LP_VEUR_USDC Oracle",
+      "ethUsdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
+      "fxPool": "0x28F3a9e42667519c83cB090b5c4f6bd34e9F5569"
+    },
+    {
+      "description": "LP_VCHF_USDC Oracle",
+      "ethUsdAggregator": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
+      "fxPool": "0x0099111Ed107BDF0B05162356aEe433514AaC440"
+    }
+  ]
+}

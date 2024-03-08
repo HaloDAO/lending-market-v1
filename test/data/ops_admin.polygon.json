@@ -1,0 +1,53 @@
+{
+  "blockchain": {
+    "eoaWallet": "0x1B736B89cd70Cf355d71f55E626Dc53E8D56Bc2E",
+    "forkBlock": 52764552
+  },
+  "chainlink": {
+    "ethUsd": "0xF9680D99D6C9589e2a93a78A04A279e509205945",
+    "usdcUsd": "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7"
+  },
+  "faucets": {
+    "usdcWhale": "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    "xsgdWhale": "0x728C6f69B4EaB57A9f2dE0Cf8Fd170eE5f22Eb21"
+  },
+  "fxPool": {
+    "usdcAssimilator": "0x0000000000000000000000000000000000000000",
+    "vault": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+    "xsgdAssimilator": "0x0000000000000000000000000000000000000000",
+    "xsgdUsdcFxp": "0xE6D8FcD23eD4e417d7e9D1195eDf2cA634684e0E"
+  },
+  "lendingPool": {
+    "aaveOracle": "0x0000000000000000000000000000000000000000",
+    "admin": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
+    "collateralManager": "0xDF512Eb2468D4938D81fA1F15d91567c5EdEe6a8",
+    "donor": "0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245",
+    "emergencyAdmin": "0x01e198818a895f01562E0A087595E5b1C7bb8d5c",
+    "lendingAddressProvider": "0x68aeB9C8775Cfc9b99753A1323D532556675c555",
+    "lendingPoolProxy": "0x78a5B2B028Fa6Fb0862b0961EB5131C95273763B",
+    "lendingRateOracle": "0x25290edB1633c6b60a24C5FB3a321b91a67Cafe7",
+    "oracleOwner": "0x01e198818a895f01562E0A087595E5b1C7bb8d5c",
+    "poolConfigurator": "0x0228bda708F5BA3b188D9CC8588B7dA4E254D492",
+    "priceOracle": "0x0200889C2733bB78641126DF27A0103230452b62",
+    "treasury": "0x235A2ac113014F9dcb8aBA6577F20290832dDEFd",
+    "uiDataProvider": "0x0000000000000000000000000000000000000000"
+  },
+  "reserveConfigs": {
+    "lpXsgdUsdc": {
+      "baseLtv": 8000,
+      "liquidationThreshold": 8500,
+      "liquidationBonus": 10500,
+      "reserveDecimals": 6,
+      "reserveFactor": 1000
+    }
+  },
+  "reserves": {
+    "lpXsgdUsdc": "0x0000000000000000000000000000000000000000",
+    "usdc": "0x2eB4157CeFeb13C6E38035A11244E19BC396e97C",
+    "xsgd": "0x0000000000000000000000000000000000000000"
+  },
+  "tokens": {
+    "usdc": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    "xsgd": "0xDC3326e71D45186F113a2F448984CA0e8D201995"
+  }
+}
