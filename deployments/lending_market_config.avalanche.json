@@ -16,7 +16,7 @@
       "addr": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
       "borrowRate": 39000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0xF096872672F44d6EBA71458D74fe67F9a77a23B9",
+        "aggregator": "0x29388a985C5904BFa13524f8c3Cb8bC10A02864C",
         "tokenReserve": "USDC"
       },
       "rateStrategy": {
@@ -45,8 +45,8 @@
       "addr": "0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa",
-        "tokenReserve": "EUROC"
+        "aggregator": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",
+        "tokenReserve": "EURC"
       },
       "rateStrategy": {
         "baseVariableBorrowRate": 0,
@@ -54,7 +54,7 @@
         "optimalUtilizationRate": 900000000000000000000000000,
         "stableRateSlope1": 0,
         "stableRateSlope2": 0,
-        "tokenReserve": "EUROC",
+        "tokenReserve": "EURC",
         "variableRateSlope1": 40000000000000000000000000,
         "variableRateSlope2": 600000000000000000000000000
       },
@@ -67,14 +67,14 @@
         "reserveDecimals": 6,
         "reserveFactor": 1000,
         "stableBorrowRateEnabled": false,
-        "tokenReserve": "EUROC"
+        "tokenReserve": "EURC"
       }
     },
     {
       "addr": "0x228a48df6819CCc2eCa01e2192ebAFfFdAD56c19",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0xc33745C6cD00C4097faE924CB7e2594FfF4b7d7E",
+        "aggregator": "0x132b37560040268aA7c03F6C4f415F0eBf30A87b",
         "tokenReserve": "VCHF"
       },
       "rateStrategy": {
@@ -103,7 +103,7 @@
       "addr": "0x7678e162f38ec9ef2Bfd1d0aAF9fd93355E5Fa0b",
       "borrowRate": 35000000000000000000000000,
       "chainLinkAggregator": {
-        "aggregator": "0x132b37560040268aA7c03F6C4f415F0eBf30A87b",
+        "aggregator": "0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa",
         "tokenReserve": "VEUR"
       },
       "rateStrategy": {
@@ -132,8 +132,8 @@
       "addr": "0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c",
-        "tokenReserve": "LP_EUROC_USDC"
+        "aggregator": "0x94d81606Dca42D3680c0DFc1d93eeaF6C2D55f2d",
+        "tokenReserve": "LP-EURC-USDC"
       },
       "rateStrategy": {
         "baseVariableBorrowRate": 0,
@@ -141,7 +141,7 @@
         "optimalUtilizationRate": 900000000000000000000000000,
         "stableRateSlope1": 0,
         "stableRateSlope2": 0,
-        "tokenReserve": "LP_EUROC_USDC",
+        "tokenReserve": "LP-EURC-USDC",
         "variableRateSlope1": 40000000000000000000000000,
         "variableRateSlope2": 600000000000000000000000000
       },
@@ -154,15 +154,15 @@
         "reserveDecimals": 18,
         "reserveFactor": 1000,
         "stableBorrowRateEnabled": false,
-        "tokenReserve": "LP_EUROC_USDC"
+        "tokenReserve": "LP-EURC-USDC"
       }
     },
     {
       "addr": "0x28F3a9e42667519c83cB090b5c4f6bd34e9F5569",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0x29388a985C5904BFa13524f8c3Cb8bC10A02864C",
-        "tokenReserve": "LP_VEUR_USDC"
+        "aggregator": "0x6360a8Adb883CA076e7F2c6d2fF37531A771e414",
+        "tokenReserve": "LP-VEUR-USDC"
       },
       "rateStrategy": {
         "baseVariableBorrowRate": 0,
@@ -170,7 +170,7 @@
         "optimalUtilizationRate": 900000000000000000000000000,
         "stableRateSlope1": 0,
         "stableRateSlope2": 0,
-        "tokenReserve": "LP_VEUR_USDC",
+        "tokenReserve": "LP-VEUR-USDC",
         "variableRateSlope1": 40000000000000000000000000,
         "variableRateSlope2": 600000000000000000000000000
       },
@@ -183,15 +183,15 @@
         "reserveDecimals": 18,
         "reserveFactor": 1000,
         "stableBorrowRateEnabled": false,
-        "tokenReserve": "LP_VEUR_USDC"
+        "tokenReserve": "LP-VEUR-USDC"
       }
     },
     {
       "addr": "0x0099111Ed107BDF0B05162356aEe433514AaC440",
       "borrowRate": 0,
       "chainLinkAggregator": {
-        "aggregator": "0xB9f4E777491bb848578B6FBa5c8A744A40d11128",
-        "tokenReserve": "LP_VCHF_USDC"
+        "aggregator": "0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c",
+        "tokenReserve": "LP-VCHF-USDC"
       },
       "rateStrategy": {
         "baseVariableBorrowRate": 0,
@@ -199,7 +199,7 @@
         "optimalUtilizationRate": 900000000000000000000000000,
         "stableRateSlope1": 0,
         "stableRateSlope2": 0,
-        "tokenReserve": "LP_VCHF_USDC",
+        "tokenReserve": "LP-VCHF-USDC",
         "variableRateSlope1": 40000000000000000000000000,
         "variableRateSlope2": 600000000000000000000000000
       },
@@ -212,7 +212,7 @@
         "reserveDecimals": 18,
         "reserveFactor": 1000,
         "stableBorrowRateEnabled": false,
-        "tokenReserve": "LP_VCHF_USDC"
+        "tokenReserve": "LP-VCHF-USDC"
       }
     }
   ]
