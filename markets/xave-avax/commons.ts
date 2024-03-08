@@ -42,15 +42,15 @@ export const CommonsConfig: ICommonConfiguration = {
     VCHF: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
-    EUROC: {
+    EURC: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
     VEUR: {
       borrowRate: oneRay.multipliedBy(0.035).toFixed(),
     },
-    LP_EUROC_USDC: { borrowRate: oneRay.multipliedBy(0).toFixed() },
-    LP_VEUR_USDC: { borrowRate: oneRay.multipliedBy(0).toFixed() },
-    LP_VCHF_USDC: { borrowRate: oneRay.multipliedBy(0).toFixed() },
+    'LP-EURC-USDC': { borrowRate: oneRay.multipliedBy(0).toFixed() },
+    'LP-VEUR-USDC': { borrowRate: oneRay.multipliedBy(0).toFixed() },
+    'LP-VCHF-USDC': { borrowRate: oneRay.multipliedBy(0).toFixed() },
   },
   // ----------------
   // COMMON PROTOCOL ADDRESSES ACROSS POOLS
@@ -109,13 +109,13 @@ export const CommonsConfig: ICommonConfiguration = {
   },
   ChainlinkAggregator: {
     [eAvalancheNetwork.avalanche]: {
-      USDC: '0x29388a985C5904BFa13524f8c3Cb8bC10A02864C',
-      VCHF: '0x132b37560040268aA7c03F6C4f415F0eBf30A87b',
-      EUROC: '0xB9f4E777491bb848578B6FBa5c8A744A40d11128',
-      VEUR: '0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa',
-      LP_EUROC_USDC: '0x94d81606Dca42D3680c0DFc1d93eeaF6C2D55f2d',
-      LP_VEUR_USDC: '0x6360a8Adb883CA076e7F2c6d2fF37531A771e414',
-      LP_VCHF_USDC: '0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c',
+      USDC: '0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa',
+      VCHF: '0x6aa83895c0159B1D6Ab2722712bb5F1adF881B06',
+      EURC: '0x132b37560040268aA7c03F6C4f415F0eBf30A87b',
+      VEUR: '0xc33745C6cD00C4097faE924CB7e2594FfF4b7d7E',
+      'LP-EURC-USDC': '0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c',
+      'LP-VEUR-USDC': '0x29388a985C5904BFa13524f8c3Cb8bC10A02864C',
+      'LP-VCHF-USDC': '0xB9f4E777491bb848578B6FBa5c8A744A40d11128',
     },
     [eAvalancheNetwork.fuji]: {},
   },

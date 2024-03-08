@@ -279,6 +279,8 @@ forge script script/XaveOraclesDeployment.s.sol:XaveOraclesDeployment --sig "run
 
 ```
 
+Add all newly deployed oracles in commons.ts under ChainlinkAggregator
+
 4 - Generate `lending_market_config.network.json` by running the command
 
 ```sh

@@ -12,8 +12,8 @@ import {IHaloUiPoolDataProvider} from '../contracts/misc/interfaces/IHaloUiPoolD
 
 contract LendingMarketUiPoolProvider is Test, LendingMarketTestHelper {
   // Buildbear
-  address constant LP_ADDRESS_PROVIDER_ADD = 0xde29585a4134752632a07f09BCA0f02F72a33B8d;
-  address constant UI_POOL_PROVIDER_ADD = 0xf89E599bB7c19bE276e95c1EA55A9684ac740255;
+  address constant LP_ADDRESS_PROVIDER_ADD = 0x201f4C703c769EFbe230af7043ec766Fa53A5b4C;
+  address constant UI_POOL_PROVIDER_ADD = 0x9cFf4A10b6Fb163a4DF369AaFed9d95838222ca6;
 
   function setUp() public {
     vm.createSelectFork('https://rpc.buildbear.io/xclabs');

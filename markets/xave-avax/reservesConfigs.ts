@@ -27,7 +27,7 @@ export const strategyXSGD: IReserveParams = {
   reserveFactor: '1000',
 };
 
-export const strategyEUROC: IReserveParams = {
+export const strategyEURC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '9000',
@@ -63,7 +63,7 @@ export const strategyVEUR: IReserveParams = {
   reserveFactor: '1000',
 };
 
-export const strategyLP_EUROC_USDC: IReserveParams = {
+export const strategyLP_EURC_USDC: IReserveParams = {
   strategy: rateStrategyStableThree,
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8000',
