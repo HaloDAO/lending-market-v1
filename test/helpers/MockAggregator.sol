@@ -4,6 +4,7 @@ pragma solidity 0.6.12;
 contract MockAggregator {
   int256 private mockAnswer;
   uint8 public decimals;
+  uint256 startedUpdated;
 
   event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp);
 
@@ -11,6 +12,10 @@ contract MockAggregator {
     mockAnswer = _initialAnswer;
     decimals = _decimals;
     emit AnswerUpdated(_initialAnswer, 0, now);
+  }
+
+  function setStartedUpdated(uint256 _startedUpdated) external {
+    startedUpdated = _startedUpdated;
   }
 
   function latestAnswer() external view returns (int256) {
@@ -23,8 +28,8 @@ contract MockAggregator {
     returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
   {
     roundId = 1;
-    startedAt = block.timestamp;
-    updatedAt = block.timestamp;
+    startedAt = startedUpdated != 0 ? startedUpdated : block.timestamp;
+    updatedAt = startedUpdated != 0 ? startedUpdated : block.timestamp;
     answeredInRound = 1;
     answer = mockAnswer;
   }

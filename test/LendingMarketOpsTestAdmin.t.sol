@@ -49,9 +49,13 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
   // string private NETWORK = 'polygon';
   // string private RPC_URL = vm.envString('POLYGON_RPC_URL');
 
-  string private NETWORK = 'avalanche';
-  string private RPC_URL = vm.envString('AVALANCHE_RPC_URL');
+  string private NETWORK = 'AVALANCHE';
+  string private RPC_URL = vm.envString(string(abi.encodePacked(NETWORK, '_RPC_URL')));
   // string private RPC_URL = 'https://rpc.buildbear.io/xclabs';
+
+  uint256 constant LP_TOKEN_PRICE_DISCOUNT_BIPS = 8000;
+  uint256 constant BIPS_SCALE = 1e4;
+
 
   IOpsTestData.Root root = _readTestData(string(abi.encodePacked('ops_admin.', NETWORK, '.json')));
 
@@ -430,7 +434,10 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         // console.log('healthFactorBeforeBorrow', healthFactorBeforeBorrow / 1e27);
       }
 
-      _borrowFromLendingPool(root.blockchain.eoaWallet, root.tokens.usdc, maxAvailableUsdcBorrows - (200 * 1e6));
+      console2.log('usdc bal before borrow', IERC20(root.tokens.usdc).balanceOf(root.blockchain.eoaWallet));
+      console.log('maxAvailableUsdcBorrows: ', maxAvailableUsdcBorrows);
+
+      _borrowFromLendingPool(root.blockchain.eoaWallet, root.tokens.usdc, maxAvailableUsdcBorrows);
 
       console.log("aFXP balance 2:", IERC20(root.reserves.fxpLp).balanceOf(root.blockchain.eoaWallet));
 
@@ -442,7 +449,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
       assertEq(
         usdcBalAfterBorrow,
-        usdcBalBeforeBorrow + (maxAvailableUsdcBorrows - 200 * 1e6),
+        usdcBalBeforeBorrow + (maxAvailableUsdcBorrows),
         'USDC balance increased after borrow'
       );
 
@@ -454,32 +461,18 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
       address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
 
       {
-        uint256 usdcPrice = AaveOracle(aaveOracle).getAssetPrice(root.tokens.usdc);
-        console.log('usdcPrice:', usdcPrice);
-        MockAggregator manipulatedLPOracle = new MockAggregator(10_500, 8);
-
-        address[] memory assets = new address[](1);
-        assets[0] = root.tokens.usdc;
-        address[] memory sources = new address[](1);
-        sources[0] = address(manipulatedLPOracle);
-
-        vm.prank(root.lendingPool.oracleOwner);
-        // LP token Price manipulation is working
-        AaveOracle(aaveOracle).setAssetSources(assets, sources);
-      }
-
-      {
         uint256 lpTokenPrice = AaveOracle(aaveOracle).getAssetPrice(root.fxPool.fxp);
-        // console.log('lpTokenPrice Before Manipulation:', lpTokenPrice);
+        console.log('lpTokenPrice Before Manipulation:', lpTokenPrice);
 
         (, , , , , uint256 healthFactorBeforeManip) = lendingPoolContract.getUserAccountData(root.blockchain.eoaWallet);
 
         console.log('HF before price manipulation', healthFactorBeforeManip / 1e18);
+        MockAggregator m = _manipulatePriceOracle(root.fxPool.fxp, int256(lpTokenPrice * LP_TOKEN_PRICE_DISCOUNT_BIPS / BIPS_SCALE), 18);
       }
-      _manipulatePriceOracle(root.fxPool.fxp, 1, 18);
+
 
       // console.log("aFXP balance 3:", IERC20(root.reserves.fxpLp).balanceOf(root.blockchain.eoaWallet));
-      // _manipulatePriceOracle(root.fxPool.fxp, 9, 17);
+      // _manipulatePriceOracle(root.fxPool.fxp, 9e17, 17);
 
       // TODO: Manipulate price to make loan health of eoa wallet below 1
       {
@@ -493,7 +486,9 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         console.log('HF after price manipulation', healthFactorAfterBorrowAfter / 1e18);
       }
 
-       console.log("donor aFXP balance 1", IERC20(root.reserves.fxpLp).balanceOf(root.lendingPool.donor));
+      console.log("donor aFXP balance 1", IERC20(root.reserves.fxpLp).balanceOf(root.lendingPool.donor));
+      uint256 amtToLiquidate = maxAvailableUsdcBorrows * LP_TOKEN_PRICE_DISCOUNT_BIPS / BIPS_SCALE;
+      console2.log('liquidating from position [USDC]: ', amtToLiquidate);
 
       _liquidatePosition(
         root.lendingPool.donor,
@@ -501,7 +496,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         root.fxPool.fxp,
         root.tokens.usdc,
         // type(uint256).max,
-        1 * 1e6,
+        amtToLiquidate,
         true
       );
 
@@ -512,7 +507,6 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
       // Assert loan health and position of eoa wallet to decrease
 
-      vm.warp(block.timestamp + 31536000);
       vm.startPrank(root.blockchain.eoaWallet);
       IERC20(root.tokens.usdc).approve(root.lendingPool.lendingPoolProxy, type(uint256).max);
 
@@ -520,17 +514,19 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
       lendingPoolContract.repay(
         root.tokens.usdc,
-        maxAvailableUsdcBorrows - 200 * 1e6,
+        maxAvailableUsdcBorrows,
         2, // stablecoin borrowing
         root.blockchain.eoaWallet
       );
+
+      // IERC20(root.).balanceOf(root.blockchain.eoaWallet);
       vm.stopPrank();
 
       // TODO: In sepolia, 0 healthFactor becomes very big number (underflow), how to deal with this?
       // assertGt(healthFactorAfterBorrow, healthFactorBefore, 'Health factor increased after borrow');
 
       // TODO: Fix stack too deep
-      // assertGt(totalCollateralETHAfterBorrow, totalCollateralETHBefore, 'totalCollateralETHAfterBorrow increased');      
+      // assertGt(totalCollateralETHAfterBorrow, totalCollateralETHBefore, 'totalCollateralETHAfterBorrow increased');
 
       assertGt(
         usdcBalAfterBorrow,
@@ -552,7 +548,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
         xsgdLpBalBeforeRepay,
         'LP Token balance increased after withdraw'
       );
-      
+
     }
   }
 
@@ -658,7 +654,7 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
     vm.stopPrank();
   }
 
-  function _manipulatePriceOracle(address asset, int256 price, uint8 decimals) private {
+  function _manipulatePriceOracle(address asset, int256 price, uint8 decimals) private returns(MockAggregator) {
     address aaveOracle = ILendingPoolAddressesProvider(root.lendingPool.lendingAddressProvider).getPriceOracle();
     MockAggregator manipulatedLPOracle = new MockAggregator(price, decimals);
 
@@ -669,6 +665,8 @@ contract LendingMarketOpsTestAdmin is Test, OpsConfigHelper {
 
     vm.prank(root.lendingPool.oracleOwner);
     AaveOracle(aaveOracle).setAssetSources(assets, sources);
+
+    return manipulatedLPOracle;
   }
 
   function _liquidatePosition(
