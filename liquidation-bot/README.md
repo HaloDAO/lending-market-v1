@@ -79,6 +79,13 @@ yarn run:bot --flash
 
 In order to use flash liquidation, you have to deploy the contracts first, and then set the `LIQUIDATOR_ADDRESSES` environment variable.
 
+#### Dev mode
+
+```shell
+yarn dev:bot
+yarn dev:bot --flash
+```
+
 ### Remarks
 
 The script can throw an error and stop execution in some case, specially if you have a blockchain provider error, if you have not enough
