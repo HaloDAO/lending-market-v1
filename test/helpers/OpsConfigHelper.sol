@@ -31,10 +31,10 @@ interface IOpsTestData {
   }
 
   struct FXPoolValues {
+    address fxp;
     address usdcAssimilator;
     address vault;
     address xsgdAssimilator;
-    address xsgdUsdcFxp;
   }
 
   struct LendingPoolValues {
@@ -51,10 +51,11 @@ interface IOpsTestData {
     address priceOracle;
     address treasury;
     address uiDataProvider;
+    address walletBalanceProvider;
   }
 
   struct ReserveConfigsValues {
-    ReserveConfig lpXsgdUsdc;
+    ReserveConfig fxpLp;
   }
 
   struct ReserveConfig {
@@ -66,7 +67,7 @@ interface IOpsTestData {
   }
 
   struct ReservesValues {
-    address lpXsgdUsdc;
+    address fxpLp;
     address usdc;
     address xsgd;
   }
