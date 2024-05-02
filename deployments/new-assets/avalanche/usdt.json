@@ -1,0 +1,29 @@
+{
+  "addr": "0xc7198437980c041c805a1edcba50c1ce5db95118",
+  "borrowRate": 39000000000000000000000000,
+  "chainlinkAggregator": {
+    "aggregator": "0xEBE676ee90Fe1112671f19b6B7459bC678B67e8a",
+    "tokenReserve": "USDT"
+  },
+  "rateStrategy": {
+    "baseVariableBorrowRate": 0,
+    "name": "rateStrategyStableThree",
+    "optimalUtilizationRate": 900000000000000000000000000,
+    "stableRateSlope1": 0,
+    "stableRateSlope2": 0,
+    "tokenReserve": "USDT",
+    "variableRateSlope1": 40000000000000000000000000,
+    "variableRateSlope2": 600000000000000000000000000
+  },
+  "reserveConfig": {
+    "aTokenImpl": "AToken",
+    "baseLTVAsCollateral": 8000,
+    "borrowingEnabled": true,
+    "liquidationBonus": 10500,
+    "liquidationThreshold": 9000,
+    "reserveDecimals": 6,
+    "reserveFactor": 1000,
+    "stableBorrowRateEnabled": false,
+    "tokenReserve": "USDT"
+  }
+}
