@@ -7,18 +7,15 @@ pragma experimental ABIEncoderV2;
 import 'forge-std/Script.sol';
 import 'forge-std/StdJson.sol';
 import 'forge-std/console2.sol';
+import 'forge-std/Test.sol';
 
 import {IERC20Detailed} from '../contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {FXLPEthPriceFeedOracle} from '../contracts/xave-oracles/FXLPEthPriceFeedOracle.sol';
-import {LendingPoolAddressesProviderRegistry} from '../contracts/protocol/configuration/LendingPoolAddressesProviderRegistry.sol';
 import {LendingPoolAddressesProvider} from '../contracts/protocol/configuration/LendingPoolAddressesProvider.sol';
 import {LendingPoolConfigurator} from '../contracts/protocol/lendingpool/LendingPoolConfigurator.sol';
 import {LendingPool} from '../contracts/protocol/lendingpool/LendingPool.sol';
 import {ILendingPool} from '../contracts/interfaces/ILendingPool.sol';
-
 import {ILendingPoolAddressesProvider} from '../contracts/interfaces/ILendingPoolAddressesProvider.sol';
-
-import {StableAndVariableTokensHelper} from '../contracts/deployments/StableAndVariableTokensHelper.sol';
 import {ATokensAndRatesHelper} from '../contracts/deployments/ATokensAndRatesHelper.sol';
 import {AToken} from '../contracts/protocol/tokenization/AToken.sol';
 import {VariableDebtToken} from '../contracts/protocol/tokenization/VariableDebtToken.sol';
@@ -26,50 +23,58 @@ import {StableDebtToken} from '../contracts/protocol/tokenization/StableDebtToke
 import {DefaultReserveInterestRateStrategy} from '../contracts/protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
 import {IAaveIncentivesController} from '../contracts/interfaces/IAaveIncentivesController.sol';
 import {AaveOracle} from '../contracts/misc/AaveOracle.sol';
-import {WalletBalanceProvider} from 'contracts/misc/WalletBalanceProvider.sol';
-import {LendingRateOracle} from '../contracts/mocks/oracle/LendingRateOracle.sol';
 import {IDeploymentLendingMarketConfig} from './interfaces/IDeploymentLendingMarketConfig.sol';
 import {DeploymentConfigHelper} from './helpers/DeploymentConfigHelper.sol';
-import {AaveProtocolDataProvider} from '../contracts/misc/AaveProtocolDataProvider.sol';
 import {ILendingPoolConfigurator} from '../contracts/interfaces/ILendingPoolConfigurator.sol';
-import {LendingPoolCollateralManager} from '../contracts/protocol/lendingpool/LendingPoolCollateralManager.sol';
-import {UiHaloPoolDataProvider} from '../contracts/misc/UiHaloPoolDataProvider.sol';
-import {UiIncentiveDataProvider} from '../contracts/misc/UiIncentiveDataProvider.sol';
-import {IChainlinkAggregator} from '../contracts/interfaces/IChainlinkAggregator.sol';
-import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
-import {IAToken} from '../contracts/interfaces/IAToken.sol';
 import {ReserveConfiguration} from '../contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
+import {DataTypes} from '../contracts/protocol/libraries/types/DataTypes.sol';
 
-contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper {
+contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper, Test {
   using stdJson for string;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   address constant treasury = 0x009c4ba01488A15816093F96BA91210494E2C644;
-  address constant poolAdmin = 0x009c4ba01488A15816093F96BA91210494E2C644;
+  address constant poolAdmin = 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd;
   address constant LendingPoolAddressProviderAddress = 0xde29585a4134752632a07f09BCA0f02F72a33B8d;
   address constant stableVarHelperAddress = 0x8b661A0A273EC235e9935793692b42E9C3487164;
   address constant aTokensHelperAddress = 0x79DD0b8b83C4FB4f66e90F33139b002eb2b268f3;
   address constant aaveOracleAddress = 0x972127aFf8e6464e50eFc0a2aD344063355AE424;
   address constant incentivesController = address(0); // @todo
 
+  IDeploymentLendingMarketConfig.Token config;
+
   DataTypes.ReserveData private _reserveData;
 
   function run(string memory network) external {
-    vm.startBroadcast(0x235A2ac113014F9dcb8aBA6577F20290832dDEFd);
+    // script run
+    vm.startBroadcast();
     console2.log('Broadcasting transactions..');
     _execute(network);
+
     vm.stopBroadcast();
+
+    DataTypes.ReserveData memory newReserveData = ILendingPool(
+      ILendingPoolAddressesProvider(LendingPoolAddressProviderAddress).getLendingPool()
+    ).getReserveData(config.addr);
+
+    console2.log('~~~~~~~~~ POST DEPLOYMENT INFO ~~~~~~~~~');
+    console.log('aTokenAddress: ', newReserveData.aTokenAddress);
+    console.log('stableDebtTokenAddress: ', newReserveData.stableDebtTokenAddress);
+    console.log('variableDebtTokenAddress: ', newReserveData.variableDebtTokenAddress);
+    console.log('interestRateStrategyAddress: ', newReserveData.interestRateStrategyAddress);
+
+    // tests
+    vm.startPrank(poolAdmin);
+    _testLendingPool(config);
+    vm.stopPrank();
   }
 
   function _execute(string memory network) private {
-    IDeploymentLendingMarketConfig.Token memory c = _readDeploymentLendingMarketTokenConfig(
-      string(abi.encodePacked('new-assets/', network, '/usdt.json'))
-    );
-
+    config = _readDeploymentLendingMarketTokenConfig(string(abi.encodePacked('new-assets/', network, '/usdt.json')));
+    vm.label(config.addr, 'usdt');
     LendingPoolAddressesProvider addressProvider = LendingPoolAddressesProvider(LendingPoolAddressProviderAddress);
-    console2.log(addressProvider.getPoolAdmin());
-    _setOracles(c);
-    _initReservesByHelper(c, addressProvider);
-    _configureReservesByHelper(c, ATokensAndRatesHelper(aTokensHelperAddress), addressProvider);
+    _setOracles(config);
+    _initReservesByHelper(config, addressProvider);
+    _configureReservesByHelper(config, ATokensAndRatesHelper(aTokensHelperAddress), addressProvider);
   }
 
   function _setOracles(IDeploymentLendingMarketConfig.Token memory c) private {
@@ -103,7 +108,7 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper {
       string(abi.encodePacked('x', c.rateStrategy.tokenReserve)),
       bytes('')
     );
-    console2.log('Atokens deployed : ', address(a));
+
     console2.log('deploying stableDebt for ', c.addr);
 
     StableDebtToken sdt = new StableDebtToken();
@@ -116,7 +121,6 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper {
       string(abi.encodePacked('xsbt', c.rateStrategy.tokenReserve)),
       bytes('')
     );
-    console2.log('Sdt deployed : ', address(sdt));
     console2.log('deploying variableDebt for ', c.addr);
     VariableDebtToken vdt = new VariableDebtToken();
     vdt.initialize(
@@ -128,9 +132,6 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper {
       string(abi.encodePacked('xvdt', c.rateStrategy.tokenReserve)),
       bytes('')
     );
-
-    console2.log('Vdt deployed : ', address(vdt));
-
     return (a, sdt, vdt);
   }
 
@@ -144,8 +145,8 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper {
       _addressProvider.getLendingPool(),
       c
     );
-    console.log('aave tokens deployed');
 
+    console.log('aave tokens deployed');
     LendingPoolConfigurator cfg = LendingPoolConfigurator(_addressProvider.getLendingPoolConfigurator());
 
     DefaultReserveInterestRateStrategy strategy = new DefaultReserveInterestRateStrategy(
@@ -201,14 +202,57 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper {
       borrowingEnabled: _c.reserveConfig.borrowingEnabled
     });
 
-    console.log('sender', msg.sender);
-    console.log(addressProvider.getPoolAdmin());
-    console.log(_aTokensHelper.owner());
     console.log('set pool admin to atokens helper');
 
     addressProvider.setPoolAdmin(address(_aTokensHelper));
     console.log('Configuring reserves');
     _aTokensHelper.configureReserves(inputParams);
-    addressProvider.setPoolAdmin(0x235A2ac113014F9dcb8aBA6577F20290832dDEFd);
+    addressProvider.setPoolAdmin(poolAdmin);
+  }
+
+  function _testLendingPool(IDeploymentLendingMarketConfig.Token memory c) private {
+    address lendingPoolAddress = ILendingPoolAddressesProvider(LendingPoolAddressProviderAddress).getLendingPool();
+    address usdc = 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E;
+    vm.label(lendingPoolAddress, 'lendingPool');
+
+    DataTypes.ReserveData memory rd = ILendingPool(lendingPoolAddress).getReserveData(c.addr);
+    DataTypes.ReserveData memory rd_borrowed = ILendingPool(lendingPoolAddress).getReserveData(usdc);
+
+    console.log('~~~~~~~~~ Testing Lending Market Functions ~~~~~~~~~ ');
+    IERC20Detailed(c.addr).approve(lendingPoolAddress, 5e6);
+    console.log('depositing..');
+    ILendingPool(lendingPoolAddress).deposit(c.addr, 5e6, poolAdmin, 0);
+    assertLt(0, IERC20Detailed(rd.aTokenAddress).balanceOf(poolAdmin));
+
+    console.log('borrowing usdc..');
+    ILendingPool(lendingPoolAddress).borrow(usdc, 1e6, 2, 0, poolAdmin);
+    assertLt(0, IERC20Detailed(rd_borrowed.variableDebtTokenAddress).balanceOf(poolAdmin));
+
+    console.log('repaying..');
+    IERC20Detailed(usdc).approve(lendingPoolAddress, 1e6);
+    ILendingPool(lendingPoolAddress).repay(usdc, 1e6, 2, poolAdmin);
+    assertEq(0, IERC20Detailed(rd_borrowed.variableDebtTokenAddress).balanceOf(poolAdmin));
+
+    uint256 balanceBeforeWithdraw = IERC20Detailed(c.addr).balanceOf(poolAdmin);
+    console.log('withdrawing..');
+    ILendingPool(lendingPoolAddress).withdraw(c.addr, 3e6, poolAdmin);
+    assertLt(balanceBeforeWithdraw, IERC20Detailed(c.addr).balanceOf(poolAdmin));
+
+    console.log('~~~~~~~~~ Testing Borrowing new asset given USDC as collateral ~~~~~~~~~ ');
+    IERC20Detailed(usdc).approve(lendingPoolAddress, 5e6);
+
+    console.log('depositing..');
+    ILendingPool(lendingPoolAddress).deposit(usdc, 5e6, poolAdmin, 0);
+
+    console.log('borrowing usdt..');
+    ILendingPool(lendingPoolAddress).borrow(c.addr, 1e6, 2, 0, poolAdmin);
+    assertLt(0, IERC20Detailed(rd.variableDebtTokenAddress).balanceOf(poolAdmin));
+
+    IERC20Detailed(c.addr).approve(lendingPoolAddress, 1e6);
+    console.log('repaying..');
+    ILendingPool(lendingPoolAddress).repay(c.addr, 1e6, 2, poolAdmin);
+    assertEq(0, IERC20Detailed(rd.variableDebtTokenAddress).balanceOf(poolAdmin));
+
+    console.log('~~~~~~~~~ Testing Complete! 🥹 ~~~~~~~~~ ');
   }
 }
