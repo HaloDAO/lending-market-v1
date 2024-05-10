@@ -305,3 +305,22 @@ source .env && forge script script/LendingPoolDeployment.s.sol:LendingPoolDeploy
 
 forge script script/LendingPoolDeployment.s.sol:LendingPoolDeployment --sig "run(string memory network)" --slow --account 0x235A2ac113014F9dcb8aBA6577F20290832dDEFd --broadcast --rpc-url "RPC_URL" -vvv {network}
 ```
+
+### Adding new oracles using foundry
+
+```
+forge script script/XaveOraclesAdditionalDeployment.s.sol:XaveOraclesAdditionalDeployment \
+  --account "deployer2" \
+  --sig "run(string memory, bool, uint256)" \
+  --rpc-url {rpc url} \
+  --broadcast \
+  -vvv \
+  {network} {is lp token?} {oracle index}
+```
+
+### Adding new assets using foundry
+
+```
+
+
+```

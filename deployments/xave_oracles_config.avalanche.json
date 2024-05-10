@@ -23,6 +23,12 @@
       "decimals": 18,
       "description": "VCHF/ETH Oracle",
       "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
+    },
+    {
+      "basePriceFeed": "0xEBE676ee90Fe1112671f19b6B7459bC678B67e8a",
+      "decimals": 18,
+      "description": "USDT/ETH Oracle",
+      "quotePriceFeed": "0x976B3D034E162d8bD72D6b9C989d545b839003b0"
     }
   ],
   "lpOracles": [

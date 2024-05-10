@@ -222,11 +222,13 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper, Test {
     IERC20Detailed(c.addr).approve(lendingPoolAddress, 5e6);
     console.log('depositing..');
     ILendingPool(lendingPoolAddress).deposit(c.addr, 5e6, poolAdmin, 0);
+    console.log('aTokens received: ', IERC20Detailed(rd.aTokenAddress).balanceOf(poolAdmin));
     assertLt(0, IERC20Detailed(rd.aTokenAddress).balanceOf(poolAdmin));
 
     console.log('borrowing usdc..');
     ILendingPool(lendingPoolAddress).borrow(usdc, 1e6, 2, 0, poolAdmin);
     assertLt(0, IERC20Detailed(rd_borrowed.variableDebtTokenAddress).balanceOf(poolAdmin));
+    console.log('debt tokens received: ', IERC20Detailed(rd_borrowed.variableDebtTokenAddress).balanceOf(poolAdmin));
 
     console.log('repaying..');
     IERC20Detailed(usdc).approve(lendingPoolAddress, 1e6);
@@ -237,6 +239,7 @@ contract LendingPoolAddNewAsset is Script, DeploymentConfigHelper, Test {
     console.log('withdrawing..');
     ILendingPool(lendingPoolAddress).withdraw(c.addr, 3e6, poolAdmin);
     assertLt(balanceBeforeWithdraw, IERC20Detailed(c.addr).balanceOf(poolAdmin));
+    console.log('balance withdrawn: ', IERC20Detailed(c.addr).balanceOf(poolAdmin) - balanceBeforeWithdraw);
 
     console.log('~~~~~~~~~ Testing Borrowing new asset given USDC as collateral ~~~~~~~~~ ');
     IERC20Detailed(usdc).approve(lendingPoolAddress, 5e6);

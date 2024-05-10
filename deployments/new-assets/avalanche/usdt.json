@@ -2,7 +2,7 @@
   "addr": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
   "borrowRate": 39000000000000000000000000,
   "chainlinkAggregator": {
-    "aggregator": "0xEBE676ee90Fe1112671f19b6B7459bC678B67e8a",
+    "aggregator": "0xC9cAe17093162947EDaE00D67a7d9bb509372C55",
     "tokenReserve": "USDT"
   },
   "rateStrategy": {
