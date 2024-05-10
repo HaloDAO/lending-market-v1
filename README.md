@@ -321,6 +321,5 @@ forge script script/XaveOraclesAdditionalDeployment.s.sol:XaveOraclesAdditionalD
 ### Adding new assets using foundry
 
 ```
-
-
+forge script script/LendingPoolAddNewAsset.s.sol:LendingPoolAddNewAsset --sig "run(string memory network)" --account "deployer2"  --broadcast --rpc-url {rpc url} -vvv {network}
 ```
