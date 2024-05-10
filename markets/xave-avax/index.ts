@@ -7,6 +7,7 @@ import {
   strategyLP_VCHF_USDC,
   strategyLP_VEUR_USDC,
   strategyUSDC,
+  strategyUSDT,
   strategyVCHF,
   strategyVEUR,
   strategyXSGD,
@@ -22,6 +23,7 @@ export const XaveAvalancheConfig: IXaveAvalancheConfiguration = {
   ProviderId: 3,
   ReservesConfig: {
     USDC: strategyUSDC,
+    USDT: strategyUSDT,
     // XSGD: strategyXSGD,
     EURC: strategyEURC,
     VCHF: strategyVCHF,
@@ -40,6 +42,7 @@ export const XaveAvalancheConfig: IXaveAvalancheConfiguration = {
       'LP-EURC-USDC': '0x7A1A919c033eBc0d9F23cBF2Aa41c24AEf826ca2',
       'LP-VEUR-USDC': '0x28F3a9e42667519c83cB090b5c4f6bd34e9F5569',
       'LP-VCHF-USDC': '0x0099111Ed107BDF0B05162356aEe433514AaC440',
+      USDT: '0xc7198437980c041c805a1edcba50c1ce5db95118',
     },
     [eAvalancheNetwork.fuji]: {
       USDC: '',

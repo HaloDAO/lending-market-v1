@@ -352,7 +352,7 @@ export type iHaloMaticPoolAssets<T> = Pick<
 // iAssetsWithoutUSD<T> - common asset references
 export type iXaveAvalanchePoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  'USDC' | 'EURC' | 'VCHF' | 'VEUR' | 'LP-EURC-USDC' | 'LP-VEUR-USDC' | 'LP-VCHF-USDC'
+  'USDC' | 'EURC' | 'VCHF' | 'VEUR' | 'LP-EURC-USDC' | 'LP-VEUR-USDC' | 'LP-VCHF-USDC' | 'USDT'
 >;
 
 export type iXaveSepoliaPoolAssets<T> = Pick<iAssetsWithoutUSD<T>, 'USDC' | 'XSGD' | 'LP-XSGD-USDC'>;

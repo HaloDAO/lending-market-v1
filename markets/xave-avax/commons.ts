@@ -110,6 +110,7 @@ export const CommonsConfig: ICommonConfiguration = {
   ChainlinkAggregator: {
     [eAvalancheNetwork.avalanche]: {
       USDC: '0x29388a985C5904BFa13524f8c3Cb8bC10A02864C',
+      USDT: '0xEBE676ee90Fe1112671f19b6B7459bC678B67e8a',
       VCHF: '0x132b37560040268aA7c03F6C4f415F0eBf30A87b',
       EURC: '0xB9f4E777491bb848578B6FBa5c8A744A40d11128',
       VEUR: '0xA7F333136d5cB3E26f95247Be2CCea4731ab6eAa',
